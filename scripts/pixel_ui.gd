@@ -1,7 +1,7 @@
 class_name PixelUI
 extends RefCounted
 
-const UIVisualTokens = preload("res://scripts/ui_visual_tokens.gd")
+const VisualTokens = preload("res://scripts/ui_visual_tokens.gd")
 
 ## Reuses Godot's existing vector fallback font while rasterizing glyphs as if
 ## they were displayed on a low-density monitor: no antialiasing, no subpixel
@@ -32,6 +32,7 @@ static func font() -> Font:
 
 static func apply(control: Control) -> void:
 	control.add_theme_font_override("font", font())
+	control.add_theme_font_size_override("font_size", VisualTokens.UI_FONT_SIZE)
 	control.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 
 
@@ -43,7 +44,7 @@ static func tooltip_theme() -> Theme:
 	var panel_style := StyleBoxFlat.new()
 	panel_style.bg_color = Color.BLACK
 	panel_style.border_color = Color.WHITE
-	panel_style.set_border_width_all(2)
+	panel_style.set_border_width_all(int(VisualTokens.LINE_WIDTH))
 	panel_style.set_corner_radius_all(0)
 	panel_style.content_margin_left = 5.0
 	panel_style.content_margin_right = 5.0
@@ -52,5 +53,5 @@ static func tooltip_theme() -> Theme:
 	_tooltip_theme.set_stylebox("panel", "TooltipPanel", panel_style)
 	_tooltip_theme.set_color("font_color", "TooltipLabel", Color.WHITE)
 	_tooltip_theme.set_font("font", "TooltipLabel", font())
-	_tooltip_theme.set_font_size("font_size", "TooltipLabel", UIVisualTokens.TOOLTIP_FONT_SIZE)
+	_tooltip_theme.set_font_size("font_size", "TooltipLabel", VisualTokens.TOOLTIP_FONT_SIZE)
 	return _tooltip_theme

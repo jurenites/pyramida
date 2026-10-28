@@ -1,0 +1,13 @@
+{
+  "defaults": {
+    "width": 3,
+    "depth": 3,
+    "floors": 3,
+    "seed": 2026,
+    "top_setback": true,
+    "max_room_cells": 6,
+    "min_rooms": 1,
+    "allowed_shapes": ["room_domino", "bar", "small_square", "rectangle"]
+  },
+  "neighbour_footprints": [[2, 3], [3, 2], [3, 3], [3, 3], [2, 3], [3, 2], [3, 3], [3, 3]]
+}

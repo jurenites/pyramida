@@ -1,0 +1,40 @@
+{
+  "version": 2,
+  "plot": {
+    "width": 3,
+    "depth": 3,
+    "ceiling": 9,
+    "bedrock": 3,
+    "overhang": 1
+  },
+  "street": {
+    "passage_width": 1,
+    "front_road_width": 3,
+    "alley_width": 1,
+    "neighbour_height": 3
+  },
+  "colors": [
+    "ec8d76",
+    "eec867",
+    "70b6d9",
+    "ac9cda",
+    "72b8a2"
+  ],
+  "supply": {
+    "starting_shape": "small_square",
+    "seed": 2026
+  },
+  "shapes": [
+    {"id": "small_pole", "role": "pole", "weight": 0, "cells": [[0, 0, 0], [0, 1, 0], [0, 2, 0]], "door": [0, 0, 0]},
+    {"id": "cube", "weight": 20, "cells": [[0, 0, 0]], "door": [0, 0, 0], "role": "hall"},
+    {"id": "domino", "weight": 25, "cells": [[0, 0, 0], [0, 0, 1]], "door": [0, 0, 0], "role": "hall"},
+    {"id": "room_domino", "normal": [-1, 0, 0], "long_side_door": true, "weight": 8, "cells": [[0, 0, 0], [0, 0, 1]], "door": [0, 0, 0]},
+    {"id": "bar", "normal": [-1, 0, 0], "long_side_door": true, "weight": 20, "cells": [[0, 0, 0], [0, 0, 1], [0, 0, 2]], "door": [0, 0, 0]},
+    {"id": "small_square", "weight": 18, "cells": [[0, 0, 0], [1, 0, 0], [0, 0, 1], [1, 0, 1]], "door": [0, 0, 0]},
+    {"id": "rectangle", "normal": [-1, 0, 0], "long_side_door": true, "weight": 5, "cells": [[0, 0, 0], [1, 0, 0], [0, 0, 1], [1, 0, 1], [0, 0, 2], [1, 0, 2]], "door": [0, 0, 0]},
+    {"id": "flat_l", "palette_hidden": true, "weight": 0, "cells": [[0, 0, 0], [0, 0, 1], [0, 0, 2], [1, 0, 2]], "door": [0, 0, 0]},
+    {"id": "flat_l_mirror", "palette_hidden": true, "weight": 0, "cells": [[1, 0, 0], [1, 0, 1], [1, 0, 2], [0, 0, 2]], "door": [1, 0, 0]},
+    {"id": "elevator", "role": "elevator", "weight": 4, "cells": [[0, 0, 0]], "door": [0, 0, 0]},
+    {"id": "stairs", "role": "stairs", "weight": 10, "cells": [[0, 0, 0]], "door": [0, 0, 0]}
+  ]
+}

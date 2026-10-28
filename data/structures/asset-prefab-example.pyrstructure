@@ -1,0 +1,1414 @@
+{
+	"assembly": [],
+	"draft": {
+		"braces": [],
+		"cells": [
+			{
+				"at": [
+					0,
+					0,
+					0
+				],
+				"material": "stone"
+			},
+			{
+				"at": [
+					1,
+					0,
+					0
+				],
+				"material": "stone"
+			},
+			{
+				"at": [
+					0,
+					0,
+					1
+				],
+				"material": "stone"
+			}
+		],
+		"door": [
+			{
+				"cell": [
+					0,
+					0,
+					1
+				],
+				"side": [
+					0,
+					0,
+					1
+				]
+			}
+		],
+		"extra_doors": [],
+		"ladders": [],
+		"name": "Terraced workshop",
+		"utilities": [],
+		"work_per_brace": 3.0,
+		"work_per_cell": 6.0
+	},
+	"format": "pyramida-structure-workshop",
+	"version": 1,
+	"workspace": {
+		"authoring": {
+			"active_asset": "custom_1753744",
+			"assets": {
+				"custom_1753744": {
+					"category": "prefab",
+					"contract": {
+						"margin": 0.05,
+						"mount": "floor",
+						"offset": [
+							-0.5,
+							-0.150000005960464,
+							0.0
+						],
+						"size": [
+							7.0,
+							7.0,
+							7.0
+						]
+					},
+					"name": "Terraced workshop",
+					"parts": [
+						{
+							"asset_ref": "house",
+							"at": [
+								0.0,
+								0.0,
+								0.0
+							],
+							"contract": {
+								"margin": 0.05,
+								"mount": "floor",
+								"offset": [
+									0.0,
+									0.0,
+									0.0
+								],
+								"size": [
+									1.96000003814697,
+									2.0,
+									1.96000003814697
+								]
+							},
+							"kind": "assembly",
+							"label": "House",
+							"rotation": [
+								0.0,
+								0.0,
+								0.0
+							],
+							"linked": true,
+							"hidden_components": [
+								"Roof"
+							]
+						},
+						{
+							"asset_ref": "stairs",
+							"at": [
+								0.0,
+								0.0,
+								2.0
+							],
+							"contract": {
+								"margin": 0.05,
+								"mount": "floor",
+								"offset": [
+									0.0,
+									0.0,
+									0.0
+								],
+								"size": [
+									2.0,
+									2.0,
+									2.0
+								]
+							},
+							"kind": "assembly",
+							"label": "Ladder",
+							"rotation": [
+								0.0,
+								1.57079637050629,
+								0.0
+							],
+							"linked": true
+						},
+						{
+							"asset_ref": "platform",
+							"at": [
+								0.0,
+								2.0,
+								2.0
+							],
+							"contract": {
+								"margin": 0.05,
+								"mount": "floor",
+								"offset": [
+									0.0,
+									-1.0,
+									0.0
+								],
+								"size": [
+									2.0,
+									1.0,
+									2.0
+								]
+							},
+							"kind": "assembly",
+							"label": "Platform",
+							"rotation": [
+								0.0,
+								0.0,
+								0.0
+							],
+							"linked": true
+						},
+						{
+							"asset_ref": "utility_ac",
+							"at": [
+								1.0,
+								0.699999988079071,
+								0.0
+							],
+							"contract": {
+								"margin": 0.05,
+								"mount": "wall",
+								"offset": [
+									0.0,
+									0.0,
+									0.25
+								],
+								"size": [
+									0.5,
+									0.75,
+									0.5
+								]
+							},
+							"kind": "assembly",
+							"label": "Wall Cooler",
+							"rotation": [
+								0.0,
+								1.57079637050629,
+								0.0
+							],
+							"linked": true
+						},
+						{
+							"asset_ref": "utility_pipe",
+							"at": [
+								1.01999998092651,
+								0.790000021457672,
+								0.479999989271164
+							],
+							"contract": {
+								"margin": 0.05,
+								"mount": "free",
+								"offset": [
+									0.0,
+									0.0,
+									0.0
+								],
+								"size": [
+									1.0,
+									0.100000001490116,
+									0.100000001490116
+								]
+							},
+							"kind": "assembly",
+							"label": "Pipe",
+							"rotation": [
+								0.0,
+								1.57079637050629,
+								0.0
+							],
+							"scale": [
+								1.20000004768372,
+								1.0,
+								1.0
+							],
+							"linked": true
+						},
+						{
+							"asset_ref": "utility_pipe",
+							"at": [
+								1.07000005245209,
+								1.0,
+								1.08000004291534
+							],
+							"contract": {
+								"margin": 0.05,
+								"mount": "free",
+								"offset": [
+									0.0,
+									0.0,
+									0.0
+								],
+								"size": [
+									1.0,
+									0.100000001490116,
+									0.100000001490116
+								]
+							},
+							"kind": "assembly",
+							"label": "Pipe",
+							"rotation": [
+								0.0,
+								0.0,
+								1.57079637050629
+							],
+							"linked": true
+						},
+						{
+							"asset_ref": "utility_pipe",
+							"at": [
+								1.07000005245209,
+								2.0,
+								1.08000004291534
+							],
+							"contract": {
+								"margin": 0.05,
+								"mount": "free",
+								"offset": [
+									0.0,
+									0.0,
+									0.0
+								],
+								"size": [
+									1.0,
+									0.100000001490116,
+									0.100000001490116
+								]
+							},
+							"kind": "assembly",
+							"label": "Pipe",
+							"rotation": [
+								0.0,
+								0.0,
+								1.57079637050629
+							],
+							"linked": true
+						},
+						{
+							"asset_ref": "house",
+							"at": [
+								0.0,
+								2.0,
+								0.0
+							],
+							"contract": {
+								"margin": 0.05,
+								"mount": "floor",
+								"offset": [
+									0.0,
+									0.0,
+									0.0
+								],
+								"size": [
+									1.96000003814697,
+									2.0,
+									1.96000003814697
+								]
+							},
+							"kind": "assembly",
+							"label": "House",
+							"rotation": [
+								0.0,
+								0.0,
+								0.0
+							],
+							"linked": true,
+							"hidden_components": [
+								"Roof"
+							]
+						},
+						{
+							"asset_ref": "stairs",
+							"at": [
+								0.0,
+								2.0,
+								2.0
+							],
+							"contract": {
+								"margin": 0.05,
+								"mount": "floor",
+								"offset": [
+									0.0,
+									0.0,
+									0.0
+								],
+								"size": [
+									2.0,
+									2.0,
+									2.0
+								]
+							},
+							"kind": "assembly",
+							"label": "Ladder",
+							"rotation": [
+								0.0,
+								1.57079637050629,
+								0.0
+							],
+							"linked": true
+						},
+						{
+							"asset_ref": "platform",
+							"at": [
+								0.0,
+								4.0,
+								2.0
+							],
+							"contract": {
+								"margin": 0.05,
+								"mount": "floor",
+								"offset": [
+									0.0,
+									-1.0,
+									0.0
+								],
+								"size": [
+									2.0,
+									1.0,
+									2.0
+								]
+							},
+							"kind": "assembly",
+							"label": "Platform",
+							"rotation": [
+								0.0,
+								0.0,
+								0.0
+							],
+							"linked": true
+						},
+						{
+							"asset_ref": "utility_ac",
+							"at": [
+								1.0,
+								2.70000004768372,
+								0.0
+							],
+							"contract": {
+								"margin": 0.05,
+								"mount": "wall",
+								"offset": [
+									0.0,
+									0.0,
+									0.25
+								],
+								"size": [
+									0.5,
+									0.75,
+									0.5
+								]
+							},
+							"kind": "assembly",
+							"label": "Wall Cooler",
+							"rotation": [
+								0.0,
+								1.57079637050629,
+								0.0
+							],
+							"linked": true
+						},
+						{
+							"asset_ref": "utility_pipe",
+							"at": [
+								1.01999998092651,
+								2.78999996185303,
+								0.479999989271164
+							],
+							"contract": {
+								"margin": 0.05,
+								"mount": "free",
+								"offset": [
+									0.0,
+									0.0,
+									0.0
+								],
+								"size": [
+									1.0,
+									0.100000001490116,
+									0.100000001490116
+								]
+							},
+							"kind": "assembly",
+							"label": "Pipe",
+							"rotation": [
+								0.0,
+								1.57079637050629,
+								0.0
+							],
+							"scale": [
+								1.20000004768372,
+								1.0,
+								1.0
+							],
+							"linked": true
+						},
+						{
+							"asset_ref": "utility_pipe",
+							"at": [
+								1.07000005245209,
+								3.0,
+								1.08000004291534
+							],
+							"contract": {
+								"margin": 0.05,
+								"mount": "free",
+								"offset": [
+									0.0,
+									0.0,
+									0.0
+								],
+								"size": [
+									1.0,
+									0.100000001490116,
+									0.100000001490116
+								]
+							},
+							"kind": "assembly",
+							"label": "Pipe",
+							"rotation": [
+								0.0,
+								0.0,
+								1.57079637050629
+							],
+							"linked": true
+						},
+						{
+							"asset_ref": "utility_pipe",
+							"at": [
+								1.07000005245209,
+								4.0,
+								1.08000004291534
+							],
+							"contract": {
+								"margin": 0.05,
+								"mount": "free",
+								"offset": [
+									0.0,
+									0.0,
+									0.0
+								],
+								"size": [
+									1.0,
+									0.100000001490116,
+									0.100000001490116
+								]
+							},
+							"kind": "assembly",
+							"label": "Pipe",
+							"rotation": [
+								0.0,
+								0.0,
+								1.57079637050629
+							],
+							"linked": true
+						},
+						{
+							"asset_ref": "house",
+							"at": [
+								0.0,
+								4.0,
+								0.0
+							],
+							"contract": {
+								"margin": 0.05,
+								"mount": "floor",
+								"offset": [
+									0.0,
+									0.0,
+									0.0
+								],
+								"size": [
+									1.96000003814697,
+									2.0,
+									1.96000003814697
+								]
+							},
+							"kind": "assembly",
+							"label": "House",
+							"rotation": [
+								0.0,
+								0.0,
+								0.0
+							],
+							"linked": true
+						},
+						{
+							"asset_ref": "utility_ac",
+							"at": [
+								1.0,
+								4.69999980926514,
+								0.0
+							],
+							"contract": {
+								"margin": 0.05,
+								"mount": "wall",
+								"offset": [
+									0.0,
+									0.0,
+									0.25
+								],
+								"size": [
+									0.5,
+									0.75,
+									0.5
+								]
+							},
+							"kind": "assembly",
+							"label": "Wall Cooler",
+							"rotation": [
+								0.0,
+								1.57079637050629,
+								0.0
+							],
+							"linked": true
+						},
+						{
+							"asset_ref": "utility_pipe",
+							"at": [
+								1.01999998092651,
+								4.78999996185303,
+								0.479999989271164
+							],
+							"contract": {
+								"margin": 0.05,
+								"mount": "free",
+								"offset": [
+									0.0,
+									0.0,
+									0.0
+								],
+								"size": [
+									1.0,
+									0.100000001490116,
+									0.100000001490116
+								]
+							},
+							"kind": "assembly",
+							"label": "Pipe",
+							"rotation": [
+								0.0,
+								1.57079637050629,
+								0.0
+							],
+							"scale": [
+								1.20000004768372,
+								1.0,
+								1.0
+							],
+							"linked": true
+						},
+						{
+							"asset_ref": "utility_pipe",
+							"at": [
+								1.07000005245209,
+								5.0,
+								1.08000004291534
+							],
+							"contract": {
+								"margin": 0.05,
+								"mount": "free",
+								"offset": [
+									0.0,
+									0.0,
+									0.0
+								],
+								"size": [
+									1.0,
+									0.100000001490116,
+									0.100000001490116
+								]
+							},
+							"kind": "assembly",
+							"label": "Pipe",
+							"rotation": [
+								0.0,
+								0.0,
+								1.57079637050629
+							],
+							"linked": true
+						},
+						{
+							"asset_ref": "utility_pipe",
+							"at": [
+								1.07000005245209,
+								6.0,
+								1.08000004291534
+							],
+							"contract": {
+								"margin": 0.05,
+								"mount": "free",
+								"offset": [
+									0.0,
+									0.0,
+									0.0
+								],
+								"size": [
+									1.0,
+									0.100000001490116,
+									0.100000001490116
+								]
+							},
+							"kind": "assembly",
+							"label": "Pipe",
+							"rotation": [
+								0.0,
+								0.0,
+								1.57079637050629
+							],
+							"linked": true
+						},
+						{
+							"asset_ref": "sawmill",
+							"at": [
+								-2.5,
+								0.0,
+								0.0
+							],
+							"contract": {
+								"margin": 0.05,
+								"mount": "floor",
+								"offset": [
+									0.0,
+									0.0,
+									0.0
+								],
+								"size": [
+									1.96000003814697,
+									2.0,
+									1.96000003814697
+								]
+							},
+							"kind": "assembly",
+							"label": "Sawmill",
+							"rotation": [
+								0.0,
+								0.0,
+								0.0
+							],
+							"linked": true
+						},
+						{
+							"asset_ref": "log_shed",
+							"at": [
+								-2.5,
+								0.0,
+								-2.0
+							],
+							"contract": {
+								"margin": 0.05,
+								"mount": "floor",
+								"offset": [
+									0.0,
+									0.0,
+									0.0
+								],
+								"size": [
+									1.0,
+									1.5,
+									2.0
+								]
+							},
+							"kind": "assembly",
+							"label": "Log Shed",
+							"rotation": [
+								0.0,
+								0.0,
+								0.0
+							],
+							"linked": true
+						}
+					]
+				}
+			},
+			"category": "prefab",
+			"contract": {
+				"margin": 0.05,
+				"mount": "floor",
+				"offset": [
+					-0.5,
+					-0.150000005960464,
+					0.0
+				],
+				"size": [
+					7.0,
+					7.0,
+					7.0
+				]
+			},
+			"scopes": []
+		},
+		"building_drafts": {},
+		"building_kind": "",
+		"layer": 0,
+		"manual_level": false,
+		"mode": 0,
+		"origin": [
+			0,
+			0,
+			0
+		],
+		"parts": [
+			{
+				"asset_ref": "house",
+				"at": [
+					0.0,
+					0.0,
+					0.0
+				],
+				"contract": {
+					"margin": 0.05,
+					"mount": "floor",
+					"offset": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"size": [
+						1.96000003814697,
+						2.0,
+						1.96000003814697
+					]
+				},
+				"kind": "assembly",
+				"label": "House",
+				"rotation": [
+					0.0,
+					0.0,
+					0.0
+				],
+				"linked": true,
+				"hidden_components": [
+					"Roof"
+				]
+			},
+			{
+				"asset_ref": "stairs",
+				"at": [
+					0.0,
+					0.0,
+					2.0
+				],
+				"contract": {
+					"margin": 0.05,
+					"mount": "floor",
+					"offset": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"size": [
+						2.0,
+						2.0,
+						2.0
+					]
+				},
+				"kind": "assembly",
+				"label": "Ladder",
+				"rotation": [
+					0.0,
+					1.57079637050629,
+					0.0
+				],
+				"linked": true
+			},
+			{
+				"asset_ref": "platform",
+				"at": [
+					0.0,
+					2.0,
+					2.0
+				],
+				"contract": {
+					"margin": 0.05,
+					"mount": "floor",
+					"offset": [
+						0.0,
+						-1.0,
+						0.0
+					],
+					"size": [
+						2.0,
+						1.0,
+						2.0
+					]
+				},
+				"kind": "assembly",
+				"label": "Platform",
+				"rotation": [
+					0.0,
+					0.0,
+					0.0
+				],
+				"linked": true
+			},
+			{
+				"asset_ref": "utility_ac",
+				"at": [
+					1.0,
+					0.699999988079071,
+					0.0
+				],
+				"contract": {
+					"margin": 0.05,
+					"mount": "wall",
+					"offset": [
+						0.0,
+						0.0,
+						0.25
+					],
+					"size": [
+						0.5,
+						0.75,
+						0.5
+					]
+				},
+				"kind": "assembly",
+				"label": "Wall Cooler",
+				"rotation": [
+					0.0,
+					1.57079637050629,
+					0.0
+				],
+				"linked": true
+			},
+			{
+				"asset_ref": "utility_pipe",
+				"at": [
+					1.01999998092651,
+					0.790000021457672,
+					0.479999989271164
+				],
+				"contract": {
+					"margin": 0.05,
+					"mount": "free",
+					"offset": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"size": [
+						1.0,
+						0.100000001490116,
+						0.100000001490116
+					]
+				},
+				"kind": "assembly",
+				"label": "Pipe",
+				"rotation": [
+					0.0,
+					1.57079637050629,
+					0.0
+				],
+				"scale": [
+					1.20000004768372,
+					1.0,
+					1.0
+				],
+				"linked": true
+			},
+			{
+				"asset_ref": "utility_pipe",
+				"at": [
+					1.07000005245209,
+					1.0,
+					1.08000004291534
+				],
+				"contract": {
+					"margin": 0.05,
+					"mount": "free",
+					"offset": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"size": [
+						1.0,
+						0.100000001490116,
+						0.100000001490116
+					]
+				},
+				"kind": "assembly",
+				"label": "Pipe",
+				"rotation": [
+					0.0,
+					0.0,
+					1.57079637050629
+				],
+				"linked": true
+			},
+			{
+				"asset_ref": "utility_pipe",
+				"at": [
+					1.07000005245209,
+					2.0,
+					1.08000004291534
+				],
+				"contract": {
+					"margin": 0.05,
+					"mount": "free",
+					"offset": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"size": [
+						1.0,
+						0.100000001490116,
+						0.100000001490116
+					]
+				},
+				"kind": "assembly",
+				"label": "Pipe",
+				"rotation": [
+					0.0,
+					0.0,
+					1.57079637050629
+				],
+				"linked": true
+			},
+			{
+				"asset_ref": "house",
+				"at": [
+					0.0,
+					2.0,
+					0.0
+				],
+				"contract": {
+					"margin": 0.05,
+					"mount": "floor",
+					"offset": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"size": [
+						1.96000003814697,
+						2.0,
+						1.96000003814697
+					]
+				},
+				"kind": "assembly",
+				"label": "House",
+				"rotation": [
+					0.0,
+					0.0,
+					0.0
+				],
+				"linked": true,
+				"hidden_components": [
+					"Roof"
+				]
+			},
+			{
+				"asset_ref": "stairs",
+				"at": [
+					0.0,
+					2.0,
+					2.0
+				],
+				"contract": {
+					"margin": 0.05,
+					"mount": "floor",
+					"offset": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"size": [
+						2.0,
+						2.0,
+						2.0
+					]
+				},
+				"kind": "assembly",
+				"label": "Ladder",
+				"rotation": [
+					0.0,
+					1.57079637050629,
+					0.0
+				],
+				"linked": true
+			},
+			{
+				"asset_ref": "platform",
+				"at": [
+					0.0,
+					4.0,
+					2.0
+				],
+				"contract": {
+					"margin": 0.05,
+					"mount": "floor",
+					"offset": [
+						0.0,
+						-1.0,
+						0.0
+					],
+					"size": [
+						2.0,
+						1.0,
+						2.0
+					]
+				},
+				"kind": "assembly",
+				"label": "Platform",
+				"rotation": [
+					0.0,
+					0.0,
+					0.0
+				],
+				"linked": true
+			},
+			{
+				"asset_ref": "utility_ac",
+				"at": [
+					1.0,
+					2.70000004768372,
+					0.0
+				],
+				"contract": {
+					"margin": 0.05,
+					"mount": "wall",
+					"offset": [
+						0.0,
+						0.0,
+						0.25
+					],
+					"size": [
+						0.5,
+						0.75,
+						0.5
+					]
+				},
+				"kind": "assembly",
+				"label": "Wall Cooler",
+				"rotation": [
+					0.0,
+					1.57079637050629,
+					0.0
+				],
+				"linked": true
+			},
+			{
+				"asset_ref": "utility_pipe",
+				"at": [
+					1.01999998092651,
+					2.78999996185303,
+					0.479999989271164
+				],
+				"contract": {
+					"margin": 0.05,
+					"mount": "free",
+					"offset": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"size": [
+						1.0,
+						0.100000001490116,
+						0.100000001490116
+					]
+				},
+				"kind": "assembly",
+				"label": "Pipe",
+				"rotation": [
+					0.0,
+					1.57079637050629,
+					0.0
+				],
+				"scale": [
+					1.20000004768372,
+					1.0,
+					1.0
+				],
+				"linked": true
+			},
+			{
+				"asset_ref": "utility_pipe",
+				"at": [
+					1.07000005245209,
+					3.0,
+					1.08000004291534
+				],
+				"contract": {
+					"margin": 0.05,
+					"mount": "free",
+					"offset": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"size": [
+						1.0,
+						0.100000001490116,
+						0.100000001490116
+					]
+				},
+				"kind": "assembly",
+				"label": "Pipe",
+				"rotation": [
+					0.0,
+					0.0,
+					1.57079637050629
+				],
+				"linked": true
+			},
+			{
+				"asset_ref": "utility_pipe",
+				"at": [
+					1.07000005245209,
+					4.0,
+					1.08000004291534
+				],
+				"contract": {
+					"margin": 0.05,
+					"mount": "free",
+					"offset": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"size": [
+						1.0,
+						0.100000001490116,
+						0.100000001490116
+					]
+				},
+				"kind": "assembly",
+				"label": "Pipe",
+				"rotation": [
+					0.0,
+					0.0,
+					1.57079637050629
+				],
+				"linked": true
+			},
+			{
+				"asset_ref": "house",
+				"at": [
+					0.0,
+					4.0,
+					0.0
+				],
+				"contract": {
+					"margin": 0.05,
+					"mount": "floor",
+					"offset": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"size": [
+						1.96000003814697,
+						2.0,
+						1.96000003814697
+					]
+				},
+				"kind": "assembly",
+				"label": "House",
+				"rotation": [
+					0.0,
+					0.0,
+					0.0
+				],
+				"linked": true
+			},
+			{
+				"asset_ref": "utility_ac",
+				"at": [
+					1.0,
+					4.69999980926514,
+					0.0
+				],
+				"contract": {
+					"margin": 0.05,
+					"mount": "wall",
+					"offset": [
+						0.0,
+						0.0,
+						0.25
+					],
+					"size": [
+						0.5,
+						0.75,
+						0.5
+					]
+				},
+				"kind": "assembly",
+				"label": "Wall Cooler",
+				"rotation": [
+					0.0,
+					1.57079637050629,
+					0.0
+				],
+				"linked": true
+			},
+			{
+				"asset_ref": "utility_pipe",
+				"at": [
+					1.01999998092651,
+					4.78999996185303,
+					0.479999989271164
+				],
+				"contract": {
+					"margin": 0.05,
+					"mount": "free",
+					"offset": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"size": [
+						1.0,
+						0.100000001490116,
+						0.100000001490116
+					]
+				},
+				"kind": "assembly",
+				"label": "Pipe",
+				"rotation": [
+					0.0,
+					1.57079637050629,
+					0.0
+				],
+				"scale": [
+					1.20000004768372,
+					1.0,
+					1.0
+				],
+				"linked": true
+			},
+			{
+				"asset_ref": "utility_pipe",
+				"at": [
+					1.07000005245209,
+					5.0,
+					1.08000004291534
+				],
+				"contract": {
+					"margin": 0.05,
+					"mount": "free",
+					"offset": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"size": [
+						1.0,
+						0.100000001490116,
+						0.100000001490116
+					]
+				},
+				"kind": "assembly",
+				"label": "Pipe",
+				"rotation": [
+					0.0,
+					0.0,
+					1.57079637050629
+				],
+				"linked": true
+			},
+			{
+				"asset_ref": "utility_pipe",
+				"at": [
+					1.07000005245209,
+					6.0,
+					1.08000004291534
+				],
+				"contract": {
+					"margin": 0.05,
+					"mount": "free",
+					"offset": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"size": [
+						1.0,
+						0.100000001490116,
+						0.100000001490116
+					]
+				},
+				"kind": "assembly",
+				"label": "Pipe",
+				"rotation": [
+					0.0,
+					0.0,
+					1.57079637050629
+				],
+				"linked": true
+			},
+			{
+				"asset_ref": "sawmill",
+				"at": [
+					-2.5,
+					0.0,
+					0.0
+				],
+				"contract": {
+					"margin": 0.05,
+					"mount": "floor",
+					"offset": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"size": [
+						1.96000003814697,
+						2.0,
+						1.96000003814697
+					]
+				},
+				"kind": "assembly",
+				"label": "Sawmill",
+				"rotation": [
+					0.0,
+					0.0,
+					0.0
+				],
+				"linked": true
+			},
+			{
+				"asset_ref": "log_shed",
+				"at": [
+					-2.5,
+					0.0,
+					-2.0
+				],
+				"contract": {
+					"margin": 0.05,
+					"mount": "floor",
+					"offset": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"size": [
+						1.0,
+						1.5,
+						2.0
+					]
+				},
+				"kind": "assembly",
+				"label": "Log Shed",
+				"rotation": [
+					0.0,
+					0.0,
+					0.0
+				],
+				"linked": true
+			}
+		],
+		"piece_editing": true,
+		"turns": 0,
+		"workers": 1
+	}
+}

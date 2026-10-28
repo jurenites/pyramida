@@ -1,0 +1,18 @@
+[gd_scene format=3]
+
+[sub_resource type="StandardMaterial3D" id="Wood"]
+albedo_color = Color(0.501961, 0.313725, 0.239216, 1)
+
+[sub_resource type="CylinderMesh" id="Stem"]
+material = SubResource("Wood")
+top_radius = 0.066
+bottom_radius = 0.075
+height = 0.40927893
+radial_segments = 6
+rings = 1
+
+[node name="Stick" type="Node3D" unique_id=1941868814]
+
+[node name="Stem" type="MeshInstance3D" parent="." unique_id=1995874697]
+transform = Transform3D(0.9917296, 0.128274, -0.004253324, -0.128274, 0.98954225, -0.065969475, -0.004253324, 0.065969475, 0.99781257, 0.02625, 0.2025, 0.0135)
+mesh = SubResource("Stem")

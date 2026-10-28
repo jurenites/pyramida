@@ -1,0 +1,219 @@
+{
+	"assembly": [
+		{
+			"braces": [],
+			"cells": [
+				{
+					"at": [
+						0,
+						0,
+						0
+					],
+					"material": "stone"
+				},
+				{
+					"at": [
+						1,
+						0,
+						0
+					],
+					"material": "stone"
+				},
+				{
+					"at": [
+						0,
+						0,
+						1
+					],
+					"material": "stone"
+				},
+				{
+					"at": [
+						0,
+						-1,
+						0
+					],
+					"material": "stone"
+				},
+				{
+					"at": [
+						0,
+						-2,
+						0
+					],
+					"material": "stone"
+				}
+			],
+			"name": "Stone corner + cellar",
+			"work_per_brace": 3.0,
+			"work_per_cell": 6.0,
+			"ladders": [
+				{
+					"cell": [
+						0,
+						0,
+						1
+					],
+					"side": [
+						0,
+						0,
+						1
+					]
+				}
+			]
+		},
+		{
+			"braces": [
+				{
+					"from": [
+						1,
+						0,
+						0
+					],
+					"to": [
+						2,
+						1,
+						0
+					]
+				},
+				{
+					"from": [
+						0,
+						0,
+						1
+					],
+					"to": [
+						1,
+						1,
+						1
+					]
+				}
+			],
+			"cells": [
+				{
+					"at": [
+						0,
+						1,
+						0
+					],
+					"material": "clay"
+				},
+				{
+					"at": [
+						1,
+						1,
+						0
+					],
+					"material": "clay"
+				},
+				{
+					"at": [
+						2,
+						1,
+						0
+					],
+					"material": "clay"
+				},
+				{
+					"at": [
+						1,
+						1,
+						1
+					],
+					"material": "clay"
+				}
+			],
+			"name": "Braced clay hall",
+			"work_per_brace": 3.0,
+			"work_per_cell": 6.0,
+			"door": [
+				{
+					"cell": [
+						1,
+						1,
+						1
+					],
+					"side": [
+						-1,
+						0,
+						0
+					]
+				}
+			],
+			"ladders": [
+				{
+					"cell": [
+						1,
+						1,
+						1
+					],
+					"side": [
+						-1,
+						0,
+						0
+					]
+				}
+			]
+		}
+	],
+	"draft": {
+		"braces": [],
+		"cells": [
+			{
+				"at": [
+					0,
+					0,
+					0
+				],
+				"material": "timber"
+			},
+			{
+				"at": [
+					1,
+					0,
+					0
+				],
+				"material": "timber"
+			},
+			{
+				"at": [
+					0,
+					0,
+					1
+				],
+				"material": "timber"
+			}
+		],
+		"name": "Timber roof rooms",
+		"work_per_brace": 3.0,
+		"work_per_cell": 6.0,
+		"door": [
+			{
+				"cell": [
+					0,
+					0,
+					1
+				],
+				"side": [
+					-1,
+					0,
+					0
+				]
+			}
+		]
+	},
+	"format": "pyramida-structure-workshop",
+	"version": 1,
+	"workspace": {
+		"layer": 2,
+		"manual_level": false,
+		"mode": 1,
+		"origin": [
+			1,
+			2,
+			0
+		],
+		"turns": 0,
+		"workers": 1
+	}
+}

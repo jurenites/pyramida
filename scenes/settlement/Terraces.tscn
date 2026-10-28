@@ -1,0 +1,9 @@
+[gd_scene format=3 uid="uid://d4cxure31otuo"]
+
+[ext_resource type="Script" uid="uid://dfjbsyneecpat" path="res://scripts/settlement/settlement.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/settlement/EditorWorld.tscn" id="2_preview"]
+
+[node name="Terraces" type="Node" unique_id=559558959]
+script = ExtResource("1")
+
+[node name="EditorPreview" parent="." unique_id=1830737176 instance=ExtResource("2_preview")]

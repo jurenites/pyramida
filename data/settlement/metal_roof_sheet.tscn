@@ -1,0 +1,71 @@
+[gd_scene format=3]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_d22av"]
+albedo_color = Color(0.3372549, 0.38431373, 0.40392157, 1)
+metallic = 0.45
+roughness = 0.72
+
+[sub_resource type="BoxMesh" id="BoxMesh_yvcon"]
+size = Vector3(1, 0.018, 1.4)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_vx4js"]
+albedo_color = Color(0.46666667, 0.5019608, 0.5176471, 1)
+metallic = 0.45
+roughness = 0.72
+
+[sub_resource type="BoxMesh" id="BoxMesh_8o8nc"]
+size = Vector3(0.022, 0.035, 1.4)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_q3b56"]
+albedo_color = Color(0.25882354, 0.30588236, 0.3254902, 1)
+metallic = 0.45
+roughness = 0.72
+
+[sub_resource type="BoxMesh" id="BoxMesh_gs77i"]
+size = Vector3(1, 0.03, 0.025)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_u56f7"]
+albedo_color = Color(0.46666667, 0.5019608, 0.5176471, 1)
+metallic = 0.45
+roughness = 0.72
+
+[sub_resource type="BoxMesh" id="BoxMesh_0e17j"]
+size = Vector3(0.022, 0.035, 1.4)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_btrcv"]
+albedo_color = Color(0.25882354, 0.30588236, 0.3254902, 1)
+metallic = 0.45
+roughness = 0.72
+
+[sub_resource type="BoxMesh" id="BoxMesh_2px48"]
+size = Vector3(1, 0.03, 0.025)
+
+[node name="MetalRoofSheet" type="Node3D" unique_id=1513942041]
+
+[node name="Slope" type="Node3D" parent="." unique_id=229512877]
+transform = Transform3D(1, 0, 0, 0, 0.90630776, -0.42261827, 0, 0.42261827, 0.90630776, 0, 0.29583278, 0)
+
+[node name="Sheet" type="MeshInstance3D" parent="Slope" unique_id=2113494692]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.009, 0)
+material_override = SubResource("StandardMaterial3D_d22av")
+mesh = SubResource("BoxMesh_yvcon")
+
+[node name="SeamLeft" type="MeshInstance3D" parent="Slope" unique_id=1349539215]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.484, 0.0355, 0)
+material_override = SubResource("StandardMaterial3D_vx4js")
+mesh = SubResource("BoxMesh_8o8nc")
+
+[node name="HeadFold" type="MeshInstance3D" parent="Slope" unique_id=243556635]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.015, -0.6875)
+material_override = SubResource("StandardMaterial3D_q3b56")
+mesh = SubResource("BoxMesh_gs77i")
+
+[node name="SeamRight" type="MeshInstance3D" parent="Slope" unique_id=1838586690]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.484, 0.0355, 0)
+material_override = SubResource("StandardMaterial3D_u56f7")
+mesh = SubResource("BoxMesh_0e17j")
+
+[node name="EaveFold" type="MeshInstance3D" parent="Slope" unique_id=188475632]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.015, 0.6875)
+material_override = SubResource("StandardMaterial3D_btrcv")
+mesh = SubResource("BoxMesh_2px48")

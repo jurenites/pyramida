@@ -3,12 +3,10 @@ extends CanvasLayer
 
 const UIVisualTokens = preload("res://scripts/ui_visual_tokens.gd")
 
-const PixelUITheme = preload("res://scripts/pixel_ui.gd")
-
 const IconLibrary = preload("res://scripts/speech_icon_library.gd")
 const Palette = preload("res://scripts/game_palette.gd")
 
-const BUBBLE_HEIGHT := 22.0
+const BUBBLE_HEIGHT := 48.0 * UIVisualTokens.POINT
 const BUBBLE_TAIL_HEIGHT := 4.0
 const BUBBLE_GAP := 4.0
 const SCREEN_MARGIN := 4.0
@@ -111,10 +109,7 @@ func _bubble_for_message(message: Dictionary) -> Control:
 
 
 func _create_bubble(message: Dictionary) -> Control:
-	var short_text := str(message.get("short_text", ""))
-	var bubble_width := 26.0
-	if not short_text.is_empty():
-		bubble_width += minf(36.0, float(short_text.length() * 5 + 3))
+	var bubble_width := 48.0 * UIVisualTokens.POINT
 
 	var bubble := Control.new()
 	bubble.name = "ActorSpeechBubble"
@@ -147,23 +142,12 @@ func _create_bubble(message: Dictionary) -> Control:
 
 	var icon := TextureRect.new()
 	icon.name = "MessageIcon"
-	icon.position = Vector2(6.0, 4.0)
-	icon.size = Vector2(14.0, 14.0)
+	icon.position = Vector2.ONE * 8 * UIVisualTokens.PADDING_UNIT
+	icon.size = Vector2.ONE * 32 * UIVisualTokens.POINT
 	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	bubble.add_child(icon)
-
-	var text_label := Label.new()
-	text_label.name = "ShortText"
-	text_label.position = Vector2(22.0, 2.0)
-	text_label.size = Vector2(maxf(0.0, bubble_width - 24.0), 18.0)
-	text_label.add_theme_color_override("font_color", Color.BLACK)
-	text_label.add_theme_font_size_override("font_size", UIVisualTokens.SPEECH_BUBBLE_TEXT_FONT_SIZE)
-	PixelUITheme.apply(text_label)
-	text_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	text_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	bubble.add_child(text_label)
 
 	_update_bubble_content(bubble, message)
 	return bubble
@@ -171,7 +155,6 @@ func _create_bubble(message: Dictionary) -> Control:
 
 func _update_bubble_content(bubble: Control, message: Dictionary) -> void:
 	var icon := bubble.get_node("MessageIcon") as TextureRect
-	var text_label := bubble.get_node("ShortText") as Label
 	var tail_fill := bubble.get_node("TailFill") as Polygon2D
 	var bubble_panel := bubble.get_node("BubblePanel") as Panel
 	var bubble_style := bubble_panel.get_theme_stylebox("panel") as StyleBoxFlat
@@ -180,7 +163,6 @@ func _update_bubble_content(bubble: Control, message: Dictionary) -> void:
 	if bubble_style != null:
 		bubble_style.bg_color = background_colour
 	icon.texture = IconLibrary.texture(str(message.get("icon", "walk")))
-	text_label.text = str(message.get("short_text", ""))
 
 
 func _bubble_background(message: Dictionary) -> Color:

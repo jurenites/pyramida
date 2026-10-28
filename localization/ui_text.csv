@@ -1,6 +1,6 @@
 keys,en,_character_limit,_interface_location,_translator_note
 prototype_title_text,FOUNDATION PROTOTYPE,32,top_left_title,Prototype title
-prototype_instructions_text,Click/drag: select citizens   •   Click ground: deselect   •   Right-click: move or work\nWASD: move camera   •   Right-click tree/site: assign citizen   •   B: building menu,180,top_left_instructions,Keep the two-line structure by preserving the escaped newline
+prototype_instructions_text,Click/drag: select people   •   Click ground: deselect   •   Right-click: move or work\nWASD: move camera   •   Right-click tree/site: assign person   •   B: building menu,180,top_left_instructions,Keep the two-line structure by preserving the escaped newline
 build_button_tooltip_text,Build,12,top_right_toolbar,Action label shown while hovering over the building button
 greenery_button_tooltip_text,Manage greenery,24,top_right_toolbar,Opens the mode for moving Bushes and Tree Stumps
 landscape_button_tooltip_text,Terraforming,24,top_right_toolbar,Opens World Unit soil addition and removal tools
@@ -31,17 +31,19 @@ building_rotate_hotkey_text,↻  R,8,selected_construction_site_hotkey_hint,Show
 building_mode_label_text,BUILD,16,top_left_mode,Short mode label
 greenery_mode_label_text,GREENERY,16,top_left_mode,Shown while moving Bushes or Tree Stumps
 landscape_mode_label_text,TERRAFORMING,16,top_left_mode,Shown while adding or removing terrain cubes
-citizen_mode_label_text,CITIZEN,16,top_left_mode,Shown whenever one or more Citizens are selected for orders
+citizen_mode_label_text,SELECTED,16,top_left_mode,Shown whenever one or more Citizens are selected for orders
 command_mode_label_text,COMMAND,16,top_left_mode,Short mode label
 day_count_text,Day %d,16,top_left_day_counter,The number replaces %d
-no_citizen_selected_text,No citizen selected,32,top_left_status,Selection state
-multiple_citizens_selected_text,Selected citizens: %d,32,top_left_status,The number replaces %d
-single_citizen_selected_text,Selected citizen: %s,48,top_left_status,The translated citizen status replaces %s
+day_tooltip_text,Day,16,top_left_day_counter,Daytime icon tooltip
+log_tooltip_text,Log,20,top_left_status,Log icon tooltip
+no_citizen_selected_text,No one selected,32,top_left_status,Selection state
+multiple_citizens_selected_text,Selected: %d,32,top_left_status,The number replaces %d
+single_citizen_selected_text,Selected: %s,48,top_left_status,The translated citizen status replaces %s
 resources_summary_text,Calories: %d   •   Water: %d   •   Logs: %d   •   Supports: %d,100,top_left_resources,Four numbers replace the placeholders in order
 onboarding_title_text,Controls,32,onboarding_panel_title,First controls lesson title
 onboarding_explanation_text,Use the mouse and keyboard to select move build and arrange the city. F1 opens this guide again.,110,onboarding_panel_body,Keep this general because key labels are deliberately hidden
 onboarding_dismiss_button_text,Got it,16,onboarding_panel_button,Action label
-citizen_name_text,Citizen,16,world_hover,World object noun
+citizen_name_text,Idle,16,world_hover,World object noun
 support_name_text,Support,16,world_hover,World object noun used for planned and completed Supports
 excavation_name_text,Excavation,16,world_hover,Short name for a planned sand excavation
 pile_name_text,Pile,16,world_hover,Starting shared storage building
@@ -97,3 +99,284 @@ support_debug_hover_text,"debug · logs %d/%d · (%.0f, %.0f)",80,debug_hover,Lo
 world_item_debug_hover_text,debug · seed %d · logs %d · water %d,80,debug_hover,Seed log count and water count replace the placeholders
 world_unit_debug_hover_text,"debug · World Unit (%d, %d)",48,debug_hover,World Unit coordinates replace the placeholders
 pile_debug_hover_text,debug · logs %d · calories %d,48,debug_hover,Pile inventory counters replace the placeholders
+settlement_eyebrow_text,A VERTICAL SETTLEMENT · PLAYABLE STUDY,68,settlement_prototype,Vertical settlement prototype
+settlement_title_text,Pyramida,60,settlement_prototype,Vertical settlement prototype
+settlement_pause_text,Pause / play,60,settlement_prototype,Vertical settlement prototype
+settlement_speed_text,Speed ×1,60,settlement_prototype,Vertical settlement prototype
+settlement_goal_heading_text,FIRST OBJECTIVE,60,settlement_prototype,Vertical settlement prototype
+settlement_goal_text,Build the upper terrace\nDeliver 4 timber upstairs.,80,settlement_prototype,Vertical settlement prototype
+settlement_goal_complete_text,Upper terrace complete\nTry a second floor or garden.,82,settlement_prototype,Vertical settlement prototype
+settlement_intro_text,Build upward. Keep it connected.,62,settlement_prototype,Vertical settlement prototype
+settlement_save_text,Save,60,settlement_prototype,Vertical settlement prototype
+settlement_load_text,Load,60,settlement_prototype,Vertical settlement prototype
+settlement_reset_text,Reset,60,settlement_prototype,Vertical settlement prototype
+settlement_routes_text,Show delivery routes,60,settlement_prototype,Vertical settlement prototype
+settlement_hint_text,Select people; right-click to move or assign work. Grow hay and bake bread.,120,settlement_prototype,Vertical settlement prototype
+settlement_tool_inspect_text,Inspect,60,settlement_prototype,Vertical settlement prototype
+settlement_tool_platform_text,Platform · 4,60,settlement_prototype,Vertical settlement prototype
+settlement_tool_stairs_text,Ladder · 3,60,settlement_prototype,Vertical settlement prototype
+settlement_tool_stockpile_text,Pile · 1,60,settlement_prototype,Vertical settlement prototype
+settlement_tool_garden_text,Garden · 2,60,settlement_prototype,Vertical settlement prototype
+settlement_tool_remove_text,Remove ladder,60,settlement_prototype,Vertical settlement prototype
+settlement_floor_down_text,Down,60,settlement_prototype,Vertical settlement prototype
+settlement_floor_up_text,Up,60,settlement_prototype,Vertical settlement prototype
+settlement_floor_text,Floor %d,60,settlement_prototype,Vertical settlement prototype
+settlement_controls_text,Drag select · Right-click order / drag orbit · WASD pan · Scroll zoom · R rotate · B build · V inspect · Esc deselect,170,settlement_prototype,Vertical settlement prototype
+settlement_resources_text,%d timber   %d food   %d people,68,settlement_prototype,Vertical settlement prototype
+settlement_worker_text,RESIDENT %d\n%s\nCarrying: %s\nWalked: %.1f m,72,settlement_prototype,Vertical settlement prototype
+settlement_summary_text,%d deliveries completed\n%d meals consumed\n%d construction sites,93,settlement_prototype,Vertical settlement prototype
+settlement_place_hint_text,Click to build · %s · floor %d · R rotate · Right-click cancel,80,settlement_prototype,Vertical settlement prototype
+settlement_remove_hint_text,Click the stairs to remove them. Occupied stairs stay protected.,121,settlement_prototype,Vertical settlement prototype
+settlement_saved_text,"Settlement saved, including workers and carried resources.",88,settlement_prototype,Vertical settlement prototype
+settlement_save_failed_text,Could not save the settlement.,60,settlement_prototype,Vertical settlement prototype
+settlement_no_save_text,No saved settlement yet.,60,settlement_prototype,Vertical settlement prototype
+settlement_invalid_save_text,This save could not be loaded. Your current settlement is unchanged.,98,settlement_prototype,Vertical settlement prototype
+settlement_loaded_text,Settlement restored.,60,settlement_prototype,Vertical settlement prototype
+settlement_reset_done_text,Fresh settlement started. Your saved settlement is unchanged.,91,settlement_prototype,Vertical settlement prototype
+settlement_status_idle_text,Idle,80,settlement_prototype,Simulation feedback
+settlement_status_fetch_timber_text,Fetching timber,80,settlement_prototype,Simulation feedback
+settlement_status_fetch_water_text,Fetching water,80,settlement_prototype,Simulation feedback
+settlement_status_to_harvest_text,Walking to harvest,80,settlement_prototype,Simulation feedback
+settlement_status_to_tree_text,Walking to tree,80,settlement_prototype,Simulation feedback
+settlement_status_disconnected_text,Waiting · route disconnected,80,settlement_prototype,Simulation feedback
+settlement_status_restored_text,Route restored,80,settlement_prototype,Simulation feedback
+settlement_status_building_text,Building,80,settlement_prototype,Simulation feedback
+settlement_status_watering_text,Watering,80,settlement_prototype,Simulation feedback
+settlement_status_harvesting_text,Harvesting,80,settlement_prototype,Simulation feedback
+settlement_status_cutting_text,Cutting timber,80,settlement_prototype,Simulation feedback
+settlement_status_storage_blocked_text,Waiting · storage full or unreachable,80,settlement_prototype,Simulation feedback
+settlement_status_to_storage_text,Carrying to storage,80,settlement_prototype,Simulation feedback
+settlement_status_unreachable_text,Waiting · destination unreachable,80,settlement_prototype,Simulation feedback
+settlement_status_carry_log_text,Carrying log,80,settlement_prototype,Simulation feedback
+settlement_status_carry_water_text,Carrying water,80,settlement_prototype,Simulation feedback
+settlement_error_outside_text,Outside the building area,80,settlement_prototype,Simulation feedback
+settlement_error_planned_text,Already planned,80,settlement_prototype,Simulation feedback
+settlement_error_empty_space_text,Choose an empty space above ground,80,settlement_prototype,Simulation feedback
+settlement_error_support_text,A platform needs ground or a floor below its posts,80,settlement_prototype,Simulation feedback
+settlement_error_access_text,Build beside an accessible floor,80,settlement_prototype,Simulation feedback
+settlement_error_floor_text,Build on an existing floor,80,settlement_prototype,Simulation feedback
+settlement_error_stairs_text,Stairs already start here,80,settlement_prototype,Simulation feedback
+settlement_error_stair_target_text,Stairs must meet a deck or roof one floor above,80,settlement_prototype,Simulation feedback
+settlement_error_clear_text,The stair entrance must be clear,80,settlement_prototype,Simulation feedback
+settlement_error_occupied_text,This space is occupied,80,settlement_prototype,Simulation feedback
+settlement_construction_queued_text,Construction queued,80,settlement_prototype,Simulation feedback
+settlement_construction_complete_text,Construction complete,80,settlement_prototype,Simulation feedback
+settlement_error_worker_text,Wait until the worker clears this space,80,settlement_prototype,Simulation feedback
+settlement_removed_text,Stairs removed · routes will be recalculated,80,settlement_prototype,Simulation feedback
+settlement_error_remove_text,Only stairs can be removed in this prototype,80,settlement_prototype,Simulation feedback
+settlement_status_meal_text,Going for a meal,90,settlement_prototype,Simulation feedback
+settlement_status_eating_text,Eating,90,settlement_prototype,Simulation feedback
+settlement_status_carry_food_text,Carrying food,90,settlement_prototype,Simulation feedback
+settlement_status_retask_text,Rerouting timber,90,settlement_prototype,Simulation feedback
+settlement_error_headroom_text,Keep the space above stairs open,90,settlement_prototype,Simulation feedback
+settlement_error_landing_text,Keep the upper landing clear,90,settlement_prototype,Simulation feedback
+settlement_object_text,%s · Floor %d,120,settlement_prototype,Inspection information
+settlement_stock_text,Timber: %d   Food: %d\nStorage: %d / %d,120,settlement_prototype,Inspection information
+settlement_garden_text,Water: %d   Growth: %d%%\nHarvest ready: %d,120,settlement_prototype,Inspection information
+settlement_tree_text,Logs remaining: %d / 3\nLiving stump regrows after harvesting,120,settlement_prototype,Inspection information
+settlement_object_platform_text,platform,120,settlement_prototype,Inspection information
+settlement_object_stairs_text,ladder,120,settlement_prototype,Inspection information
+settlement_object_stockpile_text,pile,120,settlement_prototype,Inspection information
+settlement_object_garden_text,garden,120,settlement_prototype,Inspection information
+settlement_object_well_text,well,120,settlement_prototype,Inspection information
+settlement_object_tree_text,Tree,120,settlement_prototype,Inspection information
+settlement_status_restock_text,Restocking timber,60,settlement_prototype,Logistics state
+settlement_status_unload_text,Unloading timber,60,settlement_prototype,Logistics state
+settlement_gallery_title_text,Terraces · the new 3D kit,120,settlement_gallery,Asset gallery label
+settlement_gallery_subtitle_text,Editable models · articulated people · shared construction scale,120,settlement_gallery,Asset gallery label
+settlement_asset_citizen_0_text,Linen / indigo,120,settlement_gallery,Asset gallery label
+settlement_asset_citizen_1_text,Clay / charcoal,120,settlement_gallery,Asset gallery label
+settlement_asset_citizen_2_text,Straw / sage,120,settlement_gallery,Asset gallery label
+settlement_asset_tree_text,Living tree,120,settlement_gallery,Asset gallery label
+settlement_asset_palm_text,Date palm,120,settlement_gallery,Asset gallery label
+settlement_asset_well_text,Stone well,120,settlement_gallery,Asset gallery label
+settlement_asset_garden_text,Raised garden,120,settlement_gallery,Asset gallery label
+settlement_asset_stockpile_text,Stone-corner pile,120,settlement_gallery,Asset gallery label
+settlement_asset_house_text,Courtyard house,120,settlement_gallery,Asset gallery label
+settlement_asset_sawmill_text,Saw workshop,120,settlement_gallery,Asset gallery label
+settlement_asset_table_text,Dining table,120,settlement_gallery,Asset gallery label
+settlement_asset_bed_text,Woven bed,120,settlement_gallery,Asset gallery label
+settlement_resource_log_text,Timber,20,settlement_prototype,Cargo resource label
+settlement_resource_water_text,Water,20,settlement_prototype,Cargo resource label
+settlement_resource_food_text,Food,20,settlement_prototype,Cargo resource label
+settlement_build_menu_text,build,180,settlement_build_menu,Reference menu and construction feedback
+settlement_pause_short_text,II,180,settlement_build_menu,Reference menu and construction feedback
+settlement_timber_cost_text,%d timber,180,settlement_build_menu,Reference menu and construction feedback
+settlement_category_housing_text,housing,180,settlement_build_menu,Reference menu and construction feedback
+settlement_category_industry_text,industry,180,settlement_build_menu,Reference menu and construction feedback
+settlement_category_structure_text,structure,180,settlement_build_menu,Reference menu and construction feedback
+settlement_snap_text,"Snaps to ground, decks and roofs. Add stairs to reach upper floors.",180,settlement_build_menu,Reference menu and construction feedback
+settlement_more_text,...,180,settlement_build_menu,Reference menu and construction feedback
+settlement_minus_text,−,180,settlement_build_menu,Reference menu and construction feedback
+settlement_plus_text,+,180,settlement_build_menu,Reference menu and construction feedback
+settlement_cutaway_floor_text,view floor %d,180,settlement_build_menu,Reference menu and construction feedback
+settlement_cutaway_help_text,C toggle cutaway · Q/E floor,180,settlement_build_menu,Reference menu and construction feedback
+settlement_object_house_text,house,180,settlement_build_menu,Reference menu and construction feedback
+settlement_object_hay_field_text,hay field,180,settlement_build_menu,Reference menu and construction feedback
+settlement_object_windmill_text,windmill,180,settlement_build_menu,Reference menu and construction feedback
+settlement_object_road_text,road,180,settlement_build_menu,Reference menu and construction feedback
+settlement_object_school_text,school,180,settlement_build_menu,Reference menu and construction feedback
+settlement_object_pantry_text,pantry,180,settlement_build_menu,Reference menu and construction feedback
+settlement_object_log_shed_text,log shed,180,settlement_build_menu,Reference menu and construction feedback
+settlement_object_hay_barn_text,hay barn,180,settlement_build_menu,Reference menu and construction feedback
+settlement_object_sawmill_text,sawmill,180,settlement_build_menu,Reference menu and construction feedback
+settlement_object_mine_camp_text,mine camp,180,settlement_build_menu,Reference menu and construction feedback
+settlement_object_masonry_text,masonry,180,settlement_build_menu,Reference menu and construction feedback
+settlement_object_workshop_text,workshop,180,settlement_build_menu,Reference menu and construction feedback
+settlement_description_house_text,3 resident places · 12 food. Connected rooms share a household.,180,settlement_build_menu,Reference menu and construction feedback
+settlement_description_hay_field_text,Grows hay on sand or four soil beds. Roof cover slows growth.,180,settlement_build_menu,Reference menu and construction feedback
+settlement_description_windmill_text,"Bakers carry 1 hay here and turn it into 3 food, then deliver the bread to storage. Several bakers can share a mill.",180,settlement_build_menu,Reference menu and construction feedback
+settlement_description_road_text,"People walk 35% faster along completed roads. Place them between fields, workshops and stores.",180,settlement_build_menu,Reference menu and construction feedback
+settlement_description_well_text,Irrigates fields within 2 cells on the same floor. Also supplies water for gardens and distant fields.,180,settlement_build_menu,Reference menu and construction feedback
+settlement_description_school_text,Children grow up twice as fast while a completed school exists. Extra schools do not multiply the bonus.,180,settlement_build_menu,Reference menu and construction feedback
+settlement_description_pantry_text,Legacy food supplies. New food storage belongs in houses.,180,settlement_build_menu,Reference menu and construction feedback
+settlement_description_log_shed_text,Stores 48 logs.,180,settlement_build_menu,Reference menu and construction feedback
+settlement_description_hay_barn_text,Stores 48 hay. Place it between your fields and windmill for a short bread-production route.,180,settlement_build_menu,Reference menu and construction feedback
+settlement_description_sawmill_text,"Sawyers carry timber here and cut it into planks for windmills, pantries and advanced buildings.",180,settlement_build_menu,Reference menu and construction feedback
+settlement_description_mine_camp_text,Unlocks limestone mining and stores 48 raw stone or dressed blocks. Build near a stone deposit.,180,settlement_build_menu,Reference menu and construction feedback
+settlement_description_masonry_text,"Masons carry raw stone here and dress it into blocks for the school and workshop.",180,settlement_build_menu,Reference menu and construction feedback
+settlement_description_workshop_text,All applied work is 50% faster while a completed workshop exists. Additional workshops do not stack.,180,settlement_build_menu,Reference menu and construction feedback
+settlement_description_platform_text,Raised deck with posts. Must stand on a clear surface; never floats.,180,settlement_build_menu,Reference menu and construction feedback
+settlement_description_stairs_text,Freestanding 1×1×1 ladder with its own supports. Connects diagonally to an adjacent floor one level up. R rotates.,180,settlement_build_menu,Reference menu and construction feedback
+settlement_description_stockpile_text,32 shared spaces for stone / blocks / planks / water. Adjacent piles join.,180,settlement_build_menu,Reference menu and construction feedback
+settlement_description_garden_text,Watered crop plot. Food grows and is carried to storage by people.,180,settlement_build_menu,Reference menu and construction feedback
+settlement_dead_tree_text,Logs remaining: %d / 3\nDead stump does not regrow,120,settlement_prototype,Dead tree inspection
+settlement_menu_title_text,Pyramida,180,settlement_main_menu,Main menu and automatic save feedback
+settlement_menu_tagline_text,A place to begin,180,settlement_main_menu,Main menu and automatic save feedback
+settlement_menu_resume_text,Continue,180,settlement_main_menu,Main menu and automatic save feedback
+settlement_menu_slots_text,Play,180,settlement_main_menu,Main menu and automatic save feedback
+settlement_menu_select_slot_text,Select slot,180,settlement_main_menu,Save slot selection title
+settlement_menu_settings_text,Settings,180,settlement_main_menu,Main menu and automatic save feedback
+settlement_menu_delete_save_text,Delete save file,180,settlement_main_menu,Delete save screen title and settings entry
+settlement_menu_cancel_text,Close,180,settlement_main_menu,Return from save deletion to settings
+settlement_slot_delete_text,delete,180,settlement_main_menu,Occupied save deletion tooltip
+settlement_slot_deleted_text,empty,180,settlement_main_menu,Empty slot in the delete save screen
+settlement_slot_delete_failed_text,Could not delete save file.,180,settlement_main_menu,Save deletion failure
+settlement_menu_quit_text,Quit,180,settlement_main_menu,Main menu and automatic save feedback
+settlement_menu_autosave_text,Progress saves automatically.,180,settlement_main_menu,Main menu and automatic save feedback
+settlement_menu_back_text,Back,180,settlement_main_menu,Main menu and automatic save feedback
+settlement_menu_difficulty_text,Choose difficulty,180,settlement_main_menu,Main menu and automatic save feedback
+settlement_difficulty_easy_text,Fields,180,settlement_main_menu,Main menu and automatic save feedback
+settlement_difficulty_normal_text,Sand,180,settlement_main_menu,Main menu and automatic save feedback
+settlement_difficulty_hard_text,Snow,180,settlement_main_menu,Main menu and automatic save feedback
+settlement_difficulty_easy_tooltip_text,Easy,180,settlement_main_menu,Fields difficulty tooltip
+settlement_difficulty_normal_tooltip_text,Normal,180,settlement_main_menu,Sand difficulty tooltip
+settlement_difficulty_hard_tooltip_text,Coming soon,180,settlement_main_menu,Disabled Snow difficulty tooltip
+settlement_setting_fullscreen_text,Fullscreen,180,settlement_main_menu,Main menu and automatic save feedback
+settlement_menu_controls_text,Esc  deselect / back\nC  cutaway    Q / E  view floor,180,settlement_main_menu,Main menu and automatic save feedback
+settlement_slot_empty_text,New game,180,settlement_main_menu,Main menu and automatic save feedback
+settlement_slot_progress_text,%s Day %d,180,settlement_main_menu,Saved landscape name and daytime cycle number
+settlement_slot_night_progress_text,%s Night %d,180,settlement_main_menu,Saved landscape name and nighttime cycle number
+settlement_slot_unavailable_text,Save unavailable · kept safe,180,settlement_main_menu,Main menu and automatic save feedback
+settlement_slot_current_text,Current,180,settlement_main_menu,Main menu and automatic save feedback
+settlement_slot_title_text,Settlement %d,180,settlement_main_menu,Main menu and automatic save feedback
+settlement_menu_active_text,Settlement %d · %s,180,settlement_main_menu,Active slot number and saved landscape name
+settlement_slot_damaged_text,This settlement could not be opened. Its save files have been preserved.,180,settlement_main_menu,Main menu and automatic save feedback
+settlement_autosave_failed_text,"Progress could not be saved. Check available disk space and folder access, then try again before leaving.",180,settlement_main_menu,Main menu and automatic save feedback
+settlement_slot_exists_text,This slot already contains a settlement. Choose it to continue.,180,settlement_main_menu,Main menu and automatic save feedback
+settlement_slot_recovered_text,Restored the previous automatic save.,180,settlement_main_menu,Main menu and automatic save feedback
+settlement_settings_failed_text,Settings could not be saved. Your previous settings are unchanged.,180,settlement_main_menu,Main menu and automatic save feedback
+collect_water_text,Collect water,240,settlement_water,Small seasonal water sources and weather
+stored_water_text,Water stored: %d,240,settlement_water,Small seasonal water sources and weather
+rain_now_text,Rain · hollows refilling,240,settlement_water,Small seasonal water sources and weather
+rain_in_text,Rain in %ds,240,settlement_water,Small seasonal water sources and weather
+puddle_name_text,Rain puddle,240,settlement_water,Small seasonal water sources and weather
+stream_name_text,Seasonal stream,240,settlement_water,Small seasonal water sources and weather
+surface_water_text,%s\n%d / %d buckets\nRain refills this shallow hollow. People carry one bucket at a time.,240,settlement_water,Small seasonal water sources and weather
+terrain_occupied_text,Cannot build inside solid terrain,80,settlement_water,Placement validation
+water_dry_text,This hollow is dry. Wait for rain.,80,settlement_water,Empty source feedback
+water_queued_text,Water collection queued,80,settlement_water,Collection feedback
+walking_water_text,Walking to water,60,settlement_worker,Worker status
+collecting_water_text,Collecting water,60,settlement_worker,Worker status
+settlement_citizens_tooltip_text,Population,20,settlement_prototype,Population counter tooltip
+settlement_save_exit_text,Save and leave settlement,40,settlement_menu,Toolbar exit tooltip
+settlement_population_ages_text,%d adults · %d children (grow up in 3 days),100,population_tooltip,Childhood lasts three simulation days
+settlement_status_growing_text,Growing up,32,citizen_status,Child NPC
+economy_day_text,Daylight,200,settlement_economy,Peaceful Pyramida foundation
+economy_night_text,Night,200,settlement_economy,Peaceful Pyramida foundation
+economy_fetch_material_text,Fetching materials,200,settlement_economy,Peaceful Pyramida foundation
+economy_to_deposit_text,Walking to gather,200,settlement_economy,Peaceful Pyramida foundation
+economy_processing_text,Crafting,200,settlement_economy,Peaceful Pyramida foundation
+economy_walking_text,Walking,200,settlement_economy,Peaceful Pyramida foundation
+economy_order_text,Order given. Change the person’s job to Automatic to resume general work.,200,settlement_economy,Peaceful Pyramida foundation
+economy_storage_text,Storage: %d / %d,200,settlement_economy,Peaceful Pyramida foundation
+economy_deposit_text,Remaining: %d,200,settlement_economy,Peaceful Pyramida foundation
+economy_housing_text,Village housing: %d / %d,200,settlement_economy,Peaceful Pyramida foundation
+economy_irrigated_text,Irrigated · hay harvest,200,settlement_economy,Peaceful Pyramida foundation
+economy_hand_water_text,Hand-watered · hay harvest,200,settlement_economy,Peaceful Pyramida foundation
+settlement_object_berry_text,Berry bush,200,settlement_economy,Peaceful Pyramida foundation
+settlement_object_limestone_text,Limestone,200,settlement_economy,Peaceful Pyramida foundation
+settlement_resource_grain_text,Hay,200,settlement_economy,Peaceful Pyramida foundation
+settlement_resource_plank_text,Planks,200,settlement_economy,Peaceful Pyramida foundation
+settlement_resource_stone_text,Stone,200,settlement_economy,Peaceful Pyramida foundation
+settlement_resource_block_text,Blocks,200,settlement_economy,Peaceful Pyramida foundation
+economy_role_auto_text,Job: Automatic,200,settlement_economy,Peaceful Pyramida foundation
+economy_role_builder_text,Job: Builder,200,settlement_economy,Peaceful Pyramida foundation
+economy_role_forager_text,Job: Gatherer,200,settlement_economy,Peaceful Pyramida foundation
+economy_role_farmer_text,Job: Grass gatherer,200,settlement_economy,Peaceful Pyramida foundation
+economy_role_baker_text,Job: Baker,200,settlement_economy,Peaceful Pyramida foundation
+economy_role_woodcutter_text,Job: Lumber,200,settlement_economy,Peaceful Pyramida foundation
+economy_role_sawyer_text,Job: Sawyer,200,settlement_economy,Peaceful Pyramida foundation
+economy_role_miner_text,Job: Miner,200,settlement_economy,Peaceful Pyramida foundation
+economy_role_mason_text,Job: Mason,200,settlement_economy,Peaceful Pyramida foundation
+economy_role_hauler_text,Job: Hauler,200,settlement_economy,Peaceful Pyramida foundation
+economy_role_idle_text,Job: Idle / explorer,200,settlement_economy,Peaceful Pyramida foundation
+settlement_menu_seed_text,Seed %d,180,settlement_main_menu,Seed of the preview used for a new game
+kid_name_text,Kid,16,world_hover,Child inspection label
+stone_name_text,Stone,16,world_hover,Stone deposit label
+replant_bush_text,Replant,24,settlement_economy,Restart an empty bush at one berry capacity
+person_job_builder_text,Builder,16,world_hover,Current occupation label
+person_job_forager_text,Gatherer,16,world_hover,Current occupation label
+person_job_farmer_text,Grass gatherer,24,world_hover,Current occupation label
+person_job_baker_text,Baker,16,world_hover,Current occupation label
+person_job_woodcutter_text,Lumber,16,world_hover,Current occupation label
+person_job_sawyer_text,Sawyer,16,world_hover,Current occupation label
+person_job_miner_text,Miner,16,world_hover,Current occupation label
+person_job_mason_text,Mason,16,world_hover,Current occupation label
+person_job_hauler_text,Hauler,16,world_hover,Current occupation label
+willager_name_text,Willager,16,world_hover,Adult without an occupation
+relocation_move_text,Move,16,toolbar,Move the selected building
+relocation_unavailable_text,Unavailable,24,status,Relocation source or destination unavailable
+relocation_support_text,Clear the upper floor,40,status,Move things above first
+relocation_to_source_text,Moving,24,citizen,Walking to dismantle or uproot
+relocation_return_parts_text,Returning parts,24,citizen,Reserved relocation material return
+building_copy_text,Copy · C,24,toolbar,Copy selected building into placement
+building_remove_text,Remove · R,24,toolbar,Queue deconstruction of selected building
+construction_delete_text,Delete,24,toolbar,Delete selected construction plan
+salvage_to_parts_text,Collecting parts,32,citizen,Walking to recovered building materials
+salvage_materials_text,Materials,24,selection,Recovered parts awaiting hauling
+settlement_object_soil_bed_text,Soil garden bed,180,settlement_build_menu,House-sized growing foundation
+settlement_description_soil_bed_text,House-sized soil bed. Four adjoining beds support a hay field.,180,settlement_build_menu,Soil foundation
+farming_foundation_text,Sand or four soil beds required,100,settlement_build_menu,Field placement feedback
+settlement_category_nature_text,Nature,48,planting,Nature building mode in the top-right toolbar
+settlement_object_seed_vegetables_text,Vegetable seeds,48,planting,Seed planting
+settlement_object_seed_tree_text,Tree seed,48,planting,Seed planting
+settlement_object_seed_bush_text,Berry bush seed,48,planting,Seed planting
+settlement_object_seed_grass_text,Grass seeds,48,planting,Seed planting
+settlement_object_seed_palm_text,Palm seed,48,planting,Seed planting
+settlement_object_grass_patch_text,Grass,48,planting,Seed planting
+sapling_name_text,Sapling,48,planting,Seed planting
+palm_seedling_name_text,Palm seedling,48,planting,Seed planting
+vegetables_name_text,Vegetables,48,planting,Seed planting
+settlement_description_seed_vegetables_text,Vegetables,48,planting,Seed planting
+settlement_description_seed_tree_text,Tree,48,planting,Seed planting
+settlement_description_seed_bush_text,Berry bush,48,planting,Seed planting
+settlement_description_seed_grass_text,Grass,48,planting,Seed planting
+settlement_description_seed_palm_text,Palm tree,48,planting,Seed planting
+settlement_object_seed_vine_text,Vine tree,48,planting,Climbing flora
+settlement_description_seed_vine_text,Vine tree,48,planting,Climbing flora
+settlement_object_vine_tree_text,Vine tree,48,planting,Climbing flora
+vine_wall_required_text,Plant beside a wall,80,planting,Placement feedback
+settlement_object_waterworks_text,Waterworks,32,object_name,Well enclosed by a utility building
+settlement_description_waterworks_text,Rainwater storage,64,building_description,Water utility
+settlement_object_stone_storage_text,Stone storage,40,settlement_build_menu,Stone storage name
+settlement_description_stone_storage_text,Stores stone,80,settlement_build_menu,Stone storage description
+settlement_object_goods_rack_text,Pottery rack,40,settlement_build_menu,Pile tier two
+settlement_description_goods_rack_text,Stores pottery · 48,80,settlement_build_menu,Fixed goods storage
+settlement_object_small_warehouse_text,Small warehouse,40,settlement_build_menu,Pile tier three
+settlement_description_small_warehouse_text,Stores pottery · 64,80,settlement_build_menu,Fixed goods storage
+settlement_resource_pottery_text,Pottery,40,settlement_resources,Food-preserving clay pots
+terrain_dig_text,Dig · 1×1×1 m,24,settlement_toolbar,Remove one metre of exposed sand
+terrain_fill_text,Fill · 1×1×1 m,24,settlement_toolbar,Add one metre of sand
+terrain_exposed_text,Choose exposed sand,48,settlement_terrain,Terrain tool validation
+terrain_limit_text,Terrain height limit,48,settlement_terrain,Terrain tool vertical bounds

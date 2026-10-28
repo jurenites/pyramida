@@ -4,7 +4,7 @@ extends RefCounted
 const Palette = preload("res://scripts/game_palette.gd")
 const UIText = preload("res://scripts/ui_text_catalog.gd")
 const PixelUITheme = preload("res://scripts/pixel_ui.gd")
-const UIVisualTokens = preload("res://scripts/ui_visual_tokens.gd")
+const VisualTokens = preload("res://scripts/ui_visual_tokens.gd")
 const COMPASS_OUTLINE_SHADER := preload("res://shaders/compass_outline.gdshader")
 
 const BODY_RADIUS := 0.9
@@ -14,15 +14,10 @@ const FACE_HEIGHT := 0.42
 const SIDE_COUNT := 32
 const CAMERA_DISTANCE := 4.0
 const CAMERA_SIZE := 2.35
-const BUTTON_OFFSET := Vector2(-84.0, -84.0)
-const GLASS_WIDTH := 1.8
-const GLASS_BASE_HEIGHT := 0.14
-const GLASS_Y := 0.565
+const BUTTON_OFFSET := -Vector2.ONE * (VisualTokens.COMPASS_DIAMETER_PIXELS + 12 * VisualTokens.POINT)
 
 var _viewport: SubViewport
 var _camera: Camera3D
-var _glass: MeshInstance3D
-var _glass_mesh: QuadMesh
 var _hover_outline: MeshInstance3D
 
 
@@ -30,8 +25,8 @@ func mount(host: Node, parent: Node, reset_camera: Callable) -> void:
 	_viewport = SubViewport.new()
 	_viewport.name = "CompassViewport"
 	_viewport.size = Vector2i(
-		UIVisualTokens.COMPASS_DIAMETER_PIXELS,
-		UIVisualTokens.COMPASS_DIAMETER_PIXELS
+		VisualTokens.COMPASS_DIAMETER_PIXELS,
+		VisualTokens.COMPASS_DIAMETER_PIXELS
 	)
 	_viewport.transparent_bg = true
 	_viewport.own_world_3d = true
@@ -54,7 +49,6 @@ func mount(host: Node, parent: Node, reset_camera: Callable) -> void:
 	))
 	compass_root.add_child(_create_triangle(true))
 	compass_root.add_child(_create_triangle(false))
-	_create_sun_reflection(compass_root)
 	_create_camera()
 	_create_button(parent, reset_camera)
 
@@ -64,31 +58,6 @@ func update_camera(viewing_direction: Vector3) -> void:
 		return
 	_camera.position = viewing_direction.normalized() * CAMERA_DISTANCE
 	_camera.look_at(Vector3.ZERO, Vector3.UP)
-
-
-func update_sun_reflection(daylight: float, day_phase: float, sun_height: float) -> void:
-	if is_instance_valid(_glass):
-		_glass.visible = daylight > 0.08
-		_glass.rotation.y = day_phase * TAU
-	if is_instance_valid(_glass_mesh):
-		var reflection_height := lerpf(
-			BODY_HEIGHT,
-			0.1,
-			clampf(maxf(sun_height, 0.0), 0.0, 1.0)
-		)
-		_glass_mesh.size = Vector2(GLASS_WIDTH, reflection_height)
-
-
-func _create_sun_reflection(compass_root: Node3D) -> void:
-	_glass = MeshInstance3D.new()
-	_glass.name = "SemiTransparentSunGlassReflection"
-	_glass_mesh = QuadMesh.new()
-	_glass_mesh.size = Vector2(GLASS_WIDTH, GLASS_BASE_HEIGHT)
-	_glass_mesh.orientation = PlaneMesh.FACE_Y
-	_glass.mesh = _glass_mesh
-	_glass.position.y = GLASS_Y
-	_glass.material_override = _material(Color(1.0, 1.0, 1.0, 0.5), true)
-	compass_root.add_child(_glass)
 
 
 func _create_camera() -> void:
@@ -108,8 +77,8 @@ func _create_button(parent: Node, reset_camera: Callable) -> void:
 	compass_button.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
 	compass_button.position = BUTTON_OFFSET
 	compass_button.size = Vector2(
-		UIVisualTokens.COMPASS_DIAMETER_PIXELS,
-		UIVisualTokens.COMPASS_DIAMETER_PIXELS
+		VisualTokens.COMPASS_DIAMETER_PIXELS,
+		VisualTokens.COMPASS_DIAMETER_PIXELS
 	)
 	compass_button.ignore_texture_size = true
 	compass_button.stretch_mode = TextureButton.STRETCH_KEEP_ASPECT_CENTERED
@@ -138,10 +107,10 @@ func _create_hover_silhouette() -> MeshInstance3D:
 	outline.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	var outline_material := ShaderMaterial.new()
 	outline_material.shader = COMPASS_OUTLINE_SHADER
-	outline_material.set_shader_parameter("outline_pixels", UIVisualTokens.OUTLINE_PIXELS)
+	outline_material.set_shader_parameter("outline_pixels", VisualTokens.OUTLINE_PIXELS)
 	outline_material.set_shader_parameter(
 		"viewport_size",
-		Vector2(UIVisualTokens.COMPASS_DIAMETER_PIXELS, UIVisualTokens.COMPASS_DIAMETER_PIXELS)
+		Vector2(VisualTokens.COMPASS_DIAMETER_PIXELS, VisualTokens.COMPASS_DIAMETER_PIXELS)
 	)
 	outline.material_override = outline_material
 	outline.visible = false
@@ -235,13 +204,11 @@ func _create_triangle(points_north: bool) -> MeshInstance3D:
 	return instance
 
 
-func _material(colour: Color, transparent := false) -> StandardMaterial3D:
+func _material(colour: Color) -> StandardMaterial3D:
 	var material := StandardMaterial3D.new()
 	material.albedo_color = colour
 	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	material.cull_mode = BaseMaterial3D.CULL_DISABLED
-	if transparent:
-		material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	return material
 
 

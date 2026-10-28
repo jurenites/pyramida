@@ -5,6 +5,7 @@
 	"display_name": "Sawmill",
 	"bounds_world_units": [1, 1, 1],
 	"recipe_mode": "derived",
+	"workshop_recipes": [{"id":"saw_plank","input":{"log":1},"output":{"plank":1},"work_seconds":3.0}],
 	"parts": [
 		{"id":"post_sw","kind":"log","material":"wood","resource":"log","sub_unit":[0,0,0],"orientation":"y","visual_variant":0,"geometry":{"primitive":"log","start":[-0.40,0.02,-0.40],"end":[-0.40,0.70,-0.40],"start_radius":0.10,"end_radius":0.08,"sides":6}},
 		{"id":"post_se","kind":"log","material":"wood","resource":"log","sub_unit":[1,0,0],"orientation":"y","visual_variant":1,"geometry":{"primitive":"log","start":[0.40,0.02,-0.40],"end":[0.40,0.70,-0.40],"start_radius":0.10,"end_radius":0.08,"sides":6}},

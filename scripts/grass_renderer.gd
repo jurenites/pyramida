@@ -73,6 +73,8 @@ func load_world_chunk(stream_chunk: Vector2i, excluded_world_units: Dictionary) 
 
 
 func unload_world_chunk(stream_chunk: Vector2i) -> void:
+	# Stream chunks contain a whole number of grass chunks.
+	@warning_ignore("integer_division")
 	var grass_chunks_per_stream_chunk := int(STREAM_CHUNK_SIZE / CHUNK_SIZE)
 	var first_grass_chunk := stream_chunk * grass_chunks_per_stream_chunk
 	for local_x in grass_chunks_per_stream_chunk:

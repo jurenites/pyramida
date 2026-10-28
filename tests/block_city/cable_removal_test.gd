@@ -1,0 +1,56 @@
+extends SceneTree
+const Model=preload("res://scripts/block_city/model.gd")
+const Cable=preload("res://scripts/block_city/cable.gd")
+var failures:=0
+func _initialize() -> void: call_deferred("run")
+func check(ok: bool,message: String) -> void:
+	if not ok: failures+=1; push_error(message)
+func run() -> void:
+	var m=Model.new()
+	# Keep this socket-deletion fixture’s left wall clear of the starter cabinet.
+	m.transformer_cell=Vector3i(-1,0,2)
+	for y in 3:
+		m.queue[0]={"shape":"cube","color":0}
+		check(m.drop(0,0,0,false,y),"Place cable fixture")
+		var source: Dictionary={} if y==0 else {"cell":[0,y-1,0],"normal":[0,0,-1]}
+		check(m.connect_power(Vector3i(0,y,0),Vector3i.FORWARD,source),"Connect vertical daisy chain")
+	check(m.connect_power(Vector3i.ZERO,Vector3i.LEFT),"A separate socket on the same room remains independent")
+	var before: Dictionary=m.snapshot()
+	check(m.remove_power_node(Vector3i(0,1,0),Vector3i.FORWARD),"Delete the middle socket")
+	check(m.cables.size()==2 and not m.socket_exists(Vector3i(0,2,0),Vector3i.FORWARD),"Remove the selected link and dependent branch")
+	check(m.socket_exists(Vector3i.ZERO,Vector3i.FORWARD) and m.socket_exists(Vector3i.ZERO,Vector3i.LEFT),"Preserve independent sockets")
+	check(not m.powered_cells().has(Vector3i(0,1,0)) and not m.powered_cells().has(Vector3i(0,2,0)),"Removed branch immediately loses power")
+	check(m.rooms==before.rooms and m.queue==before.queue and m.turn==before.turn,"Cable deletion never removes rooms or consumes supply")
+	var loaded=Model.new()
+	check(loaded.load_state(m.snapshot()),"Remaining cable graph survives saving and loading")
+	check(m.undo() and m.snapshot()==before,"One undo restores the whole deleted branch")
+	var history_count: int=m.history.size()
+	check(not m.remove_power_node(Vector3i(2,2,2),Vector3i.LEFT) and m.history.size()==history_count,"An absent selection creates no undo entry")
+	check(m.remove_power_node(Vector3i(0,2,0),Vector3i.FORWARD) and m.cables.size()==3,"Deleting a leaf keeps its upstream links")
+	m.undo()
+	check(m.remove_power_node(Vector3i.ZERO,Vector3i.FORWARD) and m.cables.size()==1 and m.cables[0].normal==[-1,0,0],"Root deletion preserves another connection on that same room")
+	m.undo()
+	var game=load("res://scripts/block_city/game.gd").new()
+	game.auto_save=false; game.restore_last=false; root.add_child(game)
+	game.model=m; game.set_holding(false); game.refresh()
+	game.camera.position=Vector3(-4,4,-6); game.camera.look_at(Vector3(0.5,1,0.5)); game.camera.size=6
+	var socket: Vector2=game.camera.unproject_position(Cable.socket(Vector3i(0,1,0),Vector3i.FORWARD))
+	game.click_world(socket)
+	check(game.wiring and game.wire_source.cell==[0,1,0],"Clicking a visible node selects that exact cable socket")
+	var key:=InputEventKey.new(); key.keycode=KEY_BACKSPACE; key.pressed=true
+	game._input(key)
+	check(game.model.cables.size()==2 and game.model.rooms.size()==3,"Keyboard Backspace deletes the cable node, not its room")
+	check(not game.wiring and game.wire_source.is_empty() and game.preview.is_empty(),"Deletion clears the selected node and pending cable preview")
+	game._input(key)
+	check(game.model.cables.size()==2 and game.model.rooms.size()==3,"Repeated Backspace without a selection does nothing")
+	game.undo()
+	check(game.model.snapshot()==before,"UI undo restores the connection branch exactly")
+	game.selected=0; game.begin_wire()
+	game._input(key)
+	check(game.model.snapshot()==before,"Pole selection cannot accidentally delete a room or every wire")
+	game.begin_wire({"cell":[0,1,0],"normal":[0,0,-1]})
+	game.toggle_menu(); game._input(key)
+	check(game.model.snapshot()==before,"Open menu blocks cable deletion")
+	game.free()
+	print("Block City cable removal: ",failures," failures")
+	quit(1 if failures else 0)

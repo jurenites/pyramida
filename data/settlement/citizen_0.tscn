@@ -1,0 +1,211 @@
+[gd_scene format=3]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_1vy6q"]
+albedo_color = Color(0.4, 0.31764707, 0.22745098, 1)
+roughness = 0.92
+
+[sub_resource type="SphereMesh" id="SphereMesh_u4yp6"]
+radial_segments = 16
+rings = 10
+
+[sub_resource type="SphereMesh" id="SphereMesh_cnv46"]
+radial_segments = 16
+rings = 10
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_76l0b"]
+albedo_color = Color(0.12941177, 0.10980392, 0.09411765, 1)
+roughness = 0.92
+
+[sub_resource type="SphereMesh" id="SphereMesh_e8hau"]
+radial_segments = 16
+rings = 10
+
+[sub_resource type="SphereMesh" id="SphereMesh_7idyc"]
+radial_segments = 16
+rings = 10
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_3tl72"]
+radius = 0.073
+height = 0.251
+radial_segments = 16
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_y3iwg"]
+radius = 0.072
+height = 0.239
+radial_segments = 16
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_m4m3g"]
+albedo_color = Color(0.31764707, 0.5568628, 0.6039216, 1)
+roughness = 0.92
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_jwwkf"]
+radius = 0.105
+height = 0.22
+radial_segments = 16
+
+[sub_resource type="SphereMesh" id="SphereMesh_5emj6"]
+radial_segments = 16
+rings = 10
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_t1rm8"]
+radius = 0.063
+height = 0.261
+radial_segments = 16
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_mtxmt"]
+radius = 0.06
+height = 0.235
+radial_segments = 16
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_d3x10"]
+radius = 0.073
+height = 0.251
+radial_segments = 16
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_aa420"]
+radius = 0.072
+height = 0.239
+radial_segments = 16
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_4p5dg"]
+radius = 0.105
+height = 0.22
+radial_segments = 16
+
+[sub_resource type="SphereMesh" id="SphereMesh_yw5fa"]
+radial_segments = 16
+rings = 10
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_hc6up"]
+radius = 0.063
+height = 0.261
+radial_segments = 16
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_esc7e"]
+radius = 0.06
+height = 0.235
+radial_segments = 16
+
+[sub_resource type="SphereMesh" id="SphereMesh_53aig"]
+radial_segments = 16
+rings = 10
+
+[node name="Citizen0" type="Node3D" unique_id=109550210]
+
+[node name="Body" type="MeshInstance3D" parent="." unique_id=1095302426]
+transform = Transform3D(0.42, 0, 0, 0, 0.57, 0, 0, 0, 0.3, 0, 0.53, 0)
+material_override = SubResource("StandardMaterial3D_1vy6q")
+mesh = SubResource("SphereMesh_u4yp6")
+
+[node name="Head" type="Node3D" parent="." unique_id=1008438413]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.96, 0)
+
+[node name="HeadShape" type="MeshInstance3D" parent="Head" unique_id=540197727]
+transform = Transform3D(0.3, 0, 0, 0, 0.35, 0, 0, 0, 0.27, 0, 0, 0)
+material_override = SubResource("StandardMaterial3D_1vy6q")
+mesh = SubResource("SphereMesh_cnv46")
+
+[node name="HairCap" type="MeshInstance3D" parent="Head" unique_id=1338964892]
+transform = Transform3D(0.31482998, 0.025064142, 0, -0.057289466, 0.13773812, 0, 0, 0, 0.29, -0.015, 0.12, 0.025)
+material_override = SubResource("StandardMaterial3D_76l0b")
+mesh = SubResource("SphereMesh_e8hau")
+
+[node name="HairTuft" type="MeshInstance3D" parent="Head" unique_id=72427948]
+transform = Transform3D(0.13815916, 0.05062438, 0, -0.058412753, 0.11973792, 0, 0, 0, 0.22, -0.07, 0.17, 0.01)
+material_override = SubResource("StandardMaterial3D_76l0b")
+mesh = SubResource("SphereMesh_7idyc")
+
+[node name="LeftLeg" type="Node3D" parent="." unique_id=1342233198]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.11, 0.29, 0)
+
+[node name="PillLeg" type="MeshInstance3D" parent="LeftLeg" unique_id=330806814]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.0525, 0)
+material_override = SubResource("StandardMaterial3D_1vy6q")
+mesh = SubResource("CapsuleMesh_3tl72")
+
+[node name="Knee" type="Node3D" parent="LeftLeg" unique_id=791339175]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.105, 0)
+
+[node name="Shin" type="MeshInstance3D" parent="LeftLeg/Knee" unique_id=188347746]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.0475, 0)
+material_override = SubResource("StandardMaterial3D_1vy6q")
+mesh = SubResource("CapsuleMesh_y3iwg")
+
+[node name="Shorts" type="MeshInstance3D" parent="LeftLeg" unique_id=1726728025]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.015, 0)
+material_override = SubResource("StandardMaterial3D_m4m3g")
+mesh = SubResource("CapsuleMesh_jwwkf")
+metadata/citizen_cloth = true
+
+[node name="LeftShoulder" type="MeshInstance3D" parent="." unique_id=2081437537]
+transform = Transform3D(0.22, 0, 0, 0, 0.15, 0, 0, 0, 0.24, -0.15, 0.7, 0)
+material_override = SubResource("StandardMaterial3D_1vy6q")
+mesh = SubResource("SphereMesh_5emj6")
+
+[node name="LeftArm" type="Node3D" parent="." unique_id=407928154]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.18, 0.7, 0)
+
+[node name="PillArm" type="MeshInstance3D" parent="LeftArm" unique_id=987933459]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.0675, 0)
+material_override = SubResource("StandardMaterial3D_1vy6q")
+mesh = SubResource("CapsuleMesh_t1rm8")
+
+[node name="Elbow" type="Node3D" parent="LeftArm" unique_id=1866320000]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.135, 0)
+
+[node name="Forearm" type="MeshInstance3D" parent="LeftArm/Elbow" unique_id=1266358101]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.0575, 0)
+material_override = SubResource("StandardMaterial3D_1vy6q")
+mesh = SubResource("CapsuleMesh_mtxmt")
+
+[node name="RightLeg" type="Node3D" parent="." unique_id=995744350]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.11, 0.29, 0)
+
+[node name="PillLeg" type="MeshInstance3D" parent="RightLeg" unique_id=545599762]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.0525, 0)
+material_override = SubResource("StandardMaterial3D_1vy6q")
+mesh = SubResource("CapsuleMesh_d3x10")
+
+[node name="Knee" type="Node3D" parent="RightLeg" unique_id=243050016]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.105, 0)
+
+[node name="Shin" type="MeshInstance3D" parent="RightLeg/Knee" unique_id=1194963085]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.0475, 0)
+material_override = SubResource("StandardMaterial3D_1vy6q")
+mesh = SubResource("CapsuleMesh_aa420")
+
+[node name="Shorts" type="MeshInstance3D" parent="RightLeg" unique_id=506141521]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.015, 0)
+material_override = SubResource("StandardMaterial3D_m4m3g")
+mesh = SubResource("CapsuleMesh_4p5dg")
+metadata/citizen_cloth = true
+
+[node name="RightShoulder" type="MeshInstance3D" parent="." unique_id=1218977779]
+transform = Transform3D(0.22, 0, 0, 0, 0.15, 0, 0, 0, 0.24, 0.15, 0.7, 0)
+material_override = SubResource("StandardMaterial3D_1vy6q")
+mesh = SubResource("SphereMesh_yw5fa")
+
+[node name="RightArm" type="Node3D" parent="." unique_id=477545159]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.18, 0.7, 0)
+
+[node name="PillArm" type="MeshInstance3D" parent="RightArm" unique_id=1075365908]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.0675, 0)
+material_override = SubResource("StandardMaterial3D_1vy6q")
+mesh = SubResource("CapsuleMesh_hc6up")
+
+[node name="Elbow" type="Node3D" parent="RightArm" unique_id=37171216]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.135, 0)
+
+[node name="Forearm" type="MeshInstance3D" parent="RightArm/Elbow" unique_id=1154403810]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.0575, 0)
+material_override = SubResource("StandardMaterial3D_1vy6q")
+mesh = SubResource("CapsuleMesh_esc7e")
+
+[node name="ShortsWaist" type="MeshInstance3D" parent="." unique_id=389391649]
+transform = Transform3D(0.43, 0, 0, 0, 0.21, 0, 0, 0, 0.31, 0, 0.35, 0)
+material_override = SubResource("StandardMaterial3D_m4m3g")
+mesh = SubResource("SphereMesh_53aig")
+metadata/citizen_cloth = true
+
+[node name="CargoSocket" type="Node3D" parent="." unique_id=1591576787]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.53, -0.36)

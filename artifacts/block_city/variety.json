@@ -1,0 +1,58 @@
+[
+	{
+		"completed_first_lot": true,
+		"credits": 43,
+		"placements": 6,
+		"refits": 0,
+		"seed": 1
+	},
+	{
+		"completed_first_lot": true,
+		"credits": 40,
+		"placements": 6,
+		"refits": 0,
+		"seed": 2
+	},
+	{
+		"completed_first_lot": true,
+		"credits": 43,
+		"placements": 6,
+		"refits": 0,
+		"seed": 3
+	},
+	{
+		"completed_first_lot": true,
+		"credits": 45,
+		"placements": 6,
+		"refits": 0,
+		"seed": 4
+	},
+	{
+		"completed_first_lot": true,
+		"credits": 44,
+		"placements": 6,
+		"refits": 0,
+		"seed": 5
+	},
+	{
+		"completed_first_lot": true,
+		"credits": 41,
+		"placements": 6,
+		"refits": 0,
+		"seed": 6
+	},
+	{
+		"completed_first_lot": true,
+		"credits": 42,
+		"placements": 6,
+		"refits": 0,
+		"seed": 7
+	},
+	{
+		"completed_first_lot": true,
+		"credits": 41,
+		"placements": 6,
+		"refits": 0,
+		"seed": 8
+	}
+]

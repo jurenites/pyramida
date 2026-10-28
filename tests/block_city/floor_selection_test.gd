@@ -1,0 +1,87 @@
+extends SceneTree
+var failures:=0
+func _initialize() -> void: call_deferred("run")
+func check(ok: bool,message: String) -> void:
+	if not ok: failures+=1; push_error(message)
+func place(game,shape: String,x: int,z: int,y: int) -> void:
+	game.model.queue[0]={"shape":shape,"color":0}
+	check(game.model.drop(x,z,0,false,y),"Place floor-selection fixture")
+func run() -> void:
+	var game=load("res://scripts/block_city/game.gd").new()
+	game.auto_save=false; game.restore_last=false; root.add_child(game)
+	game.set_holding(true)
+	game.set_process_unhandled_input(false)
+	check(game.floor_up.visible and game.floor_down.visible and game.floor_down.disabled,"Floor arrows appear only while holding, with ground as lower limit")
+	game.floor_up.pressed.emit()
+	check(game.forced_floor==1 and game.preview.origin.y==1 and not game.preview.ok,"Manual floor overrides first-room grounding but does not bypass support")
+	game.cancel_construction()
+	check(not game.floor_up.visible and game.forced_floor==-100,"Deselecting hides arrows and restores automatic floor targeting")
+	place(game,"rectangle",0,0,0)
+	place(game,"bar",0,0,1); place(game,"bar",0,0,2)
+	game.select_debug_shape("room_domino"); game.refresh()
+	game.camera.position=Vector3(7,8,6); game.camera.look_at(Vector3(1,1,1.5)); game.camera.size=7
+	var roof: Vector2=game.camera.unproject_position(Vector3(0.5,2.99,0.5))
+	game.position_anchor(roof)
+	check(game.preview.origin.y==3,"Automatic roof targeting works before using arrows")
+	var before: int=game.model.rooms.size()
+	game.click_world(game.floor_down.get_global_rect().get_center())
+	game.floor_down.pressed.emit()
+	check(game.forced_floor==1 and game.model.rooms.size()==before,"Down selects floor two without placing a room behind the button")
+	for id in [0,1,2]:
+		for mesh in game.geometry.get_node("Room%d" % id).find_children("*","MeshInstance3D",true,false):
+			check(is_equal_approx(mesh.transparency,0.92 if id==2 else 0.0),"Only floors above the selected one fade to eight percent")
+	var target: Vector2=game.camera.unproject_position(Vector3(1.5,1,0.5))
+	check(game.position_anchor(target) and game.preview.origin==Vector3i(1,1,0) and game.preview.ok,"Selected level permits a supported lower ledge")
+	game.position_anchor(roof)
+	check(game.preview.origin.y==1,"Aiming at the highest roof cannot override the chosen level")
+	game.rotate_shape()
+	check(game.preview.origin.y==1,"Rotation preserves chosen elevation")
+	game.rotate_shape(); game.rotate_shape(); game.rotate_shape()
+	game.cursor_offset=Vector2i.ZERO
+	game.position_anchor(target)
+	game.click_world(target)
+	check(game.model.rooms[-1].cells==[[1,1,0],[1,1,1]] and game.forced_floor==1,"Placement commits the chosen level and keeps it for the next piece")
+	game.refresh()
+	game.select_debug_shape("cube")
+	check(game.forced_floor==1,"Changing palette shape preserves manual floor")
+	game.change_floor(100)
+	check(game.forced_floor==8 and game.floor_up.disabled,"Up stops at the height limit")
+	game.change_floor(-100)
+	check(game.forced_floor==0 and game.floor_down.disabled,"Down stops at ground level")
+	game.cancel_construction()
+	for room in game.model.rooms:
+		for mesh in game.geometry.get_node("Room%d" % room.id).find_children("*","MeshInstance3D",true,false):
+			check(mesh.transparency==0.0,"Cancel restores full opacity")
+	game.begin_wire()
+	check(not game.floor_up.visible and not game.floor_down.visible,"Wiring hides floor controls")
+	game.model.reset(); game.reset_placement_aim()
+	place(game,"rectangle",0,0,0); place(game,"cube",0,0,1)
+	game.model.queue[0]={"shape":"room_domino","color":0}
+	check(game.model.drop(0,0,1,false,2),"Create an upper overhang above an empty second-floor cell")
+	game.select_debug_shape("cube"); game.refresh()
+	game.change_floor(1-game.current_floor())
+	var covered: Vector2=game.camera.unproject_position(Vector3(1.5,1,0.5))
+	check(game.position_anchor(covered) and game.preview.ok and game.preview.origin==Vector3i(1,1,0),"Faded upper room cannot block targeting an empty cell underneath")
+	game.retarget_floor_held=true
+	game.position_anchor(covered)
+	check(game.preview.origin.y==1,"Alt cannot override an explicitly selected floor")
+	game.retarget_floor_held=false
+	game.click_world(covered)
+	check(game.model.rooms[-1].cells==[[1,1,0]],"Click inserts the hall under the existing upper room")
+	game.refresh(); game.cancel_construction()
+	game.begin_move(3,game.camera.unproject_position(Vector3(1.5,1.5,0.5)))
+	check(game.floor_up.visible and game.floor_down.visible,"Floor arrows are available for a moved room")
+	game.change_floor(-1)
+	game.cursor_offset=Vector2i.ZERO
+	var ground: Vector2=game.camera.unproject_position(Vector3(2.5,0,2.5))
+	game.position_anchor(ground)
+	check(game.preview.ok and game.preview.origin==Vector3i(2,0,2),"Moving an existing room obeys the selected floor")
+	game.click_world(ground)
+	check(game.model.rooms[3].cells==[[2,0,2]] and not game.floor_up.visible,"Moved room commits on the selected floor and hides controls")
+	game.set_holding(true); game.switch_depth(); game.change_floor(-1)
+	check(game.forced_floor==-2,"Basement controls select explicit underground levels")
+	game.change_floor(-100)
+	check(game.forced_floor==-3 and game.floor_down.disabled,"Basement depth is bounded")
+	game.free()
+	print("Block City floor selection: ",failures," failures")
+	quit(1 if failures else 0)

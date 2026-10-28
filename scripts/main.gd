@@ -3396,7 +3396,17 @@ func _update_hover_transition(delta: float) -> void:
 
 func _hover_display_name(world_object: Variant, collider: Node) -> String:
 	if world_object is Citizen:
-		return UIText.text(UIText.CITIZEN_NAME_TEXT)
+		var person := world_object as Citizen
+		var work: String = person.work_assignment.get("kind", person.task.get("kind", ""))
+		var role := "idle"
+		match work:
+			ActionCatalog.CHOP_TREE: role = "woodcutter"
+			ActionCatalog.HARVEST_BUSH, ActionCatalog.DELIVER_FOOD: role = "forager"
+			ActionCatalog.COLLECT_CACTUS: role = "hauler"
+			ActionCatalog.EXCAVATE: role = "miner"
+			ActionCatalog.FETCH_WORKSHOP_INPUT, ActionCatalog.SAW_PLANK: role = "sawyer"
+			"construction", ActionCatalog.FETCH_LOG, ActionCatalog.DELIVER_LOG, ActionCatalog.APPLY_BUILDING_BLOCK: role = "builder"
+		return UIText.text("person_job_%s_text" % role)
 	if world_object is SupportConstructionSite:
 		return (world_object as SupportConstructionSite).hover_text()
 	if world_object is ExcavationSite:
@@ -4075,28 +4085,12 @@ func _create_grass_renderer() -> void:
 func _reveal_world_around_citizens() -> void:
 	var changed := false
 	var newly_revealed_cells: Array[Vector2i] = []
-	var fog_radius_in_cells := int(ceil(REVEAL_RADIUS / FOG_CELL_SIZE))
 	for citizen in _citizens:
 		if not is_instance_valid(citizen):
 			continue
-		var citizen_position_2d := Vector2(citizen.global_position.x, citizen.global_position.z)
-		var citizen_cell := Vector2i(
-			floori(citizen_position_2d.x / FOG_CELL_SIZE),
-			floori(citizen_position_2d.y / FOG_CELL_SIZE)
-		)
-		for cell_x in range(citizen_cell.x - fog_radius_in_cells, citizen_cell.x + fog_radius_in_cells + 1):
-			for cell_z in range(citizen_cell.y - fog_radius_in_cells, citizen_cell.y + fog_radius_in_cells + 1):
-				var fog_cell := Vector2i(cell_x, cell_z)
-				if _revealed_fog_cells.has(fog_cell):
-					continue
-				var fog_cell_centre := Vector2(
-					(cell_x + 0.5) * FOG_CELL_SIZE,
-					(cell_z + 0.5) * FOG_CELL_SIZE
-				)
-				if fog_cell_centre.distance_squared_to(citizen_position_2d) <= REVEAL_RADIUS * REVEAL_RADIUS:
-					_revealed_fog_cells[fog_cell] = true
-					newly_revealed_cells.append(fog_cell)
-					changed = true
+		var added := preload("res://scripts/exploration_mask.gd").reveal(_revealed_fog_cells, citizen.global_position, REVEAL_RADIUS)
+		newly_revealed_cells.append_array(added)
+		changed = changed or not added.is_empty()
 	if changed:
 		_fill_enclosed_world_unit_holes(newly_revealed_cells)
 		_paint_revealed_fog_cells(newly_revealed_cells)
@@ -4303,7 +4297,6 @@ func _update_day_night() -> void:
 			fog_material.set_shader_parameter("fog_color", shadow_colour)
 	if is_instance_valid(_day_night_wheel):
 		_day_night_wheel.rotation = day_phase * TAU
-	_compass_widget.update_sun_reflection(daylight, day_phase, sun_height)
 
 
 func _set_citizens_sleeping(should_sleep: bool) -> void:
@@ -4453,49 +4446,7 @@ func _create_interface() -> void:
 
 
 func _create_day_night_wheel(parent: Node) -> void:
-	var wheel_container := Control.new()
-	wheel_container.name = "DayNightWheelContainer"
-	wheel_container.set_anchors_preset(Control.PRESET_CENTER_TOP)
-	wheel_container.position = Vector2(-21.5, 6.0)
-	wheel_container.size = Vector2(43.0, 43.0)
-	wheel_container.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	parent.add_child(wheel_container)
-
-	var wheel_image := Image.create(43, 43, false, Image.FORMAT_RGBA8)
-	wheel_image.fill(Color.TRANSPARENT)
-	for pixel_x in 43:
-		for pixel_y in 43:
-			var offset := Vector2(float(pixel_x) - 21.0, float(pixel_y) - 21.0)
-			if offset.length() > 18.5:
-				continue
-			var wheel_colour := Palette.SUN if pixel_x < 21 else Palette.NIGHT_SKY
-			if offset.length() >= 16.5:
-				wheel_colour = Color.BLACK
-			wheel_image.set_pixel(pixel_x, pixel_y, wheel_colour)
-	_day_night_wheel = TextureRect.new()
-	_day_night_wheel.name = "RotatingDayNightWheel"
-	_day_night_wheel.texture = ImageTexture.create_from_image(wheel_image)
-	_day_night_wheel.size = Vector2(43.0, 43.0)
-	_day_night_wheel.pivot_offset = Vector2(21.5, 21.5)
-	_day_night_wheel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	wheel_container.add_child(_day_night_wheel)
-
-	var sun_marker := Panel.new()
-	sun_marker.name = "FixedSunMarker"
-	sun_marker.position = Vector2(16.0, -1.0)
-	sun_marker.size = Vector2(10.0, 10.0)
-	sun_marker.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var sun_style := StyleBoxFlat.new()
-	sun_style.bg_color = Palette.SUN
-	sun_style.border_color = Color.BLACK
-	sun_style.set_border_width_all(int(VisualTokens.OUTLINE_PIXELS))
-	sun_style.corner_radius_top_left = 5
-	sun_style.corner_radius_top_right = 5
-	sun_style.corner_radius_bottom_left = 5
-	sun_style.corner_radius_bottom_right = 5
-	sun_marker.add_theme_stylebox_override("panel", sun_style)
-	wheel_container.add_child(sun_marker)
-
+	_day_night_wheel = preload("res://scripts/day_night_widget.gd").mount(parent)
 
 func _create_compass(parent: Node) -> void:
 	_compass_widget.mount(self, parent, _reset_camera_from_compass)

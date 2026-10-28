@@ -4,7 +4,7 @@ extends RefCounted
 ## Typed access to the text-based gameplay tuning file. Uppercase public names
 ## mirror its UPPER_SNAKE_CASE keys so tuning values remain easy to identify.
 
-const SETTINGS_PATH := "res://data/gameplay_settings.cfg"
+const SETTINGS_PATH := "res://game_settings.cfg"
 
 static var _settings := _load_settings()
 
@@ -35,7 +35,7 @@ static var CACTUS_TRAVEL_COST := _number("CITIZEN_MOVEMENT", "CACTUS_TRAVEL_COST
 static var EMERGENCY_ESCAPE_DELAY_SECONDS := _number("CITIZEN_MOVEMENT", "EMERGENCY_ESCAPE_DELAY_SECONDS", 2.0)
 static var MINIMUM_DELIVERY_TRAVEL_DISTANCE := _number("CITIZEN_MOVEMENT", "MINIMUM_DELIVERY_TRAVEL_DISTANCE", 0.5)
 
-static var SIMULATION_DAY_SECONDS := _number("WORLD_TIMING", "SIMULATION_DAY_SECONDS", 360.0)
+static var SIMULATION_DAY_SECONDS := preload("res://scripts/settlement/balance.gd").number("day_seconds")
 static var BUSH_REGROWTH_SECONDS := _number("WORLD_TIMING", "BUSH_REGROWTH_SECONDS", 720.0)
 
 
@@ -60,15 +60,17 @@ static func construction_recipe(building_id: String) -> Dictionary:
 
 
 static func _load_settings() -> ConfigFile:
-	var config := ConfigFile.new()
-	var load_error := config.load(SETTINGS_PATH)
-	if load_error != OK:
-		push_error("Unable to load gameplay settings at %s: error %d" % [SETTINGS_PATH, load_error])
-	return config
+	var parsed := preload("res://scripts/settings_file.gd").read(SETTINGS_PATH)
+	for warning: String in parsed.warnings: push_warning(warning)
+	return parsed.config
 
 
 static func _number(section: String, key: String, fallback: float) -> float:
-	return maxf(0.0, float(_settings.get_value(section, key, fallback)))
+	var value: Variant = _settings.get_value(section, key, fallback)
+	if not (value is float or value is int) or not is_finite(float(value)):
+		push_warning("Invalid gameplay setting %s/%s; using default" % [section, key])
+		return fallback
+	return maxf(0.0, float(value))
 
 
 static func _dictionary(section: String, key: String, fallback: Dictionary) -> Dictionary:

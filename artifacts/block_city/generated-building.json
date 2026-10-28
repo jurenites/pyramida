@@ -1,0 +1,474 @@
+{
+	"conditions": {
+		"allowed_shapes": [
+			"room_domino",
+			"bar",
+			"small_square",
+			"rectangle"
+		],
+		"depth": 3.0,
+		"floors": 3.0,
+		"max_room_cells": 6.0,
+		"min_rooms": 1.0,
+		"seed": 42,
+		"top_setback": true,
+		"width": 3.0
+	},
+	"rooms": [
+		{
+			"access_path": [],
+			"braces": [],
+			"cells": [
+				[
+					0,
+					0,
+					0
+				]
+			],
+			"color": 0,
+			"door": [
+				0,
+				0,
+				0
+			],
+			"id": 0,
+			"normal": [
+				0,
+				0,
+				-1
+			],
+			"shape": "cube"
+		},
+		{
+			"access_path": [],
+			"braces": [],
+			"cells": [
+				[
+					1,
+					0,
+					0
+				]
+			],
+			"color": 0,
+			"door": [
+				1,
+				0,
+				0
+			],
+			"id": 1,
+			"normal": [
+				0,
+				0,
+				-1
+			],
+			"shape": "cube"
+		},
+		{
+			"access_path": [],
+			"braces": [],
+			"cells": [
+				[
+					2,
+					0,
+					0
+				]
+			],
+			"color": 0,
+			"door": [
+				2,
+				0,
+				0
+			],
+			"id": 2,
+			"normal": [
+				0,
+				0,
+				-1
+			],
+			"shape": "cube"
+		},
+		{
+			"access_path": [],
+			"braces": [],
+			"cells": [
+				[
+					0,
+					0,
+					1
+				]
+			],
+			"color": 0,
+			"door": [
+				0,
+				0,
+				1
+			],
+			"id": 3,
+			"normal": [
+				0,
+				0,
+				-1
+			],
+			"shape": "cube"
+		},
+		{
+			"access_path": [],
+			"braces": [],
+			"cells": [
+				[
+					0,
+					0,
+					2
+				]
+			],
+			"color": 0,
+			"door": [
+				0,
+				0,
+				2
+			],
+			"id": 4,
+			"normal": [
+				0,
+				0,
+				-1
+			],
+			"shape": "stairs"
+		},
+		{
+			"access_path": [],
+			"braces": [],
+			"cells": [
+				[
+					2,
+					0,
+					2
+				],
+				[
+					1,
+					0,
+					2
+				],
+				[
+					2,
+					0,
+					1
+				],
+				[
+					1,
+					0,
+					1
+				]
+			],
+			"color": 0,
+			"door": [
+				2,
+				0,
+				1
+			],
+			"id": 5,
+			"normal": [
+				0,
+				0,
+				-1
+			],
+			"shape": "small_square"
+		},
+		{
+			"access_path": [],
+			"braces": [],
+			"cells": [
+				[
+					0,
+					1,
+					0
+				]
+			],
+			"color": 0,
+			"door": [
+				0,
+				1,
+				0
+			],
+			"id": 6,
+			"normal": [
+				0,
+				0,
+				-1
+			],
+			"shape": "cube"
+		},
+		{
+			"access_path": [],
+			"braces": [],
+			"cells": [
+				[
+					1,
+					1,
+					0
+				]
+			],
+			"color": 0,
+			"door": [
+				1,
+				1,
+				0
+			],
+			"id": 7,
+			"normal": [
+				0,
+				0,
+				-1
+			],
+			"shape": "cube"
+		},
+		{
+			"access_path": [],
+			"braces": [],
+			"cells": [
+				[
+					2,
+					1,
+					0
+				]
+			],
+			"color": 0,
+			"door": [
+				2,
+				1,
+				0
+			],
+			"id": 8,
+			"normal": [
+				0,
+				0,
+				-1
+			],
+			"shape": "cube"
+		},
+		{
+			"access_path": [],
+			"braces": [],
+			"cells": [
+				[
+					0,
+					1,
+					1
+				]
+			],
+			"color": 0,
+			"door": [
+				0,
+				1,
+				1
+			],
+			"id": 9,
+			"normal": [
+				0,
+				0,
+				-1
+			],
+			"shape": "cube"
+		},
+		{
+			"access_path": [],
+			"braces": [],
+			"cells": [
+				[
+					0,
+					1,
+					2
+				]
+			],
+			"color": 0,
+			"door": [
+				0,
+				1,
+				2
+			],
+			"id": 10,
+			"normal": [
+				0,
+				0,
+				-1
+			],
+			"shape": "stairs"
+		},
+		{
+			"access_path": [],
+			"braces": [],
+			"cells": [
+				[
+					2,
+					1,
+					2
+				],
+				[
+					1,
+					1,
+					2
+				],
+				[
+					2,
+					1,
+					1
+				],
+				[
+					1,
+					1,
+					1
+				]
+			],
+			"color": 1,
+			"door": [
+				2,
+				1,
+				1
+			],
+			"id": 11,
+			"normal": [
+				0,
+				0,
+				-1
+			],
+			"shape": "small_square"
+		},
+		{
+			"access_path": [],
+			"braces": [],
+			"cells": [
+				[
+					0,
+					2,
+					0
+				]
+			],
+			"color": 0,
+			"door": [
+				0,
+				2,
+				0
+			],
+			"id": 12,
+			"normal": [
+				0,
+				0,
+				-1
+			],
+			"shape": "cube"
+		},
+		{
+			"access_path": [],
+			"braces": [],
+			"cells": [
+				[
+					1,
+					2,
+					0
+				]
+			],
+			"color": 0,
+			"door": [
+				1,
+				2,
+				0
+			],
+			"id": 13,
+			"normal": [
+				0,
+				0,
+				-1
+			],
+			"shape": "cube"
+		},
+		{
+			"access_path": [],
+			"braces": [],
+			"cells": [
+				[
+					0,
+					2,
+					1
+				]
+			],
+			"color": 0,
+			"door": [
+				0,
+				2,
+				1
+			],
+			"id": 14,
+			"normal": [
+				0,
+				0,
+				-1
+			],
+			"shape": "cube"
+		},
+		{
+			"access_path": [],
+			"braces": [],
+			"cells": [
+				[
+					0,
+					2,
+					2
+				]
+			],
+			"color": 0,
+			"door": [
+				0,
+				2,
+				2
+			],
+			"id": 15,
+			"normal": [
+				0,
+				0,
+				-1
+			],
+			"shape": "cube"
+		},
+		{
+			"access_path": [],
+			"braces": [],
+			"cells": [
+				[
+					1,
+					2,
+					1
+				],
+				[
+					1,
+					2,
+					2
+				]
+			],
+			"color": 2,
+			"door": [
+				1,
+				2,
+				2
+			],
+			"id": 16,
+			"normal": [
+				-1,
+				0,
+				0
+			],
+			"shape": "room_domino"
+		}
+	],
+	"validation": {
+		"entry": [
+			0,
+			0,
+			0
+		],
+		"ok": true,
+		"ordinary_rooms": 3,
+		"reachable_cells": 24,
+		"room_count": 17
+	},
+	"version": 1
+}

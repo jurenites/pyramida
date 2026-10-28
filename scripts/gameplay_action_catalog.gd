@@ -21,11 +21,11 @@ const SAW_PLANK := "saw_plank"
 const DEFINITIONS := {
 	MOVE: {
 		"text_key": UIText.CITIZEN_WALKING_STATUS_TEXT,
-		"audio_streams": [],
+		"audio_streams": ["res://assets/audio/settlement/step_01.wav", "res://assets/audio/settlement/step_02.wav", "res://assets/audio/settlement/step_03.wav", "res://assets/audio/settlement/step_04.wav", "res://assets/audio/settlement/step_05.wav", "res://assets/audio/settlement/step_06.wav"],
 	},
 	CHOP_TREE: {
 		"text_key": UIText.CITIZEN_CUTTING_TREE_STATUS_TEXT,
-		"audio_streams": [],
+		"audio_streams": ["res://assets/audio/settlement/chop_01.wav", "res://assets/audio/settlement/chop_02.wav", "res://assets/audio/settlement/chop_03.wav", "res://assets/audio/settlement/chop_04.wav", "res://assets/audio/settlement/chop_05.wav"],
 	},
 	HARVEST_BUSH: {
 		"text_key": UIText.CITIZEN_HARVESTING_BUSH_STATUS_TEXT,

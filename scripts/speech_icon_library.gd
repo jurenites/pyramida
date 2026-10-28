@@ -3,12 +3,22 @@ extends RefCounted
 
 const Palette = preload("res://scripts/game_palette.gd")
 
+const DESIRE_ASSETS := {
+ "water": "res://assets/ui/desires/water.svg",
+ "heat": "res://assets/ui/desires/heat.svg",
+ "door_blocked": "res://assets/ui/desires/door_blocked.svg",
+ "electricity": "res://assets/ui/desires/electricity.svg",
+}
+
 static var _textures: Dictionary = {}
 
 
-static func texture(icon_id: String) -> ImageTexture:
+static func texture(icon_id: String) -> Texture2D:
 	if _textures.has(icon_id):
-		return _textures[icon_id] as ImageTexture
+		return _textures[icon_id] as Texture2D
+	if DESIRE_ASSETS.has(icon_id):
+		_textures[icon_id] = load(DESIRE_ASSETS[icon_id])
+		return _textures[icon_id] as Texture2D
 	var icon_image := Image.create(24, 24, false, Image.FORMAT_RGBA8)
 	icon_image.fill(Color.TRANSPARENT)
 	match icon_id:

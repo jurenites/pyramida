@@ -1,0 +1,18 @@
+[gd_scene format=3]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_5bhkr"]
+albedo_color = Color(0.4, 0.3254902, 0.25490198, 1)
+roughness = 0.92
+
+[sub_resource type="BoxMesh" id="BoxMesh_5kea0"]
+size = Vector3(2, 0.1, 2)
+
+[node name="SoilBed" type="Node3D" unique_id=916043024]
+
+[node name="Soil" type="MeshInstance3D" parent="." unique_id=904936213]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 0)
+material_override = SubResource("StandardMaterial3D_5bhkr")
+mesh = SubResource("BoxMesh_5kea0")
+
+[node name="AccessFront" type="Marker3D" parent="." unique_id=378328764]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.48)

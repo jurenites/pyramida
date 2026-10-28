@@ -1,0 +1,78 @@
+[gd_scene format=3]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_u6114"]
+albedo_color = Color(0.7294118, 0.40392157, 0.3019608, 1)
+roughness = 0.92
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_e5u0y"]
+top_radius = 0.19
+bottom_radius = 0.19
+height = 0.0912
+radial_segments = 8
+rings = 1
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_v8rqx"]
+top_radius = 0.38
+bottom_radius = 0.247
+height = 0.38
+radial_segments = 8
+rings = 1
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_a8rky"]
+top_radius = 0.19
+bottom_radius = 0.38
+height = 0.152
+radial_segments = 8
+rings = 1
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ulfa3"]
+albedo_color = Color(0.77000004, 0.49333334, 0.40666667, 1)
+roughness = 0.92
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_y6o0h"]
+top_radius = 0.209
+bottom_radius = 0.209
+height = 0.0532
+radial_segments = 8
+rings = 1
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ojcjs"]
+albedo_color = Color(0.2509804, 0.23137255, 0.21176471, 1)
+roughness = 0.92
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_odhdk"]
+top_radius = 0.152
+bottom_radius = 0.152
+height = 0.01
+radial_segments = 8
+rings = 1
+
+[node name="Urn" type="Node3D" unique_id=98781433]
+
+[node name="PotFoot" type="MeshInstance3D" parent="." unique_id=613105509]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.045599997, 0)
+material_override = SubResource("StandardMaterial3D_u6114")
+mesh = SubResource("CylinderMesh_e5u0y")
+
+[node name="PotBelly" type="MeshInstance3D" parent="." unique_id=1469472790]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.266, 0)
+material_override = SubResource("StandardMaterial3D_u6114")
+mesh = SubResource("CylinderMesh_v8rqx")
+
+[node name="PotShoulder" type="MeshInstance3D" parent="." unique_id=1454653639]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.513, 0)
+material_override = SubResource("StandardMaterial3D_u6114")
+mesh = SubResource("CylinderMesh_a8rky")
+
+[node name="PotRim" type="MeshInstance3D" parent="." unique_id=1371840865]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6156, 0)
+material_override = SubResource("StandardMaterial3D_ulfa3")
+mesh = SubResource("CylinderMesh_y6o0h")
+
+[node name="PotOpening" type="MeshInstance3D" parent="." unique_id=812011425]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.646, 0)
+material_override = SubResource("StandardMaterial3D_ojcjs")
+mesh = SubResource("CylinderMesh_odhdk")
+
+[node name="AccessFront" type="Marker3D" parent="." unique_id=1606970648]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.95)

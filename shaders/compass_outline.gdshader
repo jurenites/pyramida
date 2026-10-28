@@ -1,7 +1,7 @@
 shader_type spatial;
 render_mode unshaded, cull_front;
 
-uniform float outline_pixels = 2.0;
+uniform float outline_pixels = 1.0;
 uniform vec2 viewport_size = vec2(72.0);
 
 void vertex() {

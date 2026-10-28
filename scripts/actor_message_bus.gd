@@ -5,7 +5,9 @@ const MessageCatalog = preload("res://scripts/actor_message_catalog.gd")
 
 signal visible_messages_changed
 
-@export var maximum_visible_messages := 3
+@export var maximum_visible_messages := 1
+
+var _next_slot := 0.0
 
 var _elapsed := 0.0
 var _sequence := 0
@@ -36,6 +38,8 @@ func post_message(actor: Node3D, message_id: String, options: Dictionary = {}) -
 	var clusterable := bool(definition.get("clusterable", false))
 	var cluster_scope := str(definition.get("cluster_scope", "world"))
 	var entry_key := "%s|%s" % [message_id, cluster_scope]
+	if float(definition.get("repeat_seconds", 0.0)) > 0.0:
+		entry_key += "|%d" % actor.get_instance_id()
 	if not clusterable:
 		entry_key = "%s|%d" % [message_id, _sequence]
 
@@ -59,6 +63,7 @@ func post_message(actor: Node3D, message_id: String, options: Dictionary = {}) -
 	_entries[entry_key] = {
 		"key": entry_key,
 		"message_id": message_id,
+		"cluster_scope": cluster_scope,
 		"icon": str(definition.get("icon", "ok")),
 		"short_text": str(definition.get("short_text", "")),
 		"speaker_kind": speaker_kind,
@@ -89,7 +94,7 @@ func clear_message(actor: Node3D, message_id: String, cluster_scope := "world") 
 		var entry: Dictionary = _entries[entry_key]
 		if str(entry.get("message_id", "")) != message_id:
 			continue
-		if not entry_key.begins_with("%s|%s" % [message_id, cluster_scope]):
+		if str(entry.get("cluster_scope", "world")) != cluster_scope:
 			continue
 		var actors: Dictionary = entry.get("actors", {})
 		actors.erase(actor_id)
@@ -154,6 +159,8 @@ func _finish_visible_messages() -> bool:
 		var entry: Dictionary = _entries[entry_key]
 		if _elapsed < float(entry.get("visible_until", INF)):
 			continue
+		_next_slot = _elapsed + 1.0
+		entry["created_at"] = _elapsed
 		entry["visible"] = false
 		_visible_keys.erase(entry_key)
 		var repeat_seconds := float(entry.get("next_repeat_seconds", 0.0))
@@ -170,7 +177,8 @@ func _finish_visible_messages() -> bool:
 
 
 func _promote_ready_messages() -> bool:
-	var available_slots := maximum_visible_messages - _visible_keys.size()
+	if _elapsed < _next_slot: return false
+	var available_slots := mini(1, maximum_visible_messages) - _visible_keys.size()
 	if available_slots <= 0:
 		return false
 	var ready_entries: Array[Dictionary] = []
@@ -198,6 +206,9 @@ func _promote_ready_messages() -> bool:
 
 
 func _message_precedes(first: Dictionary, second: Dictionary) -> bool:
+	var first_time := float(first.get("created_at", 0.0))
+	var second_time := float(second.get("created_at", 0.0))
+	if not is_equal_approx(first_time, second_time): return first_time < second_time
 	var first_priority := int(first.get("priority", 0))
 	var second_priority := int(second.get("priority", 0))
 	if first_priority != second_priority:
@@ -226,5 +237,6 @@ func _prune_invalid_actors(entry: Dictionary) -> void:
 
 
 func _remove_entry(entry_key: String) -> void:
+	if entry_key in _visible_keys: _next_slot = _elapsed + 1.0
 	_entries.erase(entry_key)
 	_visible_keys.erase(entry_key)

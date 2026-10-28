@@ -1,0 +1,46 @@
+[gd_scene load_steps=7 format=3]
+
+[sub_resource type="StandardMaterial3D" id="Clay"]
+albedo_color = Color(0.69, 0.36, 0.23, 1)
+roughness = 1.0
+[sub_resource type="StandardMaterial3D" id="Lid"]
+albedo_color = Color(0.82, 0.61, 0.37, 1)
+roughness = 1.0
+[sub_resource type="SphereMesh" id="Belly"]
+radius = 0.30
+height = 0.48
+radial_segments = 12
+rings = 6
+[sub_resource type="CylinderMesh" id="Neck"]
+top_radius = 0.15
+bottom_radius = 0.19
+height = 0.12
+radial_segments = 12
+[sub_resource type="CylinderMesh" id="Cap"]
+top_radius = 0.18
+bottom_radius = 0.18
+height = 0.045
+radial_segments = 12
+[sub_resource type="CylinderMesh" id="Foot"]
+top_radius = 0.19
+bottom_radius = 0.16
+height = 0.07
+radial_segments = 12
+
+[node name="Pottery" type="Node3D"]
+[node name="Belly" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.26, 0)
+mesh = SubResource("Belly")
+material_override = SubResource("Clay")
+[node name="Neck" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.48, 0)
+mesh = SubResource("Neck")
+material_override = SubResource("Clay")
+[node name="Lid" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.55, 0)
+mesh = SubResource("Cap")
+material_override = SubResource("Lid")
+[node name="Foot" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.045, 0)
+mesh = SubResource("Foot")
+material_override = SubResource("Clay")

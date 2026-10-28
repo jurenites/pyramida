@@ -1,0 +1,3995 @@
+{
+  "cpu_before": [
+    {
+      "citizens": 3,
+      "cpu_scopes_inclusive": [
+        {
+          "calls": 180,
+          "max_ms": 22.785,
+          "mean_ms": 1.44134444444444,
+          "scope": "frame_cpu",
+          "total_ms": 259.442
+        },
+        {
+          "calls": 180,
+          "max_ms": 22.214,
+          "mean_ms": 0.9584,
+          "scope": "world_view",
+          "total_ms": 172.512
+        },
+        {
+          "calls": 180,
+          "max_ms": 21.512,
+          "mean_ms": 0.560494444444444,
+          "scope": "view.animation",
+          "total_ms": 100.889
+        },
+        {
+          "calls": 180,
+          "max_ms": 1.919,
+          "mean_ms": 0.386222222222222,
+          "scope": "view.visibility",
+          "total_ms": 69.52
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.418,
+          "mean_ms": 0.202138888888889,
+          "scope": "hud",
+          "total_ms": 36.385
+        },
+        {
+          "calls": 180,
+          "max_ms": 4.016,
+          "mean_ms": 0.179933333333333,
+          "scope": "simulation",
+          "total_ms": 32.388
+        },
+        {
+          "calls": 60,
+          "max_ms": 3.811,
+          "mean_ms": 0.29295,
+          "scope": "simulation.citizens",
+          "total_ms": 17.577
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.988,
+          "mean_ms": 0.148333333333333,
+          "scope": "simulation.economy",
+          "total_ms": 8.9
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.145,
+          "mean_ms": 0.0453444444444444,
+          "scope": "hover",
+          "total_ms": 8.162
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.077,
+          "mean_ms": 0.0274666666666667,
+          "scope": "audio_and_lighting",
+          "total_ms": 4.944
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.153,
+          "mean_ms": 0.0787666666666667,
+          "scope": "simulation.plants",
+          "total_ms": 4.726
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.017,
+          "mean_ms": 0.00815,
+          "scope": "streaming",
+          "total_ms": 1.467
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.034,
+          "mean_ms": 0.00777222222222222,
+          "scope": "fog",
+          "total_ms": 1.399
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.013,
+          "mean_ms": 0.00378333333333333,
+          "scope": "camera",
+          "total_ms": 0.681
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.013,
+          "mean_ms": 0.00274444444444444,
+          "scope": "view.grass",
+          "total_ms": 0.494
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.083,
+          "mean_ms": 0.00523333333333333,
+          "scope": "simulation.water",
+          "total_ms": 0.314
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.005,
+          "mean_ms": 0.00266666666666667,
+          "scope": "simulation.exploration",
+          "total_ms": 0.16
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.002,
+          "mean_ms": 0.00128333333333333,
+          "scope": "simulation.cleanup",
+          "total_ms": 0.077
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.001,
+          "mean_ms": 0.000261111111111111,
+          "scope": "autosave",
+          "total_ms": 0.047
+        }
+      ],
+      "draw_calls": 0.0,
+      "landscape": "easy",
+      "location": "(0.0, 0.0, 0.0)",
+      "rendered": false,
+      "viewport_gpu_ms": 0.0,
+      "wall_ms": 259.971
+    },
+    {
+      "citizens": 3,
+      "cpu_scopes_inclusive": [
+        {
+          "calls": 180,
+          "max_ms": 29.543,
+          "mean_ms": 1.68881666666667,
+          "scope": "frame_cpu",
+          "total_ms": 303.987
+        },
+        {
+          "calls": 180,
+          "max_ms": 2.886,
+          "mean_ms": 0.917988888888889,
+          "scope": "world_view",
+          "total_ms": 165.238
+        },
+        {
+          "calls": 180,
+          "max_ms": 2.352,
+          "mean_ms": 0.487838888888889,
+          "scope": "view.animation",
+          "total_ms": 87.811
+        },
+        {
+          "calls": 180,
+          "max_ms": 1.632,
+          "mean_ms": 0.416166666666667,
+          "scope": "view.visibility",
+          "total_ms": 74.91
+        },
+        {
+          "calls": 180,
+          "max_ms": 27.939,
+          "mean_ms": 0.412655555555556,
+          "scope": "simulation",
+          "total_ms": 74.278
+        },
+        {
+          "calls": 60,
+          "max_ms": 27.703,
+          "mean_ms": 0.922833333333333,
+          "scope": "simulation.citizens",
+          "total_ms": 55.37
+        },
+        {
+          "calls": 180,
+          "max_ms": 1.225,
+          "mean_ms": 0.240072222222222,
+          "scope": "hud",
+          "total_ms": 43.213
+        },
+        {
+          "calls": 60,
+          "max_ms": 1.356,
+          "mean_ms": 0.1649,
+          "scope": "simulation.economy",
+          "total_ms": 9.894
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.156,
+          "mean_ms": 0.0510722222222222,
+          "scope": "hover",
+          "total_ms": 9.193
+        },
+        {
+          "calls": 60,
+          "max_ms": 2.138,
+          "mean_ms": 0.123566666666667,
+          "scope": "simulation.plants",
+          "total_ms": 7.414
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.066,
+          "mean_ms": 0.0315055555555556,
+          "scope": "audio_and_lighting",
+          "total_ms": 5.671
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.467,
+          "mean_ms": 0.0114333333333333,
+          "scope": "streaming",
+          "total_ms": 2.058
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.065,
+          "mean_ms": 0.00889444444444444,
+          "scope": "fog",
+          "total_ms": 1.601
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.267,
+          "mean_ms": 0.00615,
+          "scope": "camera",
+          "total_ms": 1.107
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.01,
+          "mean_ms": 0.00337777777777778,
+          "scope": "view.grass",
+          "total_ms": 0.608
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.183,
+          "mean_ms": 0.00885,
+          "scope": "simulation.exploration",
+          "total_ms": 0.531
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.047,
+          "mean_ms": 0.00416666666666667,
+          "scope": "simulation.water",
+          "total_ms": 0.25
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.003,
+          "mean_ms": 0.00171666666666667,
+          "scope": "simulation.cleanup",
+          "total_ms": 0.103
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.001,
+          "mean_ms": 0.000327777777777778,
+          "scope": "autosave",
+          "total_ms": 0.059
+        }
+      ],
+      "draw_calls": 0.0,
+      "landscape": "easy",
+      "location": "(-18.0, 0.0, -12.0)",
+      "rendered": false,
+      "viewport_gpu_ms": 0.0,
+      "wall_ms": 304.589
+    },
+    {
+      "citizens": 3,
+      "cpu_scopes_inclusive": [
+        {
+          "calls": 180,
+          "max_ms": 21.392,
+          "mean_ms": 2.51751111111111,
+          "scope": "frame_cpu",
+          "total_ms": 453.152
+        },
+        {
+          "calls": 180,
+          "max_ms": 19.669,
+          "mean_ms": 1.39836666666667,
+          "scope": "world_view",
+          "total_ms": 251.706
+        },
+        {
+          "calls": 180,
+          "max_ms": 5.917,
+          "mean_ms": 0.663494444444444,
+          "scope": "view.animation",
+          "total_ms": 119.429
+        },
+        {
+          "calls": 180,
+          "max_ms": 15.965,
+          "mean_ms": 0.610733333333333,
+          "scope": "simulation",
+          "total_ms": 109.932
+        },
+        {
+          "calls": 180,
+          "max_ms": 4.386,
+          "mean_ms": 0.515427777777778,
+          "scope": "view.visibility",
+          "total_ms": 92.777
+        },
+        {
+          "calls": 60,
+          "max_ms": 15.729,
+          "mean_ms": 1.48955,
+          "scope": "simulation.citizens",
+          "total_ms": 89.373
+        },
+        {
+          "calls": 180,
+          "max_ms": 2.712,
+          "mean_ms": 0.348477777777778,
+          "scope": "hud",
+          "total_ms": 62.726
+        },
+        {
+          "calls": 180,
+          "max_ms": 18.005,
+          "mean_ms": 0.204594444444444,
+          "scope": "view.grass",
+          "total_ms": 36.827
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.228,
+          "mean_ms": 0.0641444444444444,
+          "scope": "hover",
+          "total_ms": 11.546
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.936,
+          "mean_ms": 0.18085,
+          "scope": "simulation.economy",
+          "total_ms": 10.851
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.83,
+          "mean_ms": 0.0494277777777778,
+          "scope": "audio_and_lighting",
+          "total_ms": 8.897
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.545,
+          "mean_ms": 0.113566666666667,
+          "scope": "simulation.plants",
+          "total_ms": 6.814
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.601,
+          "mean_ms": 0.0172333333333333,
+          "scope": "fog",
+          "total_ms": 3.102
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.169,
+          "mean_ms": 0.0112888888888889,
+          "scope": "streaming",
+          "total_ms": 2.032
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.875,
+          "mean_ms": 0.01885,
+          "scope": "simulation.water",
+          "total_ms": 1.131
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.031,
+          "mean_ms": 0.00588888888888889,
+          "scope": "camera",
+          "total_ms": 1.06
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.215,
+          "mean_ms": 0.0105666666666667,
+          "scope": "simulation.exploration",
+          "total_ms": 0.634
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.004,
+          "mean_ms": 0.00198333333333333,
+          "scope": "simulation.cleanup",
+          "total_ms": 0.119
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.001,
+          "mean_ms": 0.000466666666666667,
+          "scope": "autosave",
+          "total_ms": 0.084
+        }
+      ],
+      "draw_calls": 0.0,
+      "landscape": "easy",
+      "location": "(17.0, 0.0, 0.0)",
+      "rendered": false,
+      "viewport_gpu_ms": 0.0,
+      "wall_ms": 453.841
+    },
+    {
+      "citizens": 3,
+      "cpu_scopes_inclusive": [
+        {
+          "calls": 180,
+          "max_ms": 6.734,
+          "mean_ms": 1.76647777777778,
+          "scope": "frame_cpu",
+          "total_ms": 317.966
+        },
+        {
+          "calls": 180,
+          "max_ms": 5.362,
+          "mean_ms": 1.14947777777778,
+          "scope": "world_view",
+          "total_ms": 206.906
+        },
+        {
+          "calls": 180,
+          "max_ms": 1.538,
+          "mean_ms": 0.653927777777778,
+          "scope": "view.visibility",
+          "total_ms": 117.707
+        },
+        {
+          "calls": 180,
+          "max_ms": 4.499,
+          "mean_ms": 0.481722222222222,
+          "scope": "view.animation",
+          "total_ms": 86.71
+        },
+        {
+          "calls": 180,
+          "max_ms": 1.231,
+          "mean_ms": 0.252594444444444,
+          "scope": "hud",
+          "total_ms": 45.467
+        },
+        {
+          "calls": 180,
+          "max_ms": 4.519,
+          "mean_ms": 0.251344444444444,
+          "scope": "simulation",
+          "total_ms": 45.242
+        },
+        {
+          "calls": 60,
+          "max_ms": 4.163,
+          "mean_ms": 0.333983333333333,
+          "scope": "simulation.citizens",
+          "total_ms": 20.039
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.323,
+          "mean_ms": 0.2666,
+          "scope": "simulation.economy",
+          "total_ms": 15.996
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.126,
+          "mean_ms": 0.0509944444444444,
+          "scope": "hover",
+          "total_ms": 9.179
+        },
+        {
+          "calls": 60,
+          "max_ms": 1.673,
+          "mean_ms": 0.12725,
+          "scope": "simulation.plants",
+          "total_ms": 7.635
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.111,
+          "mean_ms": 0.0314944444444444,
+          "scope": "audio_and_lighting",
+          "total_ms": 5.669
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.168,
+          "mean_ms": 0.00946111111111111,
+          "scope": "streaming",
+          "total_ms": 1.703
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.055,
+          "mean_ms": 0.00828333333333333,
+          "scope": "fog",
+          "total_ms": 1.491
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.011,
+          "mean_ms": 0.00452777777777778,
+          "scope": "camera",
+          "total_ms": 0.815
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.015,
+          "mean_ms": 0.00358333333333333,
+          "scope": "view.grass",
+          "total_ms": 0.645
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.181,
+          "mean_ms": 0.0100333333333333,
+          "scope": "simulation.water",
+          "total_ms": 0.602
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.005,
+          "mean_ms": 0.003,
+          "scope": "simulation.exploration",
+          "total_ms": 0.18
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.002,
+          "mean_ms": 0.00153333333333333,
+          "scope": "simulation.cleanup",
+          "total_ms": 0.092
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.001,
+          "mean_ms": 0.000305555555555556,
+          "scope": "autosave",
+          "total_ms": 0.055
+        }
+      ],
+      "draw_calls": 0.0,
+      "landscape": "normal",
+      "location": "(0.0, 0.0, 0.0)",
+      "rendered": false,
+      "viewport_gpu_ms": 0.0,
+      "wall_ms": 318.538
+    },
+    {
+      "citizens": 3,
+      "cpu_scopes_inclusive": [
+        {
+          "calls": 180,
+          "max_ms": 35.826,
+          "mean_ms": 2.06353333333333,
+          "scope": "frame_cpu",
+          "total_ms": 371.436
+        },
+        {
+          "calls": 180,
+          "max_ms": 2.466,
+          "mean_ms": 1.17684444444444,
+          "scope": "world_view",
+          "total_ms": 211.832
+        },
+        {
+          "calls": 180,
+          "max_ms": 1.836,
+          "mean_ms": 0.688916666666667,
+          "scope": "view.visibility",
+          "total_ms": 124.005
+        },
+        {
+          "calls": 180,
+          "max_ms": 33.914,
+          "mean_ms": 0.48415,
+          "scope": "simulation",
+          "total_ms": 87.147
+        },
+        {
+          "calls": 180,
+          "max_ms": 1.524,
+          "mean_ms": 0.472388888888889,
+          "scope": "view.animation",
+          "total_ms": 85.03
+        },
+        {
+          "calls": 60,
+          "max_ms": 33.502,
+          "mean_ms": 1.01128333333333,
+          "scope": "simulation.citizens",
+          "total_ms": 60.677
+        },
+        {
+          "calls": 180,
+          "max_ms": 6.481,
+          "mean_ms": 0.285594444444444,
+          "scope": "hud",
+          "total_ms": 51.407
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.79,
+          "mean_ms": 0.284833333333333,
+          "scope": "simulation.economy",
+          "total_ms": 17.09
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.253,
+          "mean_ms": 0.0517666666666667,
+          "scope": "hover",
+          "total_ms": 9.318
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.644,
+          "mean_ms": 0.122316666666667,
+          "scope": "simulation.plants",
+          "total_ms": 7.339
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.235,
+          "mean_ms": 0.0330888888888889,
+          "scope": "audio_and_lighting",
+          "total_ms": 5.956
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.043,
+          "mean_ms": 0.00926666666666667,
+          "scope": "streaming",
+          "total_ms": 1.668
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.029,
+          "mean_ms": 0.00826111111111111,
+          "scope": "fog",
+          "total_ms": 1.487
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.114,
+          "mean_ms": 0.00557777777777778,
+          "scope": "camera",
+          "total_ms": 1.004
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.16,
+          "mean_ms": 0.00450555555555556,
+          "scope": "view.grass",
+          "total_ms": 0.811
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.252,
+          "mean_ms": 0.01025,
+          "scope": "simulation.exploration",
+          "total_ms": 0.615
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.171,
+          "mean_ms": 0.00998333333333333,
+          "scope": "simulation.water",
+          "total_ms": 0.599
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.003,
+          "mean_ms": 0.0017,
+          "scope": "simulation.cleanup",
+          "total_ms": 0.102
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.001,
+          "mean_ms": 0.000366666666666667,
+          "scope": "autosave",
+          "total_ms": 0.066
+        }
+      ],
+      "draw_calls": 0.0,
+      "landscape": "normal",
+      "location": "(-18.0, 0.0, -12.0)",
+      "rendered": false,
+      "viewport_gpu_ms": 0.0,
+      "wall_ms": 372.001
+    },
+    {
+      "citizens": 3,
+      "cpu_scopes_inclusive": [
+        {
+          "calls": 180,
+          "max_ms": 16.253,
+          "mean_ms": 2.31107222222222,
+          "scope": "frame_cpu",
+          "total_ms": 415.993
+        },
+        {
+          "calls": 180,
+          "max_ms": 9.628,
+          "mean_ms": 1.45156111111111,
+          "scope": "world_view",
+          "total_ms": 261.281
+        },
+        {
+          "calls": 180,
+          "max_ms": 9.178,
+          "mean_ms": 0.843122222222222,
+          "scope": "view.visibility",
+          "total_ms": 151.762
+        },
+        {
+          "calls": 180,
+          "max_ms": 7.349,
+          "mean_ms": 0.531088888888889,
+          "scope": "view.animation",
+          "total_ms": 95.596
+        },
+        {
+          "calls": 180,
+          "max_ms": 14.304,
+          "mean_ms": 0.479916666666667,
+          "scope": "simulation",
+          "total_ms": 86.385
+        },
+        {
+          "calls": 60,
+          "max_ms": 13.891,
+          "mean_ms": 0.99335,
+          "scope": "simulation.citizens",
+          "total_ms": 59.601
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.807,
+          "mean_ms": 0.247816666666667,
+          "scope": "hud",
+          "total_ms": 44.607
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.96,
+          "mean_ms": 0.28855,
+          "scope": "simulation.economy",
+          "total_ms": 17.313
+        },
+        {
+          "calls": 180,
+          "max_ms": 5.858,
+          "mean_ms": 0.0656277777777778,
+          "scope": "view.grass",
+          "total_ms": 11.813
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.374,
+          "mean_ms": 0.0558722222222222,
+          "scope": "hover",
+          "total_ms": 10.057
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.263,
+          "mean_ms": 0.105783333333333,
+          "scope": "simulation.plants",
+          "total_ms": 6.347
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.145,
+          "mean_ms": 0.0345166666666667,
+          "scope": "audio_and_lighting",
+          "total_ms": 6.213
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.597,
+          "mean_ms": 0.0152111111111111,
+          "scope": "fog",
+          "total_ms": 2.738
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.649,
+          "mean_ms": 0.0125111111111111,
+          "scope": "streaming",
+          "total_ms": 2.252
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.014,
+          "mean_ms": 0.00475,
+          "scope": "camera",
+          "total_ms": 0.855
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.221,
+          "mean_ms": 0.01095,
+          "scope": "simulation.water",
+          "total_ms": 0.657
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.22,
+          "mean_ms": 0.00975,
+          "scope": "simulation.exploration",
+          "total_ms": 0.585
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.003,
+          "mean_ms": 0.00165,
+          "scope": "simulation.cleanup",
+          "total_ms": 0.099
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.001,
+          "mean_ms": 0.0003,
+          "scope": "autosave",
+          "total_ms": 0.054
+        }
+      ],
+      "draw_calls": 0.0,
+      "landscape": "normal",
+      "location": "(17.0, 0.0, 0.0)",
+      "rendered": false,
+      "viewport_gpu_ms": 0.0,
+      "wall_ms": 416.603
+    }
+  ],
+  "cpu_after": [
+    {
+      "citizens": 3,
+      "cpu_scopes_inclusive": [
+        {
+          "calls": 180,
+          "max_ms": 11.028,
+          "mean_ms": 0.94975,
+          "scope": "frame_cpu",
+          "total_ms": 170.955
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.876,
+          "mean_ms": 0.31695,
+          "scope": "world_view",
+          "total_ms": 57.051
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.849,
+          "mean_ms": 0.303038888888889,
+          "scope": "view.animation",
+          "total_ms": 54.547
+        },
+        {
+          "calls": 180,
+          "max_ms": 10.113,
+          "mean_ms": 0.259888888888889,
+          "scope": "simulation",
+          "total_ms": 46.78
+        },
+        {
+          "calls": 180,
+          "max_ms": 7.949,
+          "mean_ms": 0.248972222222222,
+          "scope": "hud",
+          "total_ms": 44.815
+        },
+        {
+          "calls": 60,
+          "max_ms": 8.644,
+          "mean_ms": 0.413666666666667,
+          "scope": "simulation.citizens",
+          "total_ms": 24.82
+        },
+        {
+          "calls": 60,
+          "max_ms": 6.612,
+          "mean_ms": 0.254483333333333,
+          "scope": "simulation.economy",
+          "total_ms": 15.269
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.118,
+          "mean_ms": 0.0473888888888889,
+          "scope": "hover",
+          "total_ms": 8.53
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.245,
+          "mean_ms": 0.0899333333333333,
+          "scope": "simulation.plants",
+          "total_ms": 5.396
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.123,
+          "mean_ms": 0.0275333333333333,
+          "scope": "audio_and_lighting",
+          "total_ms": 4.956
+        },
+        {
+          "calls": 180,
+          "max_ms": 3.078,
+          "mean_ms": 0.0256111111111111,
+          "scope": "fog",
+          "total_ms": 4.61
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.179,
+          "mean_ms": 0.0102666666666667,
+          "scope": "streaming",
+          "total_ms": 1.848
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.017,
+          "mean_ms": 0.00412777777777778,
+          "scope": "camera",
+          "total_ms": 0.743
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.035,
+          "mean_ms": 0.00323333333333333,
+          "scope": "view.grass",
+          "total_ms": 0.582
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.073,
+          "mean_ms": 0.00471666666666667,
+          "scope": "simulation.water",
+          "total_ms": 0.283
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.005,
+          "mean_ms": 0.00139444444444444,
+          "scope": "view.visibility",
+          "total_ms": 0.251
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.005,
+          "mean_ms": 0.003,
+          "scope": "simulation.exploration",
+          "total_ms": 0.18
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.003,
+          "mean_ms": 0.00161666666666667,
+          "scope": "simulation.cleanup",
+          "total_ms": 0.097
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.001,
+          "mean_ms": 0.000283333333333333,
+          "scope": "autosave",
+          "total_ms": 0.051
+        }
+      ],
+      "draw_calls": 0.0,
+      "landscape": "easy",
+      "location": "(0.0, 0.0, 0.0)",
+      "measured_frames": {
+        "max_ms": 11.031,
+        "mean_ms": 0.953855555555555,
+        "p95_ms": 1.562
+      },
+      "rendered": false,
+      "viewport_gpu_ms": 0.0,
+      "wall_ms": 171.694
+    },
+    {
+      "citizens": 3,
+      "cpu_scopes_inclusive": [
+        {
+          "calls": 180,
+          "max_ms": 55.031,
+          "mean_ms": 2.25066666666667,
+          "scope": "frame_cpu",
+          "total_ms": 405.12
+        },
+        {
+          "calls": 180,
+          "max_ms": 34.165,
+          "mean_ms": 0.811516666666667,
+          "scope": "world_view",
+          "total_ms": 146.073
+        },
+        {
+          "calls": 180,
+          "max_ms": 33.368,
+          "mean_ms": 0.774833333333333,
+          "scope": "view.animation",
+          "total_ms": 139.47
+        },
+        {
+          "calls": 180,
+          "max_ms": 53.845,
+          "mean_ms": 0.656316666666667,
+          "scope": "simulation",
+          "total_ms": 118.137
+        },
+        {
+          "calls": 180,
+          "max_ms": 4.664,
+          "mean_ms": 0.522161111111111,
+          "scope": "hud",
+          "total_ms": 93.989
+        },
+        {
+          "calls": 60,
+          "max_ms": 53.584,
+          "mean_ms": 1.55131666666667,
+          "scope": "simulation.citizens",
+          "total_ms": 93.079
+        },
+        {
+          "calls": 180,
+          "max_ms": 1.443,
+          "mean_ms": 0.119288888888889,
+          "scope": "hover",
+          "total_ms": 21.472
+        },
+        {
+          "calls": 60,
+          "max_ms": 1.028,
+          "mean_ms": 0.223583333333333,
+          "scope": "simulation.economy",
+          "total_ms": 13.415
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.548,
+          "mean_ms": 0.0638444444444444,
+          "scope": "audio_and_lighting",
+          "total_ms": 11.492
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.813,
+          "mean_ms": 0.145433333333333,
+          "scope": "simulation.plants",
+          "total_ms": 8.726
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.311,
+          "mean_ms": 0.0181611111111111,
+          "scope": "streaming",
+          "total_ms": 3.269
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.092,
+          "mean_ms": 0.0129611111111111,
+          "scope": "fog",
+          "total_ms": 2.333
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.122,
+          "mean_ms": 0.0083,
+          "scope": "camera",
+          "total_ms": 1.494
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.139,
+          "mean_ms": 0.00695,
+          "scope": "view.grass",
+          "total_ms": 1.251
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.44,
+          "mean_ms": 0.0150166666666667,
+          "scope": "simulation.exploration",
+          "total_ms": 0.901
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.142,
+          "mean_ms": 0.00347777777777778,
+          "scope": "view.visibility",
+          "total_ms": 0.626
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.051,
+          "mean_ms": 0.00521666666666667,
+          "scope": "simulation.water",
+          "total_ms": 0.313
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.051,
+          "mean_ms": 0.00311666666666667,
+          "scope": "simulation.cleanup",
+          "total_ms": 0.187
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.042,
+          "mean_ms": 0.000622222222222222,
+          "scope": "autosave",
+          "total_ms": 0.112
+        }
+      ],
+      "draw_calls": 0.0,
+      "landscape": "easy",
+      "location": "(-18.0, 0.0, -12.0)",
+      "measured_frames": {
+        "max_ms": 55.035,
+        "mean_ms": 2.25794444444444,
+        "p95_ms": 5.662
+      },
+      "rendered": false,
+      "viewport_gpu_ms": 0.0,
+      "wall_ms": 406.43
+    },
+    {
+      "citizens": 3,
+      "cpu_scopes_inclusive": [
+        {
+          "calls": 180,
+          "max_ms": 27.138,
+          "mean_ms": 1.77965,
+          "scope": "frame_cpu",
+          "total_ms": 320.337
+        },
+        {
+          "calls": 180,
+          "max_ms": 23.535,
+          "mean_ms": 0.668344444444444,
+          "scope": "simulation",
+          "total_ms": 120.302
+        },
+        {
+          "calls": 180,
+          "max_ms": 24.431,
+          "mean_ms": 0.636127777777778,
+          "scope": "world_view",
+          "total_ms": 114.503
+        },
+        {
+          "calls": 60,
+          "max_ms": 23.275,
+          "mean_ms": 1.58245,
+          "scope": "simulation.citizens",
+          "total_ms": 94.947
+        },
+        {
+          "calls": 180,
+          "max_ms": 2.281,
+          "mean_ms": 0.378516666666667,
+          "scope": "view.animation",
+          "total_ms": 68.133
+        },
+        {
+          "calls": 180,
+          "max_ms": 1.38,
+          "mean_ms": 0.296055555555556,
+          "scope": "hud",
+          "total_ms": 53.29
+        },
+        {
+          "calls": 180,
+          "max_ms": 23.487,
+          "mean_ms": 0.234677777777778,
+          "scope": "view.grass",
+          "total_ms": 42.242
+        },
+        {
+          "calls": 60,
+          "max_ms": 7.542,
+          "mean_ms": 0.29435,
+          "scope": "simulation.economy",
+          "total_ms": 17.661
+        },
+        {
+          "calls": 180,
+          "max_ms": 4.349,
+          "mean_ms": 0.0676222222222222,
+          "scope": "audio_and_lighting",
+          "total_ms": 12.172
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.351,
+          "mean_ms": 0.0668444444444444,
+          "scope": "hover",
+          "total_ms": 12.032
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.197,
+          "mean_ms": 0.0949166666666667,
+          "scope": "simulation.plants",
+          "total_ms": 5.695
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.691,
+          "mean_ms": 0.0172555555555556,
+          "scope": "fog",
+          "total_ms": 3.106
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.062,
+          "mean_ms": 0.0117388888888889,
+          "scope": "streaming",
+          "total_ms": 2.113
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.897,
+          "mean_ms": 0.00978888888888889,
+          "scope": "view.visibility",
+          "total_ms": 1.762
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.024,
+          "mean_ms": 0.00519444444444444,
+          "scope": "camera",
+          "total_ms": 0.935
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.222,
+          "mean_ms": 0.01075,
+          "scope": "simulation.exploration",
+          "total_ms": 0.645
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.128,
+          "mean_ms": 0.00611666666666667,
+          "scope": "simulation.water",
+          "total_ms": 0.367
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.02,
+          "mean_ms": 0.00251666666666667,
+          "scope": "simulation.cleanup",
+          "total_ms": 0.151
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.003,
+          "mean_ms": 0.000344444444444444,
+          "scope": "autosave",
+          "total_ms": 0.062
+        }
+      ],
+      "draw_calls": 0.0,
+      "landscape": "easy",
+      "location": "(17.0, 0.0, 0.0)",
+      "measured_frames": {
+        "max_ms": 27.141,
+        "mean_ms": 1.78710555555556,
+        "p95_ms": 9.502
+      },
+      "rendered": false,
+      "viewport_gpu_ms": 0.0,
+      "wall_ms": 321.679
+    },
+    {
+      "citizens": 3,
+      "cpu_scopes_inclusive": [
+        {
+          "calls": 180,
+          "max_ms": 6.802,
+          "mean_ms": 1.15236111111111,
+          "scope": "frame_cpu",
+          "total_ms": 207.425
+        },
+        {
+          "calls": 180,
+          "max_ms": 2.81,
+          "mean_ms": 0.410027777777778,
+          "scope": "world_view",
+          "total_ms": 73.805
+        },
+        {
+          "calls": 180,
+          "max_ms": 2.788,
+          "mean_ms": 0.388511111111111,
+          "scope": "view.animation",
+          "total_ms": 69.932
+        },
+        {
+          "calls": 180,
+          "max_ms": 5.231,
+          "mean_ms": 0.298205555555556,
+          "scope": "simulation",
+          "total_ms": 53.677
+        },
+        {
+          "calls": 180,
+          "max_ms": 3.192,
+          "mean_ms": 0.296138888888889,
+          "scope": "hud",
+          "total_ms": 53.305
+        },
+        {
+          "calls": 60,
+          "max_ms": 4.633,
+          "mean_ms": 0.374966666666667,
+          "scope": "simulation.citizens",
+          "total_ms": 22.498
+        },
+        {
+          "calls": 60,
+          "max_ms": 1.275,
+          "mean_ms": 0.354016666666667,
+          "scope": "simulation.economy",
+          "total_ms": 21.241
+        },
+        {
+          "calls": 180,
+          "max_ms": 1.486,
+          "mean_ms": 0.0703444444444444,
+          "scope": "hover",
+          "total_ms": 12.662
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.566,
+          "mean_ms": 0.1315,
+          "scope": "simulation.plants",
+          "total_ms": 7.89
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.449,
+          "mean_ms": 0.0355555555555556,
+          "scope": "audio_and_lighting",
+          "total_ms": 6.4
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.412,
+          "mean_ms": 0.0132555555555556,
+          "scope": "streaming",
+          "total_ms": 2.386
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.262,
+          "mean_ms": 0.00981666666666667,
+          "scope": "fog",
+          "total_ms": 1.767
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.609,
+          "mean_ms": 0.00763333333333333,
+          "scope": "view.grass",
+          "total_ms": 1.374
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.13,
+          "mean_ms": 0.00633888888888889,
+          "scope": "camera",
+          "total_ms": 1.141
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.293,
+          "mean_ms": 0.0127166666666667,
+          "scope": "simulation.water",
+          "total_ms": 0.763
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.036,
+          "mean_ms": 0.00168888888888889,
+          "scope": "view.visibility",
+          "total_ms": 0.304
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.009,
+          "mean_ms": 0.00353333333333333,
+          "scope": "simulation.exploration",
+          "total_ms": 0.212
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.089,
+          "mean_ms": 0.000827777777777778,
+          "scope": "autosave",
+          "total_ms": 0.149
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.006,
+          "mean_ms": 0.00186666666666667,
+          "scope": "simulation.cleanup",
+          "total_ms": 0.112
+        }
+      ],
+      "draw_calls": 0.0,
+      "landscape": "normal",
+      "location": "(0.0, 0.0, 0.0)",
+      "measured_frames": {
+        "max_ms": 6.805,
+        "mean_ms": 1.15862222222222,
+        "p95_ms": 4.191
+      },
+      "rendered": false,
+      "viewport_gpu_ms": 0.0,
+      "wall_ms": 208.552
+    },
+    {
+      "citizens": 3,
+      "cpu_scopes_inclusive": [
+        {
+          "calls": 180,
+          "max_ms": 47.774,
+          "mean_ms": 1.66423333333333,
+          "scope": "frame_cpu",
+          "total_ms": 299.562
+        },
+        {
+          "calls": 180,
+          "max_ms": 46.726,
+          "mean_ms": 0.671394444444444,
+          "scope": "simulation",
+          "total_ms": 120.851
+        },
+        {
+          "calls": 60,
+          "max_ms": 46.271,
+          "mean_ms": 1.44806666666667,
+          "scope": "simulation.citizens",
+          "total_ms": 86.884
+        },
+        {
+          "calls": 180,
+          "max_ms": 4.815,
+          "mean_ms": 0.472338888888889,
+          "scope": "world_view",
+          "total_ms": 85.021
+        },
+        {
+          "calls": 180,
+          "max_ms": 4.67,
+          "mean_ms": 0.443938888888889,
+          "scope": "view.animation",
+          "total_ms": 79.909
+        },
+        {
+          "calls": 180,
+          "max_ms": 2.6,
+          "mean_ms": 0.338561111111111,
+          "scope": "hud",
+          "total_ms": 60.941
+        },
+        {
+          "calls": 60,
+          "max_ms": 1.0,
+          "mean_ms": 0.374366666666667,
+          "scope": "simulation.economy",
+          "total_ms": 22.462
+        },
+        {
+          "calls": 180,
+          "max_ms": 1.197,
+          "mean_ms": 0.0805722222222222,
+          "scope": "hover",
+          "total_ms": 14.503
+        },
+        {
+          "calls": 180,
+          "max_ms": 2.135,
+          "mean_ms": 0.0537611111111111,
+          "scope": "audio_and_lighting",
+          "total_ms": 9.677
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.643,
+          "mean_ms": 0.143816666666667,
+          "scope": "simulation.plants",
+          "total_ms": 8.629
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.71,
+          "mean_ms": 0.0149333333333333,
+          "scope": "fog",
+          "total_ms": 2.688
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.254,
+          "mean_ms": 0.0126,
+          "scope": "streaming",
+          "total_ms": 2.268
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.06,
+          "mean_ms": 0.00557777777777778,
+          "scope": "camera",
+          "total_ms": 1.004
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.289,
+          "mean_ms": 0.0158666666666667,
+          "scope": "simulation.water",
+          "total_ms": 0.952
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.074,
+          "mean_ms": 0.00479444444444444,
+          "scope": "view.grass",
+          "total_ms": 0.863
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.265,
+          "mean_ms": 0.0114666666666667,
+          "scope": "simulation.exploration",
+          "total_ms": 0.688
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.046,
+          "mean_ms": 0.00207777777777778,
+          "scope": "view.visibility",
+          "total_ms": 0.374
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.004,
+          "mean_ms": 0.00188333333333333,
+          "scope": "simulation.cleanup",
+          "total_ms": 0.113
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.001,
+          "mean_ms": 0.000266666666666667,
+          "scope": "autosave",
+          "total_ms": 0.048
+        }
+      ],
+      "draw_calls": 0.0,
+      "landscape": "normal",
+      "location": "(-18.0, 0.0, -12.0)",
+      "measured_frames": {
+        "max_ms": 47.779,
+        "mean_ms": 1.66852777777778,
+        "p95_ms": 4.235
+      },
+      "rendered": false,
+      "viewport_gpu_ms": 0.0,
+      "wall_ms": 300.335
+    },
+    {
+      "citizens": 3,
+      "cpu_scopes_inclusive": [
+        {
+          "calls": 180,
+          "max_ms": 22.531,
+          "mean_ms": 1.44487222222222,
+          "scope": "frame_cpu",
+          "total_ms": 260.077
+        },
+        {
+          "calls": 180,
+          "max_ms": 20.102,
+          "mean_ms": 0.573294444444444,
+          "scope": "simulation",
+          "total_ms": 103.193
+        },
+        {
+          "calls": 180,
+          "max_ms": 9.409,
+          "mean_ms": 0.476266666666667,
+          "scope": "world_view",
+          "total_ms": 85.728
+        },
+        {
+          "calls": 60,
+          "max_ms": 19.183,
+          "mean_ms": 1.1773,
+          "scope": "simulation.citizens",
+          "total_ms": 70.638
+        },
+        {
+          "calls": 180,
+          "max_ms": 1.418,
+          "mean_ms": 0.374972222222222,
+          "scope": "view.animation",
+          "total_ms": 67.495
+        },
+        {
+          "calls": 180,
+          "max_ms": 1.13,
+          "mean_ms": 0.257138888888889,
+          "scope": "hud",
+          "total_ms": 46.285
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.982,
+          "mean_ms": 0.362866666666667,
+          "scope": "simulation.economy",
+          "total_ms": 21.772
+        },
+        {
+          "calls": 180,
+          "max_ms": 7.809,
+          "mean_ms": 0.0769,
+          "scope": "view.grass",
+          "total_ms": 13.842
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.569,
+          "mean_ms": 0.0610888888888889,
+          "scope": "hover",
+          "total_ms": 10.996
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.402,
+          "mean_ms": 0.1355,
+          "scope": "simulation.plants",
+          "total_ms": 8.13
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.461,
+          "mean_ms": 0.0353722222222222,
+          "scope": "audio_and_lighting",
+          "total_ms": 6.367
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.674,
+          "mean_ms": 0.0162666666666667,
+          "scope": "fog",
+          "total_ms": 2.928
+        },
+        {
+          "calls": 180,
+          "max_ms": 1.13,
+          "mean_ms": 0.0136277777777778,
+          "scope": "view.visibility",
+          "total_ms": 2.453
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.065,
+          "mean_ms": 0.0106777777777778,
+          "scope": "streaming",
+          "total_ms": 1.922
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.047,
+          "mean_ms": 0.00462222222222222,
+          "scope": "camera",
+          "total_ms": 0.832
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.253,
+          "mean_ms": 0.0127333333333333,
+          "scope": "simulation.water",
+          "total_ms": 0.764
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.23,
+          "mean_ms": 0.0110666666666667,
+          "scope": "simulation.exploration",
+          "total_ms": 0.664
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.099,
+          "mean_ms": 0.00358333333333333,
+          "scope": "simulation.cleanup",
+          "total_ms": 0.215
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.003,
+          "mean_ms": 0.000316666666666667,
+          "scope": "autosave",
+          "total_ms": 0.057
+        }
+      ],
+      "draw_calls": 0.0,
+      "landscape": "normal",
+      "location": "(17.0, 0.0, 0.0)",
+      "measured_frames": {
+        "max_ms": 22.535,
+        "mean_ms": 1.44842777777778,
+        "p95_ms": 8.426
+      },
+      "rendered": false,
+      "viewport_gpu_ms": 0.0,
+      "wall_ms": 260.717
+    }
+  ],
+  "rendered_before": [
+    {
+      "citizens": 3,
+      "cpu_scopes_inclusive": [
+        {
+          "calls": 180,
+          "max_ms": 11.676,
+          "mean_ms": 2.59731666666667,
+          "scope": "frame_cpu",
+          "total_ms": 467.517
+        },
+        {
+          "calls": 180,
+          "max_ms": 9.217,
+          "mean_ms": 1.61762222222222,
+          "scope": "world_view",
+          "total_ms": 291.172
+        },
+        {
+          "calls": 180,
+          "max_ms": 7.494,
+          "mean_ms": 1.00051111111111,
+          "scope": "view.animation",
+          "total_ms": 180.092
+        },
+        {
+          "calls": 180,
+          "max_ms": 1.673,
+          "mean_ms": 0.587727777777778,
+          "scope": "view.visibility",
+          "total_ms": 105.791
+        },
+        {
+          "calls": 180,
+          "max_ms": 2.292,
+          "mean_ms": 0.480311111111111,
+          "scope": "hud",
+          "total_ms": 86.456
+        },
+        {
+          "calls": 180,
+          "max_ms": 5.222,
+          "mean_ms": 0.254022222222222,
+          "scope": "simulation",
+          "total_ms": 45.724
+        },
+        {
+          "calls": 60,
+          "max_ms": 4.852,
+          "mean_ms": 0.382083333333333,
+          "scope": "simulation.citizens",
+          "total_ms": 22.925
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.503,
+          "mean_ms": 0.0957277777777778,
+          "scope": "hover",
+          "total_ms": 17.231
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.34,
+          "mean_ms": 0.0680444444444444,
+          "scope": "audio_and_lighting",
+          "total_ms": 12.248
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.612,
+          "mean_ms": 0.199333333333333,
+          "scope": "simulation.economy",
+          "total_ms": 11.96
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.331,
+          "mean_ms": 0.134566666666667,
+          "scope": "simulation.plants",
+          "total_ms": 8.074
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.077,
+          "mean_ms": 0.0218,
+          "scope": "streaming",
+          "total_ms": 3.924
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.049,
+          "mean_ms": 0.0204388888888889,
+          "scope": "camera",
+          "total_ms": 3.679
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.175,
+          "mean_ms": 0.0191611111111111,
+          "scope": "fog",
+          "total_ms": 3.449
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.043,
+          "mean_ms": 0.00665,
+          "scope": "view.grass",
+          "total_ms": 1.197
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.278,
+          "mean_ms": 0.0109,
+          "scope": "simulation.water",
+          "total_ms": 0.654
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.036,
+          "mean_ms": 0.00601666666666667,
+          "scope": "simulation.exploration",
+          "total_ms": 0.361
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.006,
+          "mean_ms": 0.00261666666666667,
+          "scope": "simulation.cleanup",
+          "total_ms": 0.157
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.001,
+          "mean_ms": 0.000494444444444444,
+          "scope": "autosave",
+          "total_ms": 0.089
+        }
+      ],
+      "draw_calls": 483.0,
+      "landscape": "easy",
+      "location": "(0.0, 0.0, 0.0)",
+      "rendered": true,
+      "viewport_gpu_ms": 5.3289999961853,
+      "wall_ms": 3169.232
+    },
+    {
+      "citizens": 3,
+      "cpu_scopes_inclusive": [
+        {
+          "calls": 180,
+          "max_ms": 35.772,
+          "mean_ms": 2.64378888888889,
+          "scope": "frame_cpu",
+          "total_ms": 475.882
+        },
+        {
+          "calls": 180,
+          "max_ms": 4.087,
+          "mean_ms": 1.48089444444444,
+          "scope": "world_view",
+          "total_ms": 266.561
+        },
+        {
+          "calls": 180,
+          "max_ms": 2.825,
+          "mean_ms": 0.893283333333333,
+          "scope": "view.animation",
+          "total_ms": 160.791
+        },
+        {
+          "calls": 180,
+          "max_ms": 1.8,
+          "mean_ms": 0.561594444444444,
+          "scope": "view.visibility",
+          "total_ms": 101.087
+        },
+        {
+          "calls": 180,
+          "max_ms": 33.829,
+          "mean_ms": 0.479683333333333,
+          "scope": "simulation",
+          "total_ms": 86.343
+        },
+        {
+          "calls": 180,
+          "max_ms": 1.106,
+          "mean_ms": 0.439666666666667,
+          "scope": "hud",
+          "total_ms": 79.14
+        },
+        {
+          "calls": 60,
+          "max_ms": 33.423,
+          "mean_ms": 1.07411666666667,
+          "scope": "simulation.citizens",
+          "total_ms": 64.447
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.234,
+          "mean_ms": 0.0950055555555556,
+          "scope": "hover",
+          "total_ms": 17.101
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.402,
+          "mean_ms": 0.190683333333333,
+          "scope": "simulation.economy",
+          "total_ms": 11.441
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.324,
+          "mean_ms": 0.0624055555555556,
+          "scope": "audio_and_lighting",
+          "total_ms": 11.233
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.267,
+          "mean_ms": 0.129866666666667,
+          "scope": "simulation.plants",
+          "total_ms": 7.792
+        },
+        {
+          "calls": 180,
+          "max_ms": 2.266,
+          "mean_ms": 0.0309388888888889,
+          "scope": "camera",
+          "total_ms": 5.569
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.053,
+          "mean_ms": 0.0194388888888889,
+          "scope": "streaming",
+          "total_ms": 3.499
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.05,
+          "mean_ms": 0.0167833333333333,
+          "scope": "fog",
+          "total_ms": 3.021
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.02,
+          "mean_ms": 0.00566111111111111,
+          "scope": "view.grass",
+          "total_ms": 1.019
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.235,
+          "mean_ms": 0.01225,
+          "scope": "simulation.exploration",
+          "total_ms": 0.735
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.119,
+          "mean_ms": 0.00751666666666667,
+          "scope": "simulation.water",
+          "total_ms": 0.451
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.007,
+          "mean_ms": 0.00238333333333333,
+          "scope": "simulation.cleanup",
+          "total_ms": 0.143
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.001,
+          "mean_ms": 0.000494444444444444,
+          "scope": "autosave",
+          "total_ms": 0.089
+        }
+      ],
+      "draw_calls": 430.0,
+      "landscape": "easy",
+      "location": "(-18.0, 0.0, -12.0)",
+      "rendered": true,
+      "viewport_gpu_ms": 5.14400005340576,
+      "wall_ms": 3085.177
+    },
+    {
+      "citizens": 3,
+      "cpu_scopes_inclusive": [
+        {
+          "calls": 180,
+          "max_ms": 48.955,
+          "mean_ms": 3.44090555555556,
+          "scope": "frame_cpu",
+          "total_ms": 619.363
+        },
+        {
+          "calls": 180,
+          "max_ms": 31.135,
+          "mean_ms": 1.96814444444444,
+          "scope": "world_view",
+          "total_ms": 354.266
+        },
+        {
+          "calls": 180,
+          "max_ms": 9.086,
+          "mean_ms": 0.980827777777778,
+          "scope": "view.animation",
+          "total_ms": 176.549
+        },
+        {
+          "calls": 180,
+          "max_ms": 13.55,
+          "mean_ms": 0.666088888888889,
+          "scope": "view.visibility",
+          "total_ms": 119.896
+        },
+        {
+          "calls": 180,
+          "max_ms": 25.808,
+          "mean_ms": 0.58895,
+          "scope": "simulation",
+          "total_ms": 106.011
+        },
+        {
+          "calls": 180,
+          "max_ms": 13.257,
+          "mean_ms": 0.544616666666667,
+          "scope": "hud",
+          "total_ms": 98.031
+        },
+        {
+          "calls": 60,
+          "max_ms": 22.03,
+          "mean_ms": 1.34183333333333,
+          "scope": "simulation.citizens",
+          "total_ms": 80.51
+        },
+        {
+          "calls": 180,
+          "max_ms": 29.418,
+          "mean_ms": 0.28205,
+          "scope": "view.grass",
+          "total_ms": 50.769
+        },
+        {
+          "calls": 180,
+          "max_ms": 7.418,
+          "mean_ms": 0.134977777777778,
+          "scope": "hover",
+          "total_ms": 24.296
+        },
+        {
+          "calls": 180,
+          "max_ms": 6.983,
+          "mean_ms": 0.10765,
+          "scope": "audio_and_lighting",
+          "total_ms": 19.377
+        },
+        {
+          "calls": 60,
+          "max_ms": 1.837,
+          "mean_ms": 0.2141,
+          "scope": "simulation.economy",
+          "total_ms": 12.846
+        },
+        {
+          "calls": 60,
+          "max_ms": 1.906,
+          "mean_ms": 0.15765,
+          "scope": "simulation.plants",
+          "total_ms": 9.459
+        },
+        {
+          "calls": 180,
+          "max_ms": 1.496,
+          "mean_ms": 0.0319111111111111,
+          "scope": "fog",
+          "total_ms": 5.744
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.632,
+          "mean_ms": 0.0220055555555556,
+          "scope": "camera",
+          "total_ms": 3.961
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.07,
+          "mean_ms": 0.0203444444444444,
+          "scope": "streaming",
+          "total_ms": 3.662
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.543,
+          "mean_ms": 0.0186833333333333,
+          "scope": "simulation.exploration",
+          "total_ms": 1.121
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.148,
+          "mean_ms": 0.00948333333333333,
+          "scope": "simulation.water",
+          "total_ms": 0.569
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.012,
+          "mean_ms": 0.00243333333333333,
+          "scope": "simulation.cleanup",
+          "total_ms": 0.146
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.001,
+          "mean_ms": 0.000466666666666667,
+          "scope": "autosave",
+          "total_ms": 0.084
+        }
+      ],
+      "draw_calls": 646.0,
+      "landscape": "easy",
+      "location": "(17.0, 0.0, 0.0)",
+      "rendered": true,
+      "viewport_gpu_ms": 4.46700000762939,
+      "wall_ms": 3368.763
+    },
+    {
+      "citizens": 3,
+      "cpu_scopes_inclusive": [
+        {
+          "calls": 180,
+          "max_ms": 40.145,
+          "mean_ms": 3.26160555555556,
+          "scope": "frame_cpu",
+          "total_ms": 587.089
+        },
+        {
+          "calls": 180,
+          "max_ms": 18.535,
+          "mean_ms": 1.98353333333333,
+          "scope": "world_view",
+          "total_ms": 357.036
+        },
+        {
+          "calls": 180,
+          "max_ms": 13.691,
+          "mean_ms": 1.09051111111111,
+          "scope": "view.visibility",
+          "total_ms": 196.292
+        },
+        {
+          "calls": 180,
+          "max_ms": 4.675,
+          "mean_ms": 0.866527777777778,
+          "scope": "view.animation",
+          "total_ms": 155.975
+        },
+        {
+          "calls": 180,
+          "max_ms": 16.292,
+          "mean_ms": 0.594072222222222,
+          "scope": "hud",
+          "total_ms": 106.933
+        },
+        {
+          "calls": 180,
+          "max_ms": 20.277,
+          "mean_ms": 0.423216666666667,
+          "scope": "simulation",
+          "total_ms": 76.179
+        },
+        {
+          "calls": 60,
+          "max_ms": 15.107,
+          "mean_ms": 0.608283333333333,
+          "scope": "simulation.citizens",
+          "total_ms": 36.497
+        },
+        {
+          "calls": 60,
+          "max_ms": 2.06,
+          "mean_ms": 0.381116666666667,
+          "scope": "simulation.economy",
+          "total_ms": 22.867
+        },
+        {
+          "calls": 180,
+          "max_ms": 2.438,
+          "mean_ms": 0.111977777777778,
+          "scope": "hover",
+          "total_ms": 20.156
+        },
+        {
+          "calls": 60,
+          "max_ms": 4.545,
+          "mean_ms": 0.200266666666667,
+          "scope": "simulation.plants",
+          "total_ms": 12.016
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.367,
+          "mean_ms": 0.0594777777777778,
+          "scope": "audio_and_lighting",
+          "total_ms": 10.706
+        },
+        {
+          "calls": 180,
+          "max_ms": 2.135,
+          "mean_ms": 0.0307277777777778,
+          "scope": "streaming",
+          "total_ms": 5.531
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.25,
+          "mean_ms": 0.02055,
+          "scope": "camera",
+          "total_ms": 3.699
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.252,
+          "mean_ms": 0.0178777777777778,
+          "scope": "fog",
+          "total_ms": 3.218
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.762,
+          "mean_ms": 0.0237833333333333,
+          "scope": "simulation.water",
+          "total_ms": 1.427
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.015,
+          "mean_ms": 0.00583333333333333,
+          "scope": "view.grass",
+          "total_ms": 1.05
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.01,
+          "mean_ms": 0.00483333333333333,
+          "scope": "simulation.exploration",
+          "total_ms": 0.29
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.005,
+          "mean_ms": 0.00216666666666667,
+          "scope": "simulation.cleanup",
+          "total_ms": 0.13
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.001,
+          "mean_ms": 0.000483333333333333,
+          "scope": "autosave",
+          "total_ms": 0.087
+        }
+      ],
+      "draw_calls": 491.0,
+      "landscape": "normal",
+      "location": "(0.0, 0.0, 0.0)",
+      "rendered": true,
+      "viewport_gpu_ms": 4.80200004577637,
+      "wall_ms": 3117.939
+    },
+    {
+      "citizens": 3,
+      "cpu_scopes_inclusive": [
+        {
+          "calls": 180,
+          "max_ms": 46.427,
+          "mean_ms": 3.21590555555556,
+          "scope": "frame_cpu",
+          "total_ms": 578.863
+        },
+        {
+          "calls": 180,
+          "max_ms": 14.896,
+          "mean_ms": 1.93611666666667,
+          "scope": "world_view",
+          "total_ms": 348.501
+        },
+        {
+          "calls": 180,
+          "max_ms": 8.578,
+          "mean_ms": 1.03863333333333,
+          "scope": "view.visibility",
+          "total_ms": 186.954
+        },
+        {
+          "calls": 180,
+          "max_ms": 6.214,
+          "mean_ms": 0.865705555555556,
+          "scope": "view.animation",
+          "total_ms": 155.827
+        },
+        {
+          "calls": 180,
+          "max_ms": 43.303,
+          "mean_ms": 0.583427777777778,
+          "scope": "simulation",
+          "total_ms": 105.017
+        },
+        {
+          "calls": 180,
+          "max_ms": 3.287,
+          "mean_ms": 0.457472222222222,
+          "scope": "hud",
+          "total_ms": 82.345
+        },
+        {
+          "calls": 60,
+          "max_ms": 42.394,
+          "mean_ms": 1.19373333333333,
+          "scope": "simulation.citizens",
+          "total_ms": 71.624
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.673,
+          "mean_ms": 0.366966666666667,
+          "scope": "simulation.economy",
+          "total_ms": 22.018
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.655,
+          "mean_ms": 0.0993,
+          "scope": "hover",
+          "total_ms": 17.874
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.323,
+          "mean_ms": 0.0635666666666667,
+          "scope": "audio_and_lighting",
+          "total_ms": 11.442
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.187,
+          "mean_ms": 0.130466666666667,
+          "scope": "simulation.plants",
+          "total_ms": 7.828
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.091,
+          "mean_ms": 0.0203222222222222,
+          "scope": "streaming",
+          "total_ms": 3.658
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.089,
+          "mean_ms": 0.0187444444444444,
+          "scope": "camera",
+          "total_ms": 3.374
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.07,
+          "mean_ms": 0.0168,
+          "scope": "fog",
+          "total_ms": 3.024
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.422,
+          "mean_ms": 0.00898888888888889,
+          "scope": "view.grass",
+          "total_ms": 1.618
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.598,
+          "mean_ms": 0.0218333333333333,
+          "scope": "simulation.water",
+          "total_ms": 1.31
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.199,
+          "mean_ms": 0.0112,
+          "scope": "simulation.exploration",
+          "total_ms": 0.672
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.005,
+          "mean_ms": 0.00221666666666667,
+          "scope": "simulation.cleanup",
+          "total_ms": 0.133
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.001,
+          "mean_ms": 0.000438888888888889,
+          "scope": "autosave",
+          "total_ms": 0.079
+        }
+      ],
+      "draw_calls": 438.0,
+      "landscape": "normal",
+      "location": "(-18.0, 0.0, -12.0)",
+      "rendered": true,
+      "viewport_gpu_ms": 2.74900007247925,
+      "wall_ms": 3081.771
+    },
+    {
+      "citizens": 3,
+      "cpu_scopes_inclusive": [
+        {
+          "calls": 180,
+          "max_ms": 104.298,
+          "mean_ms": 4.14823333333333,
+          "scope": "frame_cpu",
+          "total_ms": 746.682
+        },
+        {
+          "calls": 180,
+          "max_ms": 55.485,
+          "mean_ms": 2.55281111111111,
+          "scope": "world_view",
+          "total_ms": 459.506
+        },
+        {
+          "calls": 180,
+          "max_ms": 45.205,
+          "mean_ms": 1.29007222222222,
+          "scope": "view.animation",
+          "total_ms": 232.213
+        },
+        {
+          "calls": 180,
+          "max_ms": 22.857,
+          "mean_ms": 1.13784444444444,
+          "scope": "view.visibility",
+          "total_ms": 204.812
+        },
+        {
+          "calls": 180,
+          "max_ms": 30.118,
+          "mean_ms": 0.735633333333333,
+          "scope": "simulation",
+          "total_ms": 132.414
+        },
+        {
+          "calls": 180,
+          "max_ms": 4.24,
+          "mean_ms": 0.47715,
+          "scope": "hud",
+          "total_ms": 85.887
+        },
+        {
+          "calls": 60,
+          "max_ms": 15.564,
+          "mean_ms": 1.33511666666667,
+          "scope": "simulation.citizens",
+          "total_ms": 80.107
+        },
+        {
+          "calls": 60,
+          "max_ms": 10.29,
+          "mean_ms": 0.586383333333333,
+          "scope": "simulation.economy",
+          "total_ms": 35.183
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.414,
+          "mean_ms": 0.0956222222222222,
+          "scope": "hover",
+          "total_ms": 17.212
+        },
+        {
+          "calls": 180,
+          "max_ms": 10.362,
+          "mean_ms": 0.0935777777777778,
+          "scope": "camera",
+          "total_ms": 16.844
+        },
+        {
+          "calls": 180,
+          "max_ms": 2.374,
+          "mean_ms": 0.0888388888888889,
+          "scope": "audio_and_lighting",
+          "total_ms": 15.991
+        },
+        {
+          "calls": 180,
+          "max_ms": 8.45,
+          "mean_ms": 0.0885666666666667,
+          "scope": "view.grass",
+          "total_ms": 15.942
+        },
+        {
+          "calls": 60,
+          "max_ms": 2.498,
+          "mean_ms": 0.186283333333333,
+          "scope": "simulation.plants",
+          "total_ms": 11.177
+        },
+        {
+          "calls": 180,
+          "max_ms": 2.121,
+          "mean_ms": 0.0412222222222222,
+          "scope": "fog",
+          "total_ms": 7.42
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.376,
+          "mean_ms": 0.0230944444444444,
+          "scope": "streaming",
+          "total_ms": 4.157
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.513,
+          "mean_ms": 0.0203666666666667,
+          "scope": "simulation.water",
+          "total_ms": 1.222
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.378,
+          "mean_ms": 0.0164166666666667,
+          "scope": "simulation.exploration",
+          "total_ms": 0.985
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.06,
+          "mean_ms": 0.00338333333333333,
+          "scope": "simulation.cleanup",
+          "total_ms": 0.203
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.016,
+          "mean_ms": 0.000638888888888889,
+          "scope": "autosave",
+          "total_ms": 0.115
+        }
+      ],
+      "draw_calls": 679.0,
+      "landscape": "normal",
+      "location": "(17.0, 0.0, 0.0)",
+      "rendered": true,
+      "viewport_gpu_ms": 5.76599979400635,
+      "wall_ms": 3299.661
+    }
+  ],
+  "rendered_after": [
+    {
+      "citizens": 3,
+      "cpu_scopes_inclusive": [
+        {
+          "calls": 180,
+          "max_ms": 4.818,
+          "mean_ms": 1.383,
+          "scope": "frame_cpu",
+          "total_ms": 248.94
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.887,
+          "mean_ms": 0.495516666666667,
+          "scope": "world_view",
+          "total_ms": 89.193
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.848,
+          "mean_ms": 0.471672222222222,
+          "scope": "view.animation",
+          "total_ms": 84.901
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.726,
+          "mean_ms": 0.406422222222222,
+          "scope": "hud",
+          "total_ms": 73.156
+        },
+        {
+          "calls": 180,
+          "max_ms": 3.797,
+          "mean_ms": 0.228244444444444,
+          "scope": "simulation",
+          "total_ms": 41.084
+        },
+        {
+          "calls": 180,
+          "max_ms": 2.267,
+          "mean_ms": 0.125861111111111,
+          "scope": "hover",
+          "total_ms": 22.655
+        },
+        {
+          "calls": 60,
+          "max_ms": 3.444,
+          "mean_ms": 0.331866666666667,
+          "scope": "simulation.citizens",
+          "total_ms": 19.912
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.357,
+          "mean_ms": 0.185766666666667,
+          "scope": "simulation.economy",
+          "total_ms": 11.146
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.13,
+          "mean_ms": 0.0512111111111111,
+          "scope": "audio_and_lighting",
+          "total_ms": 9.218
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.186,
+          "mean_ms": 0.126166666666667,
+          "scope": "simulation.plants",
+          "total_ms": 7.57
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.075,
+          "mean_ms": 0.0200777777777778,
+          "scope": "streaming",
+          "total_ms": 3.614
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.073,
+          "mean_ms": 0.0184833333333333,
+          "scope": "camera",
+          "total_ms": 3.327
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.06,
+          "mean_ms": 0.0167611111111111,
+          "scope": "fog",
+          "total_ms": 3.017
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.015,
+          "mean_ms": 0.00425555555555556,
+          "scope": "view.grass",
+          "total_ms": 0.766
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.221,
+          "mean_ms": 0.0102,
+          "scope": "simulation.water",
+          "total_ms": 0.612
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.006,
+          "mean_ms": 0.00218888888888889,
+          "scope": "view.visibility",
+          "total_ms": 0.394
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.008,
+          "mean_ms": 0.0052,
+          "scope": "simulation.exploration",
+          "total_ms": 0.312
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.004,
+          "mean_ms": 0.00215,
+          "scope": "simulation.cleanup",
+          "total_ms": 0.129
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.001,
+          "mean_ms": 0.000327777777777778,
+          "scope": "autosave",
+          "total_ms": 0.059
+        }
+      ],
+      "draw_calls": 483.0,
+      "landscape": "easy",
+      "location": "(0.0, 0.0, 0.0)",
+      "measured_frames": {
+        "max_ms": 35.654,
+        "mean_ms": 16.8297277777778,
+        "p95_ms": 19.393
+      },
+      "rendered": true,
+      "viewport_gpu_ms": 3.50500011444092,
+      "wall_ms": 3029.351
+    },
+    {
+      "citizens": 3,
+      "cpu_scopes_inclusive": [
+        {
+          "calls": 180,
+          "max_ms": 29.713,
+          "mean_ms": 1.67812222222222,
+          "scope": "frame_cpu",
+          "total_ms": 302.062
+        },
+        {
+          "calls": 180,
+          "max_ms": 2.899,
+          "mean_ms": 0.561355555555556,
+          "scope": "world_view",
+          "total_ms": 101.044
+        },
+        {
+          "calls": 180,
+          "max_ms": 2.836,
+          "mean_ms": 0.537444444444444,
+          "scope": "view.animation",
+          "total_ms": 96.74
+        },
+        {
+          "calls": 180,
+          "max_ms": 27.774,
+          "mean_ms": 0.463466666666667,
+          "scope": "simulation",
+          "total_ms": 83.424
+        },
+        {
+          "calls": 180,
+          "max_ms": 3.092,
+          "mean_ms": 0.419727777777778,
+          "scope": "hud",
+          "total_ms": 75.551
+        },
+        {
+          "calls": 60,
+          "max_ms": 27.449,
+          "mean_ms": 0.9518,
+          "scope": "simulation.citizens",
+          "total_ms": 57.108
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.35,
+          "mean_ms": 0.0948111111111111,
+          "scope": "hover",
+          "total_ms": 17.066
+        },
+        {
+          "calls": 60,
+          "max_ms": 1.752,
+          "mean_ms": 0.240116666666667,
+          "scope": "simulation.economy",
+          "total_ms": 14.407
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.181,
+          "mean_ms": 0.0525833333333333,
+          "scope": "audio_and_lighting",
+          "total_ms": 9.465
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.377,
+          "mean_ms": 0.137583333333333,
+          "scope": "simulation.plants",
+          "total_ms": 8.255
+        },
+        {
+          "calls": 180,
+          "max_ms": 1.148,
+          "mean_ms": 0.0275277777777778,
+          "scope": "streaming",
+          "total_ms": 4.955
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.067,
+          "mean_ms": 0.0200722222222222,
+          "scope": "camera",
+          "total_ms": 3.613
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.075,
+          "mean_ms": 0.0185,
+          "scope": "fog",
+          "total_ms": 3.33
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.515,
+          "mean_ms": 0.0193833333333333,
+          "scope": "simulation.water",
+          "total_ms": 1.163
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.224,
+          "mean_ms": 0.0126333333333333,
+          "scope": "simulation.exploration",
+          "total_ms": 0.758
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.016,
+          "mean_ms": 0.00412777777777778,
+          "scope": "view.grass",
+          "total_ms": 0.743
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.008,
+          "mean_ms": 0.00226666666666667,
+          "scope": "view.visibility",
+          "total_ms": 0.408
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.006,
+          "mean_ms": 0.00238333333333333,
+          "scope": "simulation.cleanup",
+          "total_ms": 0.143
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.001,
+          "mean_ms": 0.000383333333333333,
+          "scope": "autosave",
+          "total_ms": 0.069
+        }
+      ],
+      "draw_calls": 430.0,
+      "landscape": "easy",
+      "location": "(-18.0, 0.0, -12.0)",
+      "measured_frames": {
+        "max_ms": 63.003,
+        "mean_ms": 17.3196388888889,
+        "p95_ms": 26.062
+      },
+      "rendered": true,
+      "viewport_gpu_ms": 4.69299983978271,
+      "wall_ms": 3117.535
+    },
+    {
+      "citizens": 3,
+      "cpu_scopes_inclusive": [
+        {
+          "calls": 180,
+          "max_ms": 31.872,
+          "mean_ms": 1.84822222222222,
+          "scope": "frame_cpu",
+          "total_ms": 332.68
+        },
+        {
+          "calls": 180,
+          "max_ms": 28.751,
+          "mean_ms": 0.756133333333333,
+          "scope": "world_view",
+          "total_ms": 136.104
+        },
+        {
+          "calls": 180,
+          "max_ms": 15.19,
+          "mean_ms": 0.496444444444444,
+          "scope": "simulation",
+          "total_ms": 89.36
+        },
+        {
+          "calls": 180,
+          "max_ms": 1.258,
+          "mean_ms": 0.471772222222222,
+          "scope": "view.animation",
+          "total_ms": 84.919
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.77,
+          "mean_ms": 0.3971,
+          "scope": "hud",
+          "total_ms": 71.478
+        },
+        {
+          "calls": 60,
+          "max_ms": 14.86,
+          "mean_ms": 1.11491666666667,
+          "scope": "simulation.citizens",
+          "total_ms": 66.895
+        },
+        {
+          "calls": 180,
+          "max_ms": 20.424,
+          "mean_ms": 0.21885,
+          "scope": "view.grass",
+          "total_ms": 39.393
+        },
+        {
+          "calls": 180,
+          "max_ms": 6.212,
+          "mean_ms": 0.0887388888888889,
+          "scope": "audio_and_lighting",
+          "total_ms": 15.973
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.315,
+          "mean_ms": 0.185966666666667,
+          "scope": "simulation.economy",
+          "total_ms": 11.158
+        },
+        {
+          "calls": 180,
+          "max_ms": 7.904,
+          "mean_ms": 0.0487222222222222,
+          "scope": "view.visibility",
+          "total_ms": 8.77
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.198,
+          "mean_ms": 0.12705,
+          "scope": "simulation.plants",
+          "total_ms": 7.623
+        },
+        {
+          "calls": 180,
+          "max_ms": 1.562,
+          "mean_ms": 0.0284166666666667,
+          "scope": "fog",
+          "total_ms": 5.115
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.442,
+          "mean_ms": 0.0233333333333333,
+          "scope": "hover",
+          "total_ms": 4.2
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.051,
+          "mean_ms": 0.0195333333333333,
+          "scope": "streaming",
+          "total_ms": 3.516
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.066,
+          "mean_ms": 0.0193888888888889,
+          "scope": "camera",
+          "total_ms": 3.49
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.593,
+          "mean_ms": 0.0185166666666667,
+          "scope": "simulation.exploration",
+          "total_ms": 1.111
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.385,
+          "mean_ms": 0.0170833333333333,
+          "scope": "simulation.water",
+          "total_ms": 1.025
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.005,
+          "mean_ms": 0.00218333333333333,
+          "scope": "simulation.cleanup",
+          "total_ms": 0.131
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.001,
+          "mean_ms": 0.0003,
+          "scope": "autosave",
+          "total_ms": 0.054
+        }
+      ],
+      "draw_calls": 648.0,
+      "landscape": "easy",
+      "location": "(17.0, 0.0, 0.0)",
+      "measured_frames": {
+        "max_ms": 49.034,
+        "mean_ms": 16.8574388888889,
+        "p95_ms": 19.538
+      },
+      "rendered": true,
+      "viewport_gpu_ms": 4.60599994659424,
+      "wall_ms": 3034.339
+    },
+    {
+      "citizens": 3,
+      "cpu_scopes_inclusive": [
+        {
+          "calls": 180,
+          "max_ms": 6.269,
+          "mean_ms": 1.53582777777778,
+          "scope": "frame_cpu",
+          "total_ms": 276.449
+        },
+        {
+          "calls": 180,
+          "max_ms": 1.475,
+          "mean_ms": 0.544077777777778,
+          "scope": "world_view",
+          "total_ms": 97.934
+        },
+        {
+          "calls": 180,
+          "max_ms": 1.427,
+          "mean_ms": 0.520761111111111,
+          "scope": "view.animation",
+          "total_ms": 93.737
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.857,
+          "mean_ms": 0.407316666666667,
+          "scope": "hud",
+          "total_ms": 73.317
+        },
+        {
+          "calls": 180,
+          "max_ms": 5.073,
+          "mean_ms": 0.338094444444444,
+          "scope": "simulation",
+          "total_ms": 60.857
+        },
+        {
+          "calls": 60,
+          "max_ms": 1.42,
+          "mean_ms": 0.421033333333333,
+          "scope": "simulation.economy",
+          "total_ms": 25.262
+        },
+        {
+          "calls": 60,
+          "max_ms": 4.533,
+          "mean_ms": 0.391783333333333,
+          "scope": "simulation.citizens",
+          "total_ms": 23.507
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.325,
+          "mean_ms": 0.106227777777778,
+          "scope": "hover",
+          "total_ms": 19.121
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.11,
+          "mean_ms": 0.0506222222222222,
+          "scope": "audio_and_lighting",
+          "total_ms": 9.112
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.4,
+          "mean_ms": 0.151333333333333,
+          "scope": "simulation.plants",
+          "total_ms": 9.08
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.084,
+          "mean_ms": 0.0213111111111111,
+          "scope": "streaming",
+          "total_ms": 3.836
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.097,
+          "mean_ms": 0.01935,
+          "scope": "camera",
+          "total_ms": 3.483
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.126,
+          "mean_ms": 0.0182,
+          "scope": "fog",
+          "total_ms": 3.276
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.325,
+          "mean_ms": 0.01745,
+          "scope": "simulation.water",
+          "total_ms": 1.047
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.012,
+          "mean_ms": 0.00430555555555556,
+          "scope": "view.grass",
+          "total_ms": 0.775
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.005,
+          "mean_ms": 0.00241666666666667,
+          "scope": "view.visibility",
+          "total_ms": 0.435
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.015,
+          "mean_ms": 0.0057,
+          "scope": "simulation.exploration",
+          "total_ms": 0.342
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.005,
+          "mean_ms": 0.0021,
+          "scope": "simulation.cleanup",
+          "total_ms": 0.126
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.001,
+          "mean_ms": 0.000333333333333333,
+          "scope": "autosave",
+          "total_ms": 0.06
+        }
+      ],
+      "draw_calls": 491.0,
+      "landscape": "normal",
+      "location": "(0.0, 0.0, 0.0)",
+      "measured_frames": {
+        "max_ms": 33.96,
+        "mean_ms": 16.7649111111111,
+        "p95_ms": 17.673
+      },
+      "rendered": true,
+      "viewport_gpu_ms": 3.18400001525879,
+      "wall_ms": 3017.684
+    },
+    {
+      "citizens": 3,
+      "cpu_scopes_inclusive": [
+        {
+          "calls": 180,
+          "max_ms": 33.514,
+          "mean_ms": 1.77659444444444,
+          "scope": "frame_cpu",
+          "total_ms": 319.787
+        },
+        {
+          "calls": 180,
+          "max_ms": 3.21,
+          "mean_ms": 0.546305555555556,
+          "scope": "world_view",
+          "total_ms": 98.335
+        },
+        {
+          "calls": 180,
+          "max_ms": 32.45,
+          "mean_ms": 0.531305555555556,
+          "scope": "simulation",
+          "total_ms": 95.635
+        },
+        {
+          "calls": 180,
+          "max_ms": 3.18,
+          "mean_ms": 0.523505555555556,
+          "scope": "view.animation",
+          "total_ms": 94.231
+        },
+        {
+          "calls": 180,
+          "max_ms": 3.318,
+          "mean_ms": 0.430533333333333,
+          "scope": "hud",
+          "total_ms": 77.496
+        },
+        {
+          "calls": 60,
+          "max_ms": 31.984,
+          "mean_ms": 1.02591666666667,
+          "scope": "simulation.citizens",
+          "total_ms": 61.555
+        },
+        {
+          "calls": 180,
+          "max_ms": 1.478,
+          "mean_ms": 0.1391,
+          "scope": "hover",
+          "total_ms": 25.038
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.999,
+          "mean_ms": 0.3741,
+          "scope": "simulation.economy",
+          "total_ms": 22.446
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.124,
+          "mean_ms": 0.0501222222222222,
+          "scope": "audio_and_lighting",
+          "total_ms": 9.022
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.206,
+          "mean_ms": 0.13835,
+          "scope": "simulation.plants",
+          "total_ms": 8.301
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.577,
+          "mean_ms": 0.0233444444444444,
+          "scope": "streaming",
+          "total_ms": 4.202
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.094,
+          "mean_ms": 0.0182388888888889,
+          "scope": "camera",
+          "total_ms": 3.283
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.159,
+          "mean_ms": 0.0174166666666667,
+          "scope": "fog",
+          "total_ms": 3.135
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.345,
+          "mean_ms": 0.0172333333333333,
+          "scope": "simulation.water",
+          "total_ms": 1.034
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.011,
+          "mean_ms": 0.00426666666666667,
+          "scope": "view.grass",
+          "total_ms": 0.768
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.232,
+          "mean_ms": 0.0124166666666667,
+          "scope": "simulation.exploration",
+          "total_ms": 0.745
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.007,
+          "mean_ms": 0.00237777777777778,
+          "scope": "view.visibility",
+          "total_ms": 0.428
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.004,
+          "mean_ms": 0.00218333333333333,
+          "scope": "simulation.cleanup",
+          "total_ms": 0.131
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.001,
+          "mean_ms": 0.000283333333333333,
+          "scope": "autosave",
+          "total_ms": 0.051
+        }
+      ],
+      "draw_calls": 438.0,
+      "landscape": "normal",
+      "location": "(-18.0, 0.0, -12.0)",
+      "measured_frames": {
+        "max_ms": 50.452,
+        "mean_ms": 17.3268555555556,
+        "p95_ms": 23.205
+      },
+      "rendered": true,
+      "viewport_gpu_ms": 3.90199995040894,
+      "wall_ms": 3118.834
+    },
+    {
+      "citizens": 3,
+      "cpu_scopes_inclusive": [
+        {
+          "calls": 180,
+          "max_ms": 16.014,
+          "mean_ms": 1.90192222222222,
+          "scope": "frame_cpu",
+          "total_ms": 342.346
+        },
+        {
+          "calls": 180,
+          "max_ms": 12.792,
+          "mean_ms": 0.627527777777778,
+          "scope": "world_view",
+          "total_ms": 112.955
+        },
+        {
+          "calls": 180,
+          "max_ms": 14.946,
+          "mean_ms": 0.571961111111111,
+          "scope": "simulation",
+          "total_ms": 102.953
+        },
+        {
+          "calls": 180,
+          "max_ms": 1.37,
+          "mean_ms": 0.499738888888889,
+          "scope": "view.animation",
+          "total_ms": 89.953
+        },
+        {
+          "calls": 180,
+          "max_ms": 1.321,
+          "mean_ms": 0.403744444444444,
+          "scope": "hud",
+          "total_ms": 72.674
+        },
+        {
+          "calls": 60,
+          "max_ms": 14.398,
+          "mean_ms": 1.05733333333333,
+          "scope": "simulation.citizens",
+          "total_ms": 63.44
+        },
+        {
+          "calls": 180,
+          "max_ms": 1.025,
+          "mean_ms": 0.143394444444444,
+          "scope": "hover",
+          "total_ms": 25.811
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.536,
+          "mean_ms": 0.361183333333333,
+          "scope": "simulation.economy",
+          "total_ms": 21.671
+        },
+        {
+          "calls": 180,
+          "max_ms": 3.986,
+          "mean_ms": 0.0742111111111111,
+          "scope": "audio_and_lighting",
+          "total_ms": 13.358
+        },
+        {
+          "calls": 180,
+          "max_ms": 6.772,
+          "mean_ms": 0.0731222222222222,
+          "scope": "view.grass",
+          "total_ms": 13.162
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.777,
+          "mean_ms": 0.1486,
+          "scope": "simulation.plants",
+          "total_ms": 8.916
+        },
+        {
+          "calls": 180,
+          "max_ms": 5.471,
+          "mean_ms": 0.0373277777777778,
+          "scope": "view.visibility",
+          "total_ms": 6.719
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.87,
+          "mean_ms": 0.0240611111111111,
+          "scope": "fog",
+          "total_ms": 4.331
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.048,
+          "mean_ms": 0.0194222222222222,
+          "scope": "streaming",
+          "total_ms": 3.496
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.128,
+          "mean_ms": 0.0185166666666667,
+          "scope": "camera",
+          "total_ms": 3.333
+        },
+        {
+          "calls": 60,
+          "max_ms": 1.801,
+          "mean_ms": 0.0424,
+          "scope": "simulation.water",
+          "total_ms": 2.544
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.297,
+          "mean_ms": 0.0136666666666667,
+          "scope": "simulation.exploration",
+          "total_ms": 0.82
+        },
+        {
+          "calls": 60,
+          "max_ms": 0.005,
+          "mean_ms": 0.00213333333333333,
+          "scope": "simulation.cleanup",
+          "total_ms": 0.128
+        },
+        {
+          "calls": 180,
+          "max_ms": 0.001,
+          "mean_ms": 0.000355555555555556,
+          "scope": "autosave",
+          "total_ms": 0.064
+        }
+      ],
+      "draw_calls": 684.0,
+      "landscape": "normal",
+      "location": "(17.0, 0.0, 0.0)",
+      "measured_frames": {
+        "max_ms": 36.782,
+        "mean_ms": 16.7525555555556,
+        "p95_ms": 19.908
+      },
+      "rendered": true,
+      "viewport_gpu_ms": 4.7519998550415,
+      "wall_ms": 3015.46
+    }
+  ],
+  "scenery_before": [
+    {
+      "inventory_updates": {
+        "cpu_scopes_inclusive": [
+          {
+            "calls": 20,
+            "max_ms": 7.01,
+            "mean_ms": 5.1133,
+            "scope": "view.entities",
+            "total_ms": 102.266
+          },
+          {
+            "calls": 20,
+            "max_ms": 5.231,
+            "mean_ms": 2.3434,
+            "scope": "view.grass",
+            "total_ms": 46.868
+          },
+          {
+            "calls": 20,
+            "max_ms": 2.405,
+            "mean_ms": 0.51315,
+            "scope": "view.terrain",
+            "total_ms": 10.263
+          },
+          {
+            "calls": 20,
+            "max_ms": 0.651,
+            "mean_ms": 0.48045,
+            "scope": "view.animation",
+            "total_ms": 9.609
+          },
+          {
+            "calls": 20,
+            "max_ms": 0.382,
+            "mean_ms": 0.28645,
+            "scope": "view.visibility",
+            "total_ms": 5.729
+          },
+          {
+            "calls": 20,
+            "max_ms": 0.175,
+            "mean_ms": 0.1349,
+            "scope": "view.water",
+            "total_ms": 2.698
+          }
+        ]
+      },
+      "landscape": "easy",
+      "streaming": {
+        "cpu_scopes_inclusive": [
+          {
+            "calls": 3,
+            "max_ms": 100.194,
+            "mean_ms": 80.523,
+            "scope": "stream.view",
+            "total_ms": 241.569
+          },
+          {
+            "calls": 3,
+            "max_ms": 88.064,
+            "mean_ms": 58.4306666666667,
+            "scope": "view.terrain",
+            "total_ms": 175.292
+          },
+          {
+            "calls": 3,
+            "max_ms": 44.49,
+            "mean_ms": 32.316,
+            "scope": "stream.integrate",
+            "total_ms": 96.948
+          },
+          {
+            "calls": 3,
+            "max_ms": 20.866,
+            "mean_ms": 14.6593333333333,
+            "scope": "view.grass",
+            "total_ms": 43.978
+          },
+          {
+            "calls": 3,
+            "max_ms": 6.951,
+            "mean_ms": 6.19266666666667,
+            "scope": "view.entities",
+            "total_ms": 18.578
+          },
+          {
+            "calls": 3,
+            "max_ms": 2.397,
+            "mean_ms": 1.41833333333333,
+            "scope": "stream.generate",
+            "total_ms": 4.255
+          },
+          {
+            "calls": 3,
+            "max_ms": 0.694,
+            "mean_ms": 0.637333333333333,
+            "scope": "view.animation",
+            "total_ms": 1.912
+          },
+          {
+            "calls": 3,
+            "max_ms": 0.481,
+            "mean_ms": 0.368,
+            "scope": "view.visibility",
+            "total_ms": 1.104
+          },
+          {
+            "calls": 3,
+            "max_ms": 0.245,
+            "mean_ms": 0.193666666666667,
+            "scope": "view.water",
+            "total_ms": 0.581
+          }
+        ]
+      }
+    },
+    {
+      "inventory_updates": {
+        "cpu_scopes_inclusive": [
+          {
+            "calls": 20,
+            "max_ms": 6.502,
+            "mean_ms": 5.39535,
+            "scope": "view.entities",
+            "total_ms": 107.907
+          },
+          {
+            "calls": 20,
+            "max_ms": 1.422,
+            "mean_ms": 0.9253,
+            "scope": "view.grass",
+            "total_ms": 18.506
+          },
+          {
+            "calls": 20,
+            "max_ms": 0.706,
+            "mean_ms": 0.5376,
+            "scope": "view.water",
+            "total_ms": 10.752
+          },
+          {
+            "calls": 20,
+            "max_ms": 1.132,
+            "mean_ms": 0.5153,
+            "scope": "view.terrain",
+            "total_ms": 10.306
+          },
+          {
+            "calls": 20,
+            "max_ms": 0.539,
+            "mean_ms": 0.453,
+            "scope": "view.visibility",
+            "total_ms": 9.06
+          },
+          {
+            "calls": 20,
+            "max_ms": 0.909,
+            "mean_ms": 0.4063,
+            "scope": "view.animation",
+            "total_ms": 8.126
+          }
+        ]
+      },
+      "landscape": "normal",
+      "streaming": {
+        "cpu_scopes_inclusive": [
+          {
+            "calls": 3,
+            "max_ms": 69.272,
+            "mean_ms": 66.7666666666667,
+            "scope": "stream.view",
+            "total_ms": 200.3
+          },
+          {
+            "calls": 3,
+            "max_ms": 48.999,
+            "mean_ms": 48.3876666666667,
+            "scope": "view.terrain",
+            "total_ms": 145.163
+          },
+          {
+            "calls": 3,
+            "max_ms": 31.303,
+            "mean_ms": 26.5376666666667,
+            "scope": "stream.integrate",
+            "total_ms": 79.613
+          },
+          {
+            "calls": 3,
+            "max_ms": 11.845,
+            "mean_ms": 11.3246666666667,
+            "scope": "stream.generate",
+            "total_ms": 33.974
+          },
+          {
+            "calls": 3,
+            "max_ms": 11.529,
+            "mean_ms": 10.9266666666667,
+            "scope": "view.entities",
+            "total_ms": 32.78
+          },
+          {
+            "calls": 3,
+            "max_ms": 9.308,
+            "mean_ms": 5.121,
+            "scope": "view.grass",
+            "total_ms": 15.363
+          },
+          {
+            "calls": 3,
+            "max_ms": 0.995,
+            "mean_ms": 0.889,
+            "scope": "view.water",
+            "total_ms": 2.667
+          },
+          {
+            "calls": 3,
+            "max_ms": 1.394,
+            "mean_ms": 0.815,
+            "scope": "view.animation",
+            "total_ms": 2.445
+          },
+          {
+            "calls": 3,
+            "max_ms": 0.733,
+            "mean_ms": 0.588666666666667,
+            "scope": "view.visibility",
+            "total_ms": 1.766
+          }
+        ]
+      }
+    }
+  ],
+  "scenery_after": [
+    {
+      "inventory_updates": {
+        "cpu_scopes_inclusive": [
+          {
+            "calls": 20,
+            "max_ms": 16.368,
+            "mean_ms": 5.87625,
+            "scope": "view.entities",
+            "total_ms": 117.525
+          },
+          {
+            "calls": 20,
+            "max_ms": 1.907,
+            "mean_ms": 0.44585,
+            "scope": "view.animation",
+            "total_ms": 8.917
+          },
+          {
+            "calls": 20,
+            "max_ms": 0.697,
+            "mean_ms": 0.34495,
+            "scope": "view.visibility",
+            "total_ms": 6.899
+          },
+          {
+            "calls": 20,
+            "max_ms": 0.373,
+            "mean_ms": 0.16455,
+            "scope": "view.water",
+            "total_ms": 3.291
+          },
+          {
+            "calls": 20,
+            "max_ms": 0.065,
+            "mean_ms": 0.03385,
+            "scope": "view.grass",
+            "total_ms": 0.677
+          },
+          {
+            "calls": 20,
+            "max_ms": 0.006,
+            "mean_ms": 0.0019,
+            "scope": "view.terrain",
+            "total_ms": 0.038
+          }
+        ]
+      },
+      "landscape": "easy",
+      "streaming": {
+        "cpu_scopes_inclusive": [
+          {
+            "calls": 3,
+            "max_ms": 39.585,
+            "mean_ms": 25.8336666666667,
+            "scope": "stream.integrate",
+            "total_ms": 77.501
+          },
+          {
+            "calls": 3,
+            "max_ms": 32.795,
+            "mean_ms": 23.8566666666667,
+            "scope": "stream.view",
+            "total_ms": 71.57
+          },
+          {
+            "calls": 3,
+            "max_ms": 18.7,
+            "mean_ms": 12.3336666666667,
+            "scope": "view.grass",
+            "total_ms": 37.001
+          },
+          {
+            "calls": 3,
+            "max_ms": 18.102,
+            "mean_ms": 6.61966666666667,
+            "scope": "stream.generate",
+            "total_ms": 19.859
+          },
+          {
+            "calls": 3,
+            "max_ms": 7.764,
+            "mean_ms": 5.34933333333333,
+            "scope": "view.terrain",
+            "total_ms": 16.048
+          },
+          {
+            "calls": 3,
+            "max_ms": 5.35,
+            "mean_ms": 5.284,
+            "scope": "view.entities",
+            "total_ms": 15.852
+          },
+          {
+            "calls": 3,
+            "max_ms": 0.382,
+            "mean_ms": 0.347333333333333,
+            "scope": "view.animation",
+            "total_ms": 1.042
+          },
+          {
+            "calls": 3,
+            "max_ms": 0.382,
+            "mean_ms": 0.305,
+            "scope": "view.visibility",
+            "total_ms": 0.915
+          },
+          {
+            "calls": 3,
+            "max_ms": 0.277,
+            "mean_ms": 0.199333333333333,
+            "scope": "view.water",
+            "total_ms": 0.598
+          }
+        ]
+      }
+    },
+    {
+      "inventory_updates": {
+        "cpu_scopes_inclusive": [
+          {
+            "calls": 20,
+            "max_ms": 10.995,
+            "mean_ms": 6.23545,
+            "scope": "view.entities",
+            "total_ms": 124.709
+          },
+          {
+            "calls": 20,
+            "max_ms": 12.122,
+            "mean_ms": 1.1129,
+            "scope": "view.visibility",
+            "total_ms": 22.258
+          },
+          {
+            "calls": 20,
+            "max_ms": 5.815,
+            "mean_ms": 0.8883,
+            "scope": "view.water",
+            "total_ms": 17.766
+          },
+          {
+            "calls": 20,
+            "max_ms": 0.512,
+            "mean_ms": 0.37395,
+            "scope": "view.animation",
+            "total_ms": 7.479
+          },
+          {
+            "calls": 20,
+            "max_ms": 0.103,
+            "mean_ms": 0.03375,
+            "scope": "view.grass",
+            "total_ms": 0.675
+          },
+          {
+            "calls": 20,
+            "max_ms": 0.003,
+            "mean_ms": 0.00175,
+            "scope": "view.terrain",
+            "total_ms": 0.035
+          }
+        ]
+      },
+      "landscape": "normal",
+      "streaming": {
+        "cpu_scopes_inclusive": [
+          {
+            "calls": 3,
+            "max_ms": 27.636,
+            "mean_ms": 24.1003333333333,
+            "scope": "stream.view",
+            "total_ms": 72.301
+          },
+          {
+            "calls": 3,
+            "max_ms": 17.83,
+            "mean_ms": 15.9653333333333,
+            "scope": "stream.integrate",
+            "total_ms": 47.896
+          },
+          {
+            "calls": 3,
+            "max_ms": 11.631,
+            "mean_ms": 11.1246666666667,
+            "scope": "stream.generate",
+            "total_ms": 33.374
+          },
+          {
+            "calls": 3,
+            "max_ms": 13.798,
+            "mean_ms": 10.944,
+            "scope": "view.entities",
+            "total_ms": 32.832
+          },
+          {
+            "calls": 3,
+            "max_ms": 10.76,
+            "mean_ms": 8.24266666666667,
+            "scope": "view.terrain",
+            "total_ms": 24.728
+          },
+          {
+            "calls": 3,
+            "max_ms": 4.388,
+            "mean_ms": 3.04233333333333,
+            "scope": "view.grass",
+            "total_ms": 9.127
+          },
+          {
+            "calls": 3,
+            "max_ms": 0.852,
+            "mean_ms": 0.827333333333333,
+            "scope": "view.water",
+            "total_ms": 2.482
+          },
+          {
+            "calls": 3,
+            "max_ms": 0.55,
+            "mean_ms": 0.533,
+            "scope": "view.visibility",
+            "total_ms": 1.599
+          },
+          {
+            "calls": 3,
+            "max_ms": 0.577,
+            "mean_ms": 0.478666666666667,
+            "scope": "view.animation",
+            "total_ms": 1.436
+          }
+        ]
+      }
+    }
+  ],
+  "notes": "Godot 4.7.1, seed 1409, 3 citizens. Frame benchmark uses fixed 1/60 simulation input; measured_frames and wall_ms measure actual elapsed time. Streaming is disabled in frame benchmark and measured separately by scenery benchmark. CPU scopes are inclusive. Runs vary with system load; GPU values are last-frame samples, not averages."
+}

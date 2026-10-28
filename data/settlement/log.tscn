@@ -1,0 +1,50 @@
+[gd_scene format=3]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_lmh4x"]
+albedo_color = Color(0.45490196, 0.31764707, 0.24313726, 1)
+roughness = 0.92
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_6x3ta"]
+top_radius = 0.115
+bottom_radius = 0.115
+height = 0.9
+radial_segments = 8
+rings = 1
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_0dg5q"]
+albedo_color = Color(0.73333335, 0.5686275, 0.4, 1)
+roughness = 0.92
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_wbhn3"]
+top_radius = 0.084
+bottom_radius = 0.084
+height = 0.012
+radial_segments = 8
+rings = 1
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_nvsn6"]
+top_radius = 0.084
+bottom_radius = 0.084
+height = 0.012
+radial_segments = 8
+rings = 1
+
+[node name="Log" type="Node3D" unique_id=2081398830]
+
+[node name="Bark" type="MeshInstance3D" parent="." unique_id=1870268005]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 0, 0.12, 0)
+material_override = SubResource("StandardMaterial3D_lmh4x")
+mesh = SubResource("CylinderMesh_6x3ta")
+
+[node name="CutEnd" type="MeshInstance3D" parent="." unique_id=821344149]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, -0.453, 0.12, 0)
+material_override = SubResource("StandardMaterial3D_0dg5q")
+mesh = SubResource("CylinderMesh_wbhn3")
+
+[node name="@MeshInstance3D@149" type="MeshInstance3D" parent="." unique_id=826075195]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 0.453, 0.12, 0)
+material_override = SubResource("StandardMaterial3D_0dg5q")
+mesh = SubResource("CylinderMesh_nvsn6")
+
+[node name="AccessFront" type="Marker3D" parent="." unique_id=387575146]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.95)

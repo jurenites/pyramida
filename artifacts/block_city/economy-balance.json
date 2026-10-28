@@ -1,0 +1,138 @@
+[
+	{
+		"build_months": 12,
+		"capital": 454.8,
+		"cash_after_12_more_months": 722.0,
+		"income": 105.0,
+		"phases": [
+			{
+				"cash": 32.5,
+				"floors": 1,
+				"month": 1,
+				"residents": 8,
+				"surplus": 17.3
+			},
+			{
+				"cash": 38.6,
+				"floors": 2,
+				"month": 8,
+				"residents": 16,
+				"surplus": 35.9
+			},
+			{
+				"cash": 68.0,
+				"floors": 3,
+				"month": 12,
+				"residents": 24,
+				"surplus": 54.5
+			}
+		],
+		"pipe_length": 12.4,
+		"residents": 24,
+		"style": "aligned",
+		"surplus": 54.5,
+		"upkeep": 50.5
+	},
+	{
+		"build_months": 15,
+		"capital": 498.0,
+		"cash_after_12_more_months": 680.3,
+		"income": 104.0,
+		"phases": [
+			{
+				"cash": 32.5,
+				"floors": 1,
+				"month": 1,
+				"residents": 8,
+				"surplus": 17.3
+			},
+			{
+				"cash": 45.1,
+				"floors": 2,
+				"month": 10,
+				"residents": 16,
+				"surplus": 33.4
+			},
+			{
+				"cash": 75.5,
+				"floors": 3,
+				"month": 15,
+				"residents": 24,
+				"surplus": 50.4
+			}
+		],
+		"pipe_length": 28.1,
+		"residents": 24,
+		"style": "wandering",
+		"surplus": 50.4,
+		"upkeep": 53.6
+	},
+	{
+		"build_months": 17,
+		"capital": 462.0,
+		"cash_after_12_more_months": 525.1,
+		"income": 80.0,
+		"phases": [
+			{
+				"cash": 40.5,
+				"floors": 1,
+				"month": 1,
+				"residents": 6,
+				"surplus": 13.3
+			},
+			{
+				"cash": 36.5,
+				"floors": 2,
+				"month": 11,
+				"residents": 12,
+				"surplus": 25.4
+			},
+			{
+				"cash": 64.3,
+				"floors": 3,
+				"month": 17,
+				"residents": 18,
+				"surplus": 38.4
+			}
+		],
+		"pipe_length": 28.1,
+		"residents": 18,
+		"style": "gardener",
+		"surplus": 38.4,
+		"upkeep": 41.6
+	},
+	{
+		"build_months": 3,
+		"capital": 454.8,
+		"cash_after_12_more_months": 150.0,
+		"income": 105.0,
+		"phases": [
+			{
+				"cash": 150.0,
+				"floors": 1,
+				"month": 1,
+				"residents": 8,
+				"surplus": 17.3
+			},
+			{
+				"cash": 150.0,
+				"floors": 2,
+				"month": 2,
+				"residents": 16,
+				"surplus": 35.9
+			},
+			{
+				"cash": 150.0,
+				"floors": 3,
+				"month": 3,
+				"residents": 24,
+				"surplus": 54.5
+			}
+		],
+		"pipe_length": 12.4,
+		"residents": 24,
+		"style": "creative",
+		"surplus": 54.5,
+		"upkeep": 50.5
+	}
+]

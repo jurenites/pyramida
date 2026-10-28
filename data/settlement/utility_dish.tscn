@@ -1,0 +1,43 @@
+[gd_scene format=3]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_cb18s"]
+albedo_color = Color(0.5058824, 0.47058824, 0.4117647, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_5rk0j"]
+size = Vector3(0.035, 0.3, 0.04)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_4ncme"]
+albedo_color = Color(0.9098039, 0.8745098, 0.78039217, 1)
+
+[sub_resource type="SphereMesh" id="SphereMesh_o8glk"]
+radius = 0.19
+height = 0.38
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_w7567"]
+albedo_color = Color(0.5058824, 0.47058824, 0.4117647, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_br7o6"]
+size = Vector3(0.025, 0.025, 0.2)
+
+[node name="UtilityDish" type="Node3D" unique_id=1808459334]
+
+[node name="@Node3D@9" type="Node3D" parent="." unique_id=1762379210]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.32, -0.48)
+
+[node name="@MeshInstance3D@10" type="MeshInstance3D" parent="@Node3D@9" unique_id=1265191802]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, 0.58)
+material_override = SubResource("StandardMaterial3D_cb18s")
+mesh = SubResource("BoxMesh_5rk0j")
+
+[node name="@MeshInstance3D@11" type="MeshInstance3D" parent="@Node3D@9" unique_id=137275710]
+transform = Transform3D(1, 0, 0, 0, 0.9393727, 0.075437516, 0, -0.3428978, 0.206662, 0, 0.08, 0.64)
+material_override = SubResource("StandardMaterial3D_4ncme")
+mesh = SubResource("SphereMesh_o8glk")
+
+[node name="@MeshInstance3D@12" type="MeshInstance3D" parent="@Node3D@9" unique_id=1326695560]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.04, 0.75)
+material_override = SubResource("StandardMaterial3D_w7567")
+mesh = SubResource("BoxMesh_br7o6")
+
+[node name="Port1" type="Marker3D" parent="." unique_id=542957826]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.32, 0)

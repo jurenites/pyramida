@@ -1,0 +1,35 @@
+[gd_scene format=3]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_aaije"]
+albedo_color = Color(0.7254902, 0.5294118, 0.32941177, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ce4ko"]
+size = Vector3(0.7, 0.055, 0.22)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_8odv2"]
+albedo_color = Color(0.7254902, 0.5294118, 0.32941177, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_5n36r"]
+size = Vector3(0.7, 0.055, 0.22)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_t1i54"]
+albedo_color = Color(0.7254902, 0.5294118, 0.32941177, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_a8k2r"]
+size = Vector3(0.7, 0.055, 0.22)
+
+[node name="SawnPlanks" type="Node3D" unique_id=553263363]
+
+[node name="Plank0" type="MeshInstance3D" parent="." unique_id=608022955]
+material_override = SubResource("StandardMaterial3D_aaije")
+mesh = SubResource("BoxMesh_ce4ko")
+
+[node name="Plank1" type="MeshInstance3D" parent="." unique_id=760231688]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.065, 0)
+material_override = SubResource("StandardMaterial3D_8odv2")
+mesh = SubResource("BoxMesh_5n36r")
+
+[node name="Plank2" type="MeshInstance3D" parent="." unique_id=1812196248]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.13, 0)
+material_override = SubResource("StandardMaterial3D_t1i54")
+mesh = SubResource("BoxMesh_a8k2r")

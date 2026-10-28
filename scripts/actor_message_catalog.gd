@@ -14,9 +14,13 @@ const NEED_WATER := "need_water"
 const NEED_FOOD := "need_food"
 const NEED_COOL_AIR := "need_cool_air"
 const NEED_FRESH_AIR := "need_fresh_air"
+const DOOR_BLOCKED := "door_blocked"
+const NEED_ELECTRICITY := "need_electricity"
 const UTILITY_DISCONNECTED := "utility_disconnected"
 
 const DEFINITIONS := {
+	DOOR_BLOCKED: {"icon": "door_blocked", "priority": 82, "initial_delay": 2.0, "display_seconds": 4.0, "time_to_live": 12.0, "repeat_seconds": 24.0, "maximum_repeat_seconds": 64.0, "clusterable": true},
+	NEED_ELECTRICITY: {"icon": "electricity", "priority": 60, "initial_delay": 2.0, "display_seconds": 4.0, "time_to_live": 12.0, "repeat_seconds": 24.0, "maximum_repeat_seconds": 64.0, "clusterable": true},
 	CONFIRM_LOG: {
 		"icon": "log",
 		"short_text": "",
@@ -79,7 +83,7 @@ const DEFINITIONS := {
 		"initial_delay": 2.0,
 		"display_seconds": 4.0,
 		"time_to_live": 12.0,
-		"repeat_seconds": 8.0,
+		"repeat_seconds": 24.0,
 		"maximum_repeat_seconds": 64.0,
 		"clusterable": true,
 	},
@@ -90,7 +94,7 @@ const DEFINITIONS := {
 		"initial_delay": 2.0,
 		"display_seconds": 4.0,
 		"time_to_live": 12.0,
-		"repeat_seconds": 8.0,
+		"repeat_seconds": 24.0,
 		"maximum_repeat_seconds": 64.0,
 		"clusterable": true,
 	},
@@ -101,7 +105,7 @@ const DEFINITIONS := {
 		"initial_delay": 2.0,
 		"display_seconds": 4.0,
 		"time_to_live": 12.0,
-		"repeat_seconds": 8.0,
+		"repeat_seconds": 24.0,
 		"maximum_repeat_seconds": 64.0,
 		"clusterable": true,
 	},
@@ -112,7 +116,7 @@ const DEFINITIONS := {
 		"initial_delay": 2.0,
 		"display_seconds": 4.0,
 		"time_to_live": 12.0,
-		"repeat_seconds": 8.0,
+		"repeat_seconds": 24.0,
 		"maximum_repeat_seconds": 64.0,
 		"clusterable": true,
 	},
@@ -123,7 +127,7 @@ const DEFINITIONS := {
 		"initial_delay": 2.0,
 		"display_seconds": 4.0,
 		"time_to_live": 12.0,
-		"repeat_seconds": 8.0,
+		"repeat_seconds": 24.0,
 		"maximum_repeat_seconds": 64.0,
 		"clusterable": true,
 	},

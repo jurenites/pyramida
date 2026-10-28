@@ -78,7 +78,10 @@ static func habitat_noise_fixed(
 	var safe_cell_size := maxi(1, cell_size)
 	var lattice_x := floori(float(x_coordinate) / float(safe_cell_size))
 	var lattice_z := floori(float(z_coordinate) / float(safe_cell_size))
+	# Truncation is part of the saved world's fixed-point noise contract.
+	@warning_ignore("integer_division")
 	var local_x: int = ((x_coordinate - lattice_x * safe_cell_size) * WORLD_FIXED_SCALE) / safe_cell_size
+	@warning_ignore("integer_division")
 	var local_z: int = ((z_coordinate - lattice_z * safe_cell_size) * WORLD_FIXED_SCALE) / safe_cell_size
 	var smooth_x: int = _smoothstep_fixed(local_x)
 	var smooth_z: int = _smoothstep_fixed(local_z)
@@ -94,6 +97,8 @@ static func habitat_noise_fixed(
 
 
 static func _smoothstep_fixed(value: int) -> int:
+	# Keep the interpolation integral, including its final truncation.
+	@warning_ignore("integer_division")
 	return (
 		value * value * (3 * WORLD_FIXED_SCALE - 2 * value)
 		/ (WORLD_FIXED_SCALE * WORLD_FIXED_SCALE)
@@ -101,6 +106,7 @@ static func _smoothstep_fixed(value: int) -> int:
 
 
 static func _lerp_fixed(from_value: int, to_value: int, weight: int) -> int:
+	@warning_ignore("integer_division")
 	return from_value + ((to_value - from_value) * weight) / WORLD_FIXED_SCALE
 
 
