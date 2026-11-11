@@ -34,6 +34,7 @@ static func complete(world, plan: Dictionary) -> void:
 		"seed_vegetables", "seed_grass":
 			world.construction_materials[cell] = {}
 			world.gardens[cell] = {"species": "grass" if plan.kind == "seed_grass" else "vegetables", "water": 0, "growth": 0.0, "food": 0, "reserved": -1}
+			if plan.kind == "seed_grass": world.gardens[cell].first_growth = true
 
 static func grow(plant: Dictionary, delta: float, tree: bool) -> bool:
 	var growth := float(plant.get("seed_growth", 1.0))

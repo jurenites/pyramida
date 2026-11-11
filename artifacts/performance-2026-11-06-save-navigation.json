@@ -1,0 +1,47 @@
+{
+  "date": "2026-11-06",
+  "engine": "Godot 4.7.1",
+  "workload": "Read-only slot_3 replay, 400 ticks at 0.05 simulation seconds; sequential headless runs",
+  "comparison": "Preserved navigation.gd versus current navigation, all other code identical",
+  "before": {
+    "max_ms": 190.423,
+    "p95_ms": 17.1,
+    "total_ms": 1441.089,
+    "expanded": 6671,
+    "searches": 12,
+    "state_sha256": "a4b1a970c2a5f46e53d22dc5e63f51db1639e0e429f44d6d52061f7d48a5416a",
+    "navigation_search_calls": 43,
+    "navigation_search_total_ms": 221.714
+  },
+  "after": {
+    "max_ms": 26.231,
+    "p95_ms": 2.412,
+    "total_ms": 723.754,
+    "expanded": 962,
+    "searches": 1,
+    "state_sha256": "a4b1a970c2a5f46e53d22dc5e63f51db1639e0e429f44d6d52061f7d48a5416a",
+    "navigation_search_calls": 15,
+    "navigation_search_total_ms": 32.863
+  },
+  "saves": [
+    {
+      "backup": false,
+      "capture_ms": 72.005,
+      "total_ms": 294.514,
+      "frames_while_saving": 25,
+      "success": true
+    },
+    {
+      "backup": true,
+      "capture_ms": 54.492,
+      "total_ms": 589.679,
+      "frames_while_saving": 66,
+      "success": true
+    }
+  ],
+  "limitations": [
+    "Single development-machine runs; not rendered frame timings",
+    "Snapshot capture remains main-thread work",
+    "Long uncached path searches and real topology rebuilds remain synchronous"
+  ]
+}

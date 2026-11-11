@@ -4,6 +4,8 @@ extends RefCounted
 const Grid = preload("res://scripts/settlement/world_grid.gd")
 const OFFSETS := [Vector2(-0.5, -0.5), Vector2(0.5, -0.5), Vector2(0.5, 0.5), Vector2(-0.5, 0.5), Vector2.ZERO]
 const MAX_RELIEF := 0.44
+const SAND_RAIN_HOLLOW_FRACTION := 0.25
+const Random = preload("res://scripts/deterministic_random.gd")
 
 static func noise(seed_: int) -> FastNoiseLite:
 	var result := FastNoiseLite.new()
@@ -17,12 +19,16 @@ static func sample_key(cell: Vector3i, offset: Vector2) -> Vector3i:
 	return Vector3i(cell.x * 2 + roundi(offset.x * 2), cell.y, cell.z * 2 + roundi(offset.y * 2))
 
 static func shape(world, cell: Vector3i, base: Array = []) -> Array:
+	if preload("res://scripts/settlement/solid_islands.gd").enabled(world):
+		var h: Array=world.terrain_shapes.get(cell,[float(cell.y),float(cell.y),float(cell.y),float(cell.y)])
+		return h.duplicate() if h.size()==5 else [h[0],h[1],h[2],h[3],(h[0]+h[2])*0.5]
 	if world.surface_edits.has(Vector2i(cell.x, cell.z)):
 		return [float(cell.y), float(cell.y), float(cell.y), float(cell.y)]
 	if base.is_empty():
 		var h := cell.y * Grid.LEVEL_HEIGHT
 		base = world.terrain_shapes.get(cell, [h, h, h, h])
 	if not world.soil_enabled or cell.y > 0: return base
+	if world.difficulty=="easy" and world.generator_version>=6 and preload("res://scripts/settlement/archipelago_landscape.gd").shore_distance(Vector2(cell.x,cell.z),world.world_seed)>-2.0: return [base[0],base[1],base[2],base[3],(base[0]+base[2])*0.5]
 	if world.soil_noise == null: world.soil_noise = noise(world.world_seed)
 	var result: Array = []
 	for index in 5:
@@ -51,6 +57,7 @@ static func walking_shapes(world) -> Dictionary:
 	return world.soil_shapes if world.soil_enabled else world.terrain_shapes
 
 static func add_hollows(world, cells: Dictionary) -> void:
+	if world.roof_rain.primary: return
 	if not world.soil_enabled: return
 	for cell: Vector3i in cells:
 		if cell.y != 0 or world.terrain_shapes.has(cell) or world.water_sources.has(cell): continue
@@ -59,13 +66,16 @@ static func add_hollows(world, cells: Dictionary) -> void:
 		if maxi(absi(cell.x), absi(cell.z)) < 14: continue
 		var h: Array = world.soil_shapes[cell]
 		if h[4] + 0.012 >= minf(minf(h[0], h[1]), minf(h[2], h[3])): continue
+		# Sand keeps one quarter of natural rain catchments, deterministically
+		# across initial generation and streamed chunks. Existing sources stay intact.
+		if world.difficulty == "normal" and Random.world_fraction(cell.x, cell.z, world.world_seed, 7921) >= SAND_RAIN_HOLLOW_FRACTION: continue
 		var inventory = world.Inventory.new()
 		inventory.capacity = 3
 		world.water_sources[cell] = {"kind": "puddle", "inventory": inventory, "regrowth": 0.0}
 		world.soil_shapes[cell] = shape(world, cell)
 
 static func prepare(world, plan: Dictionary) -> void:
-	if not world.soil_enabled or plan.kind in world.Catalog.SEEDS or plan.kind == "berry" or plan.get("deconstruction", false): return
+	if not world.soil_enabled or plan.kind in world.Catalog.SEEDS or plan.kind in ["berry", "hay_field"] or plan.get("deconstruction", false): return
 	var centre: Vector3i = plan.cell
 	if plan.kind == "platform": centre.y -= int(plan.get("platform_tier", 1))
 	var changed := false

@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/settlement/citizen_gait.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+stride_length = 1.35
+poses = PackedVector3Array(0, 0.52, -0.12, 0.15, 0.22, -0.28, 0.4, -0.5, -0.06, 0.51, -0.42, -0.85, 0.65, 1.4, -1.9, 0.74, 1.82, -1.65, 0.81, 1.76, -1.6, 0.9, 1.1, -0.8, 1, 0.52, -0.12)
+arm_swing = 0.5
+elbow_bend = 0.75
+sway = 0.045

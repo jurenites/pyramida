@@ -5,8 +5,39 @@ const Labour = preload("res://scripts/applied_labour.gd")
 static func is_salvage(plan: Dictionary) -> bool:
 	return plan.get("deconstruction", false) and plan.get("relocation", {}).get("stage") == "salvage"
 
+static func drop_cargo(world, worker: Dictionary) -> void:
+	if worker.cargo.is_empty(): return
+	# Loose goods use the existing visible, saveable salvage inventory. They do
+	# not occupy a building footprint or require storage before another order.
+	var owner: int = worker.get("relocation_cargo", -1)
+	var pile := {}
+	for plan: Dictionary in world.plans.values():
+		if plan.get("dropped_cargo", false) and plan.cell == worker.cell and int(plan.get("parts_owner", -1)) == owner:
+			pile = plan
+			break
+	if pile.is_empty():
+		var id: int = world.next_plan_id
+		world.next_plan_id += 1
+		pile = {"id": id, "kind": "stockpile", "cell": worker.cell, "direction": 0,
+			"installed": 0, "required": 0, "reserved": 0, "materials": {}, "used": {}, "claims": {},
+			"deconstruction": true, "dropped_cargo": true,
+			"relocation": {"source": worker.cell, "pickup_cell": worker.cell, "stage": "salvage",
+				"parts": world.Inventory.new(), "payload": {}, "owner": -1, "labour": Labour.new(0.6)}}
+		if owner != -1: pile.parts_owner = owner
+		world.plans[id] = pile
+	var amount: int = worker.get("cargo_amount", 1)
+	pile.relocation.parts.capacity = maxi(pile.relocation.parts.capacity, pile.relocation.parts.total() + amount)
+	pile.relocation.parts.store(worker.cargo, amount)
+	world.discover_resource(worker.cargo)
+	worker.cargo = ""
+	worker.cargo_amount = 1
+	worker.erase("relocation_cargo")
+	world.revision += 1
+
 static func request(world, cell: Vector3i) -> bool:
 	var kind: String = world.Relocation.kind_at(world, cell)
+	if world.RopeBridges.supports_bridge(world, cell, kind):
+		world.last_message = "Move or remove the attached bridge first"; return false
 	if kind not in world.Catalog.COSTS:
 		return false
 	if kind == "house": return world.Houses.remove(world, cell)
@@ -35,6 +66,7 @@ static func unpack(world, plan: Dictionary) -> void:
 	world.revision += 1
 
 static func assign_salvage(world, worker: Dictionary, plan: Dictionary) -> bool:
+	if plan.has("parts_owner"): return false
 	var move: Dictionary = plan.relocation
 	var route: Array[Vector3i] = world.navigation.route(worker.cell, move.pickup_cell)
 	if route.is_empty(): return false
@@ -58,4 +90,6 @@ static func cleanup(world) -> void:
 		world.plans.erase(id)
 		for worker: Dictionary in world.workers:
 			if worker.get("assigned_plan_id", -1) == id: worker.assigned_plan_id = -1
-		world.rebuild_navigation()
+		# The structure was removed when dismantling completed. Empty salvage
+		# is only an inventory/visual change, not a change to walkable surfaces.
+		world.revision += 1

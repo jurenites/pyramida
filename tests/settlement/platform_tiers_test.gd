@@ -21,6 +21,19 @@ func _initialize() -> void:
 	assert(world.navigation.surfaces.has(lower))
 	assert(world.snap_cell("platform", "platform", lower) == upper)
 	assert(world.request_build("platform", upper), world.last_message)
+	var merge_plan: Dictionary = world.plans[world.next_plan_id - 1]
+	assert(world.navigation.walkable(lower))
+	var worker: Dictionary = world.workers[0]
+	var previous_cell: Vector3i = worker.cell
+	worker.cell = lower
+	assert(not world.Planning.ready(world, merge_plan))
+	worker.cell = previous_cell
+	worker.route = [previous_cell, lower]
+	worker.route_index = 1
+	assert(not world.Planning.ready(world, merge_plan))
+	worker.route = []
+	worker.route_index = 0
+	assert(world.Planning.ready(world, merge_plan))
 	world._complete_plan(world.plans[world.next_plan_id - 1])
 	assert(not world.platforms.has(lower) and world.platforms[upper] == 2)
 	assert(not world.navigation.surfaces.has(lower) and world.navigation.surfaces.has(upper))

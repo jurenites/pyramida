@@ -4,29 +4,31 @@ const DEFAULT_PROFILE = preload("res://data/settlement/nature_profile.tres")
 const Illustration = preload("res://scripts/settlement/illustration_style.gd")
 const Timber = preload("res://scripts/settlement/timber_kit.gd")
 const STUMP := 0.18
-const LOG_LENGTH := 0.88
-const BARK := Color("986a4b")
-const CUT := Color("d1a775")
+const TimberPalette = preload("res://scripts/settlement/timber_palette.gd")
+const LOG_LENGTH := Timber.LOG_LENGTH
+const BARK: Color = TimberPalette.BARK[0]
+const CUT: Color = TimberPalette.WOOD[0]
 const LEAVES := Color("7e985b")
 static var materials: Dictionary = {}
+static var crown_mesh: SphereMesh
 
 static func skeleton(seed_value: int, palm: bool, profile: Resource = DEFAULT_PROFILE) -> PackedVector3Array:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = seed_value
-	var height := LOG_LENGTH * rng.randf_range(1.0 - profile.height_variation, 1.0 + profile.height_variation)
 	var lean := deg_to_rad(clampf(profile.palm_lean if palm else profile.trunk_lean, 0, 40))
 	var bend := deg_to_rad(clampf(profile.joint_bend, 0, 25))
 	var heading := rng.randf_range(0, TAU)
 	var direction := Vector3.UP
 	var points := PackedVector3Array([Vector3(0, STUMP, 0)])
-	# Two connected pieces per log give the trunk a gentle changing direction.
-	for index in 6:
+	# Bend only between full stock lengths. Retain midpoint joints for branches.
+	for index in 3:
 		heading += rng.randf_range(-0.65, 0.65)
 		var angle := rng.randf_range(lean * 0.3, lean)
 		var target := Vector3(sin(angle) * cos(heading), cos(angle), sin(angle) * sin(heading))
 		var turn := direction.angle_to(target)
 		direction = direction.slerp(target, minf(1, bend / maxf(turn, 0.00001))).normalized()
-		points.append(points[-1] + direction * height * 0.5)
+		points.append(points[-1] + direction * LOG_LENGTH * 0.5)
+		points.append(points[-1] + direction * LOG_LENGTH * 0.5)
 	return points
 
 static func populate(root: Node3D, kind: String, seed_value: int, profile: Resource = DEFAULT_PROFILE) -> void:
@@ -38,21 +40,14 @@ static func populate(root: Node3D, kind: String, seed_value: int, profile: Resou
 	var rng := RandomNumberGenerator.new()
 	rng.seed = seed_value + 79
 	var points := skeleton(seed_value, palm, profile)
-	var radius := rng.randf_range(0.15, 0.21) * 0.75 if palm else Timber.LOG_DIAMETER * 0.5 * rng.randf_range(0.97, 1.03)
-	var trunk_taper := 0.16 if palm else 0.02
-	var bark := BARK.darkened(0.12) if dead else BARK
+	var radius := Timber.LOG_DIAMETER * 0.5
+	var bark := BARK
 	root.set_meta("nature_skeleton", points)
 	root.set_meta("nature_seed", seed_value)
 	tube(root, "Stump", PackedVector3Array([Vector3(0, -0.04, 0), points[0]]), radius, radius, bark)
 	cut(root, "StumpCut", points[0], radius)
 	for index in 3:
-		var segment := Node3D.new()
-		segment.name = "Segment%d" % (index + 1)
-		root.add_child(segment)
-		var bottom := radius * (1.0 - index * trunk_taper)
-		var top := radius * (1.0 - (index + 1) * trunk_taper)
-		tube(segment, "Trunk", points.slice(index * 2, index * 2 + 3), bottom, top, bark)
-		cut(segment, "CutFace", points[index * 2 + 2], top)
+		var segment := Timber.tree_segment(root, index, points[index * 2], points[index * 2 + 2] - points[index * 2])
 		if index == 1 and not palm:
 			branch(segment, "BrokenBranch", points[3], points[3] + Vector3(-0.24, 0.23, 0.12), 0.075, 0.035, bark)
 		if index != 2: continue
@@ -70,7 +65,7 @@ static func populate(root: Node3D, kind: String, seed_value: int, profile: Resou
 				var angle := deg_to_rad(rng.randf_range(low, high))
 				var direction := Vector3(cos(azimuth) * sin(angle), cos(angle), sin(azimuth) * sin(angle))
 				var start := points[5].lerp(points[6], fork * 0.2)
-				var tip := start + direction * rng.randf_range(0.7, 0.95)
+				var tip := start + direction * rng.randf_range(0.7, 0.95) * rng.randf_range(1.0 - profile.height_variation, 1.0 + profile.height_variation)
 				branch(segment, "Fork", start, tip, 0.08, 0.025, bark)
 				if not dead:
 					var spread := rng.randf_range(1.0 - profile.crown_variation, 1.0 + profile.crown_variation)
@@ -136,12 +131,14 @@ static func branch(parent: Node3D, name_: String, start: Vector3, finish: Vector
 	node.quaternion = Quaternion(Vector3.UP, (finish - start).normalized())
 
 static func foliage(parent: Node3D, centre: Vector3, size: Vector3) -> void:
-	var sphere := SphereMesh.new()
-	sphere.radius = 0.5
-	sphere.height = 1.0
-	sphere.radial_segments = 7
-	sphere.rings = 3
-	var node := mesh(parent, "Leaves", sphere, LEAVES)
+	# Match the bushes' smooth curves; share geometry across the forest.
+	if crown_mesh == null:
+		crown_mesh = SphereMesh.new()
+		crown_mesh.radius = 0.5
+		crown_mesh.height = 1.0
+		crown_mesh.radial_segments = 32
+		crown_mesh.rings = 16
+	var node := mesh(parent, "Leaves", crown_mesh, LEAVES)
 	node.position = centre
 	node.scale = size
 

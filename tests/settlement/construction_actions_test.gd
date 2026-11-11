@@ -16,9 +16,11 @@ func check(ok: bool, message: String) -> void:
 func fresh():
 	var model = Model.new()
 	model.setup()
+	preload("res://tests/settlement/supplied_pile_fixture.gd").add_to(model)
 	model.trees.clear()
 	model.deposits.clear()
 	model.water_sources.clear()
+	model.rebuild_navigation()
 	for worker in model.workers: model.set_role(worker.id, "idle")
 	model.exploration.reveal(Nav.point(TARGET))
 	check(model.request_build("house", SOURCE), "Queue empty construction site")
@@ -105,8 +107,9 @@ func test_active_move_and_delete() -> void:
 	check(model.request_build("log_shed", Vector3i(-4, 0, 0)), "Provide timber storage for recovered materials")
 	model._complete_plan(model.plans[model.next_plan_id - 1])
 	model.set_role(0, "builder")
-	advance_until(model, func(): return not model.plans.has(id) and model.workers[0].cargo.is_empty())
-	check(model.resource_total("log") == stock, "Installed and carried materials return exactly once")
+	# Reassignment can drop carried timber into a separate salvage pile.
+	advance_until(model, func(): return model.plans.is_empty() and model.workers[0].cargo.is_empty())
+	check(model.resource_total("log") == stock, "Installed and carried materials return exactly once (%d/%d)" % [model.resource_total("log"), stock])
 
 func test_move_to_completion() -> void:
 	var model = fresh()
@@ -128,9 +131,9 @@ func test_controls() -> void:
 	game.selected_object = {"cell": SOURCE, "kind": "house", "entity_key": "plan:%s" % id}
 	game.hud.update(game.model, -1, 1, game.selected_object)
 	for frame in 3: await process_frame
-	check(game.hud.move_button.visible and game.hud.removal_button.visible and not game.hud.copy_button.visible, "Untouched site shows Move and Delete only")
+	check(game.hud.move_button.visible and game.hud.removal_button.visible and game.hud.finish_button.visible and not game.hud.copy_button.visible, "Untouched site shows Move, Delete and the debug wand")
 	check(not game.hud.move_button.disabled and not game.hud.removal_button.disabled and game.hud.deleting_plan, "Construction actions are enabled before work starts")
-	check(is_equal_approx(game.hud.selection_toolbar.get_global_rect().get_center().x, game.hud.root.size.x / 2), "Two-button action menu stays centered")
+	check(is_equal_approx(game.hud.selection_toolbar.get_global_rect().get_center().x, game.hud.root.size.x / 2), "Three-button action menu stays centered")
 	await click_action(game, game.hud.move_button)
 	check(game.moving_plan_id == id and is_instance_valid(game.preview), "Move button starts site placement")
 	game._clear_selection()

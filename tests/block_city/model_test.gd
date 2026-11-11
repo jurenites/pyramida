@@ -11,7 +11,7 @@ func check(ok: bool, message: String) -> void:
 func run() -> void:
 	var m = Model.new()
 	check(m.validate_config().is_empty(),"Valid shape configuration")
-	check(m.config.shapes.filter(func(shape):return not shape.get("palette_hidden",false)).size()==9,"Nine visible shapes include the placeable small pole")
+	check(m.config.shapes.filter(func(shape):return not shape.get("palette_hidden",false)).size()==10,"Ten visible shapes include both stair prefabs and the small pole")
 	for shape in m.config.shapes:
 		check(shape.get("role","")=="pole" or shape.cells.all(func(p): return p[1]==0),"Room shapes remain flat; poles reserve their vertical clearance")
 		for yaw in 4:

@@ -69,7 +69,8 @@ func _initialize() -> void:
 	var plank := Node3D.new()
 	plank.name = "SawnPlanks"
 	for i in 3:
-		box(plank, "Plank%d" % i, Vector3(0, i * 0.065, 0), Vector3(0.7, 0.055, 0.22), "b98754")
+		var board := box(plank, "Plank%d" % i, Vector3(0, i * 0.065, 0), preload("res://scripts/settlement/timber_kit.gd").BOARD, preload("res://scripts/settlement/timber_palette.gd").WOOD[0].to_html(false))
+		if i > 0: board.mesh = plank.get_node("Plank0").mesh
 	save_asset(plank, "plank")
 	print("PASS: original berry, limestone and cargo meshes exported")
 	quit()

@@ -3,7 +3,7 @@ extends RefCounted
 ## the previous valid snapshot stays available if the newest file is damaged.
 const Model = preload("res://scripts/settlement/world_model.gd")
 const SLOT_COUNT := 3
-const AUTOSAVE_SECONDS := 30.0
+const AUTOSAVE_SECONDS := 300.0
 var directory := "user://settlements"
 var last_error := ""
 
@@ -13,7 +13,7 @@ func path_for(slot: int) -> String:
 func occupied(slot: int) -> bool:
 	return FileAccess.file_exists(path_for(slot)) or FileAccess.file_exists(path_for(slot) + ".bak")
 
-func _read(path: String) -> Dictionary:
+func _read(path: String, into_model = null) -> Dictionary:
 	if not FileAccess.file_exists(path):
 		return {}
 	var parser := JSON.new()
@@ -22,19 +22,20 @@ func _read(path: String) -> Dictionary:
 	var data: Variant = parser.data
 	if not data is Dictionary or data.get("format") != 1 or data.get("difficulty") not in ["normal", "easy"] or not data.get("world") is Dictionary:
 		return {}
-	var validation = Model.new()
-	if not validation.restore(data.world) or validation.difficulty != data.difficulty:
+	var validation = Model.new() if into_model == null else into_model
+	var valid: bool = Model.SaveCodec.restore(validation, data.world, true) if into_model == null else validation.restore(data.world)
+	if not valid or validation.difficulty != data.difficulty:
 		return {}
 	return data
 
-func read_slot(slot: int) -> Dictionary:
+func read_slot(slot: int, into_model = null) -> Dictionary:
 	last_error = ""
 	if slot < 0 or slot >= SLOT_COUNT:
 		return {}
-	var data := _read(path_for(slot))
+	var data := _read(path_for(slot), into_model)
 	if not data.is_empty():
 		return data
-	data = _read(path_for(slot) + ".bak")
+	data = _read(path_for(slot) + ".bak", into_model)
 	if not data.is_empty():
 		data["recovered"] = true
 		return data
@@ -43,6 +44,12 @@ func read_slot(slot: int) -> Dictionary:
 	return {}
 
 func write_slot(slot: int, model, view: Dictionary = {}) -> bool:
+	return write_snapshot(slot, {"format": 1, "difficulty": model.difficulty, "saved_at": Time.get_unix_time_from_system(),
+		"elapsed": model.time, "view": view, "world": model.snapshot()})
+
+# This record contains values only, so JSON encoding and disk IO can run on a
+# worker without reading a live simulation or touching scene nodes.
+func write_snapshot(slot: int, data: Dictionary) -> bool:
 	last_error = ""
 	if slot < 0 or slot >= SLOT_COUNT:
 		return false
@@ -51,8 +58,6 @@ func write_slot(slot: int, model, view: Dictionary = {}) -> bool:
 		return false
 	var path := path_for(slot)
 	var temporary := path + ".tmp"
-	var data := {"format": 1, "difficulty": model.difficulty, "saved_at": Time.get_unix_time_from_system(),
-		"elapsed": model.time, "view": view, "world": model.snapshot()}
 	var file := FileAccess.open(temporary, FileAccess.WRITE)
 	if file == null:
 		last_error = "settlement_autosave_failed_text"

@@ -20,7 +20,11 @@ func setup() -> void:
 
 func update_camera() -> void:
 	camera.size = zoom
-	camera.position = focus + Vector3(sin(yaw) * cos(pitch), sin(pitch), cos(yaw) * cos(pitch)) * 85.0
+	# Wide, low-angle orthographic views need their near plane above the cloud
+	# bank too. Moving along the viewing axis preserves the on-screen framing.
+	var distance := maxf(85.0, (zoom * 0.5 * cos(pitch) + 24.0) / sin(pitch) + 8.0)
+	camera.far = maxf(240.0, distance + zoom * 0.5 / tan(pitch) + 64.0)
+	camera.position = focus + Vector3(sin(yaw) * cos(pitch), sin(pitch), cos(yaw) * cos(pitch)) * distance
 	# Derive orientation from yaw/pitch only, so panning cannot perturb it.
 	camera.basis = Basis.looking_at(-Vector3(sin(yaw) * cos(pitch), sin(pitch), cos(yaw) * cos(pitch)))
 	# Keep the logical focus continuous; only the rendered camera is quantized.

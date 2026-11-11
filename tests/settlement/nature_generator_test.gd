@@ -143,17 +143,12 @@ func test_plain_trunks() -> void:
 			var tree_node := Node3D.new()
 			Generator.populate(tree_node, tree_kind, seed_value)
 			check(tree_node.find_children("*Root*", "MeshInstance3D", true, false).is_empty(), "Tree enters soil without exposed roots")
-			var joint_points: PackedVector3Array = tree_node.get_meta("nature_skeleton")
 			var stock_radius: float = Generator.Timber.LOG_DIAMETER * 0.5
 			var base_mesh: Mesh = tree_node.get_node("Stump").mesh
 			for vertex_point in base_mesh.get_faces():
 				check(absf(Vector2(vertex_point.x, vertex_point.z).length() - stock_radius) < stock_radius * 0.031, "Ground entry has no flared base")
 			for segment_index in 3:
-				var trunk_mesh: Mesh = tree_node.get_node("Segment%d/Trunk" % (segment_index + 1)).mesh
-				for vertex_point in trunk_mesh.get_faces():
-					for joint_index in range(segment_index * 2, segment_index * 2 + 3):
-						var joint_point := joint_points[joint_index]
-						if not is_equal_approx(vertex_point.y, joint_point.y): continue
-						var ring_radius := Vector2(vertex_point.x - joint_point.x, vertex_point.z - joint_point.z).length()
-						check(ring_radius >= stock_radius * 0.91 and ring_radius <= stock_radius * 1.031, "All trunk rings stay close to loose log diameter")
+				var trunk: MeshInstance3D = tree_node.get_node("Segment%d/Trunk" % (segment_index + 1))
+				check(trunk.mesh == Generator.Timber.sources("log")[0].mesh, "Standing trunk reuses the exact hauled bark mesh")
+				check(trunk.basis.get_scale().is_equal_approx(Vector3.ONE), "Standing stock is rigid, without taper or length scaling")
 			tree_node.free()

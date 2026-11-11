@@ -1,4 +1,4 @@
-# Pyramida 2 — Semi-Infinite World, Streaming, and Persistence
+# Town — Semi-Infinite World, Streaming, and Persistence
 
 Status: current surface-streaming summary plus an explicitly planned persistence model. Code and passing tests are authoritative.
 

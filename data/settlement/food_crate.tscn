@@ -275,6 +275,7 @@ _surfaces = [{
 }]
 
 [node name="FoodCrate" type="Node3D" unique_id=2095894780]
+metadata/usage_status = "unused"
 
 [node name="CrateBase" type="MeshInstance3D" parent="." unique_id=21428792]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.025, 0)

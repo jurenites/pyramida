@@ -6,5 +6,6 @@ extends Resource
 @export_range(0, 40, 1) var palm_lean := 28.0
 @export_range(5, 75, 1) var branch_angle_min := 28.0
 @export_range(5, 75, 1) var branch_angle_max := 55.0
+# Crown branch height variation; harvested stock always keeps its fixed length.
 @export_range(0, 0.25, 0.01) var height_variation := 0.16
 @export_range(0, 0.3, 0.01) var crown_variation := 0.22

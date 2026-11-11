@@ -124,7 +124,8 @@ func _screen_bounds(actor, camera: Camera3D) -> Rect2:
 	var initialized := false
 	for part in actor.silhouette_parts:
 		if not part.is_visible_in_tree() or part.mesh == null: continue
-		var bounds: AABB = part.global_transform * part.mesh.get_aabb()
+		var local_bounds: AABB = part.mesh.get_aabb().grow(0.15) if part.skin != null else part.mesh.get_aabb()
+		var bounds: AABB = part.global_transform * local_bounds
 		box = box.merge(bounds) if initialized else bounds
 		initialized = true
 	if not initialized: return Rect2()
@@ -156,7 +157,28 @@ func _sync_part(source: MeshInstance3D, layer: int, wanted: Dictionary) -> void:
 		silhouette.add_child(proxy)
 		proxies[source] = proxy
 	var proxy: MeshInstance3D = proxies[source]
-	proxy.layers = layer
-	proxy.material_override = white if layer & 1 else black
-	proxy.mesh = source.mesh
-	proxy.global_transform = source.global_transform
+	# Assigning an unchanged mesh still resubmits geometry to the renderer.
+	# Buildings usually stand still while only the camera and citizens move.
+	if proxy.layers != layer: proxy.layers = layer
+	var paint := white if layer & 1 else black
+	if proxy.material_override != paint: proxy.material_override = paint
+	if proxy.mesh != source.mesh: proxy.mesh = source.mesh
+	if proxy.global_transform != source.global_transform: proxy.global_transform = source.global_transform
+	if source.skin != null:
+		var original: Skeleton3D = source.get_node(source.skeleton)
+		var rig := proxy.get_node_or_null("Skeleton3D") as Skeleton3D
+		if rig == null:
+			rig = Skeleton3D.new()
+			rig.name = "Skeleton3D"
+			proxy.add_child(rig)
+			for bone in original.get_bone_count():
+				rig.add_bone(original.get_bone_name(bone))
+				rig.set_bone_parent(bone, original.get_bone_parent(bone))
+				rig.set_bone_rest(bone, original.get_bone_rest(bone))
+			proxy.skeleton = NodePath("Skeleton3D")
+			proxy.skin = source.skin
+			proxy.custom_aabb = source.custom_aabb
+		rig.global_transform = original.global_transform
+		for bone in original.get_bone_count():
+			rig.set_bone_pose(bone, original.get_bone_pose(bone))
+		rig.force_update_all_bone_transforms()

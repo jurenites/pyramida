@@ -17,9 +17,9 @@ func run() -> void:
 	var hud := HUD.new()
 	root.add_child(hud)
 	hud.update(model, -1, 1)
-	for resource in ["food", "log", "citizens"]:
+	for resource in ["food", "citizens"]:
 		check(hud.resource_counts[resource].get_parent().visible, "Starting stock and population are visible: " + resource)
-	for resource in ["grain", "plank", "stone", "block"]:
+	for resource in ["log", "grain", "plank", "stone", "block"]:
 		check(not hud.resource_counts[resource].get_parent().visible, "Unobtained resource is hidden: " + resource)
 	check(not hud.resource_counts.water.get_parent().visible, "Natural water does not reveal stored water")
 	for count in hud.resource_counts.values():
@@ -28,7 +28,20 @@ func run() -> void:
 	await process_frame
 	var panel: Control = hud.resource_label.get_parent().get_parent().get_parent()
 	var initial_width := panel.size.x
-	var inventory = model.stores.values()[0]
+	var main_row: Control = panel.get_child(0)
+	check(main_row.get_child(0) == hud.day_icon.get_parent(), "Day counter is first in the top bar")
+	check(main_row.get_child(1) == hud.resource_counts.citizens.get_parent(), "Population follows the day counter")
+	check(main_row.get_child(2) == hud.resource_counts.food.get_parent(), "Food follows population")
+	check(main_row.get_child(3) == hud.resource_counts.water.get_parent(), "Water follows food")
+	check(not hud.material_panel.visible, "No empty sidebar before discovering materials")
+	var material_order := ["log", "grain", "plank", "stone", "block", "pottery"]
+	for index in material_order.size():
+		check(hud.material_column.get_child(index) == hud.resource_counts[material_order[index]].get_parent(), "Material sidebar order: " + material_order[index])
+	# Use a dedicated stone store; the opening house no longer stores stone.
+	var store_cell := Vector3i(6, 0, 6)
+	model.buildings[store_cell] = {"kind": "stone_storage", "direction": 0}
+	model.add_store(store_cell)
+	var inventory = model.stores[store_cell]
 	inventory.store("grain", 0)
 	check(not model.discovered_resources.has("grain"), "Zero is not a first acquisition")
 	check(not inventory.store("block", 1000) and not model.discovered_resources.has("block"), "Failed storage does not reveal a resource")
@@ -39,6 +52,12 @@ func run() -> void:
 	hud.update(model, -1, 1)
 	check(hud.resource_counts.stone.get_parent().visible and hud.resource_counts.stone.text == "0/32", "Spent stone stays visible at zero")
 	check(hud.resource_counts.water.get_parent().visible, "Spent water stays visible")
+	await process_frame
+	await process_frame
+	check(hud.material_panel.visible, "Discovering stone reveals the sidebar")
+	check(is_equal_approx(hud.root.size.x - hud.material_panel.get_rect().end.x, 12), "Sidebar stays on the right margin")
+	check(not hud.material_panel.get_rect().intersects(hud.build_panel.get_rect()), "Construction menu clears the sidebar")
+	check(not hud.material_panel.get_rect().intersects(hud.top_toolbar.get_rect()), "Sidebar clears the toolbar")
 	var saved: Dictionary = JSON.parse_string(JSON.stringify(model.snapshot()))
 	var restored = Model.new()
 	check(restored.restore(saved), "Discovery save loads")
@@ -72,6 +91,7 @@ func run() -> void:
 	await process_frame
 	await process_frame
 	check(not hud.resource_counts.stone.get_parent().visible and not hud.resource_counts.water.get_parent().visible, "Switching games resets resource visibility")
+	check(not hud.material_panel.visible, "Switching to a new game hides the empty sidebar")
 	check(is_equal_approx(panel.size.x, initial_width), "Resource bar shrinks back without empty resource slots")
 	hud.free()
 	if failures.is_empty():

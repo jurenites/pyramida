@@ -1,9 +1,10 @@
 extends RefCounted
-## Sparse resistant sandstone buttes on a level desert floor, sampled in world space.
+## Broad faceted sandstone terraces, sampled continuously in world space.
 const Grid = preload("res://scripts/settlement/world_grid.gd")
 const Random = preload("res://scripts/deterministic_random.gd")
 const Vegetation = preload("res://scripts/settlement/vegetation_patches.gd")
-const VERSION := 4
+const VERSION := 24
+const LEGACY_VERSION := 4
 const DEFAULT_SEED := 1409
 const MAX_HEIGHT := 20
 const SAFE_RADIUS := 14
@@ -20,8 +21,8 @@ static func chunk_at(cell: Vector2i) -> Vector2i:
 static func generate(seed_: int, radius := Grid.WORLD_RADIUS, erosion_steps := EROSION_STEPS) -> Dictionary:
 	return generate_region(seed_, Rect2i(-radius, -radius, radius * 2 + 1, radius * 2 + 1), erosion_steps)
 
-static func generate_chunk(seed_: int, chunk: Vector2i, difficulty := "normal") -> Dictionary:
-	return generate_region(seed_, Rect2i(chunk * CHUNK_SIZE, Vector2i.ONE * CHUNK_SIZE), EROSION_STEPS, difficulty)
+static func generate_chunk(seed_: int, chunk: Vector2i, difficulty := "normal", version := VERSION) -> Dictionary:
+	return generate_region(seed_, Rect2i(chunk * CHUNK_SIZE, Vector2i.ONE * CHUNK_SIZE), EROSION_STEPS, difficulty, version)
 
 static func formations(seed_: int, bounds: Rect2i) -> Array[Dictionary]:
 	var rng := RandomNumberGenerator.new()
@@ -47,7 +48,32 @@ static func make_butte(site: Vector2, rng: RandomNumberGenerator) -> Dictionary:
 		"radius": rng.randf_range(2.2, 3.6), "talus": rng.randf_range(3.2, 4.8),
 		"height": rng.randi_range(3, 6) * 2, "angle": rng.randf_range(-PI, PI), "phase": rng.randf_range(0, TAU)}
 
-static func sample(point: Vector2, buttes: Array[Dictionary]) -> Dictionary:
+static func terrace_height(point: Vector2, buttes: Array[Dictionary]) -> float:
+	if maxf(absf(point.x), absf(point.y)) <= SAFE_RADIUS + 0.5: return 0.0
+	var height := 0.0
+	for butte: Dictionary in buttes:
+		if point.distance_squared_to(butte.centre) > 225: continue
+		var edge := edge_distance(point, butte)
+		# Three broad, flat shelves with steep faceted shoulders between them.
+		# Shared absolute corner samples remove the old square-cell cliff outline.
+		var rise := 2.0
+		var shelf := 3.2
+		var h := 0.0
+		for tier in 3:
+			var rim := float(2 - tier) * shelf
+			h += clampf((rim + 0.85 - edge) / 0.85, 0.0, 1.0) * rise
+		height = maxf(height, h)
+	return height
+
+static func sample(point: Vector2, buttes: Array[Dictionary], version := VERSION) -> Dictionary:
+	if version >= 5:
+		var values: Array[float] = []
+		for offset: Vector2 in CORNERS: values.append(terrace_height(point + offset, buttes))
+		var level := floori(float(values.min()))
+		return {"level": level, "corners": values}
+	return legacy_sample(point, buttes)
+
+static func legacy_sample(point: Vector2, buttes: Array[Dictionary]) -> Dictionary:
 	var level := 0
 	var corners: Array[float] = [0.0, 0.0, 0.0, 0.0]
 	if maxf(absf(point.x), absf(point.y)) > SAFE_RADIUS:
@@ -61,29 +87,35 @@ static func sample(point: Vector2, buttes: Array[Dictionary]) -> Dictionary:
 				corners[index] = maxf(corners[index], clampf(1.0 - maxf(0, edge) / butte.talus, 0, 1) * 2.6)
 	return {"level": level, "corners": corners}
 
-static func generate_region(seed_: int, bounds: Rect2i, _erosion_steps := EROSION_STEPS, difficulty := "normal") -> Dictionary:
-	if difficulty == "easy": return preload("res://scripts/settlement/greece_landscape.gd").generate(seed_, bounds)
+static func generate_region(seed_: int, bounds: Rect2i, _erosion_steps := EROSION_STEPS, difficulty := "normal", version := VERSION) -> Dictionary:
+	if difficulty == "normal" and version >= 14:
+		return preload("res://scripts/settlement/solid_islands.gd").generate(seed_,bounds,version,true)
+	if difficulty == "easy":
+		if version >= 7: return preload("res://scripts/settlement/solid_islands.gd").generate(seed_,bounds,version)
+		if version >= 6: return preload("res://scripts/settlement/archipelago_landscape.gd").generate(seed_,bounds)
+		return preload("res://scripts/settlement/greece_landscape.gd").generate(seed_, bounds)
 	var buttes := formations(seed_, bounds)
 	var habitat := FastNoiseLite.new()
 	habitat.seed = seed_ ^ 5189
 	habitat.frequency = 0.035
 	var bushes := Vegetation.bushes_in(bounds.grow(1), seed_)
 	var forest_cells := Vegetation.trees_in(bounds.grow(1), seed_)
-	var result := {"seed": seed_, "version": VERSION, "heights": {}, "ground": {}, "shapes": {},
+	var result := {"seed": seed_, "version": version, "heights": {}, "ground": {}, "shapes": {},
 		"ramps": {}, "water": {}, "nature": {}, "grass": {}, "border": {}, "border_shapes": {}}
 	for x in range(bounds.position.x - 1, bounds.end.x + 1):
 		for z in range(bounds.position.y - 1, bounds.end.y + 1):
 			var column := Vector2i(x, z)
-			var value := sample(Vector2(x, z), buttes)
+			var value := sample(Vector2(x, z), buttes, version)
 			var cell := Vector3i(x, value.level, z)
+			var sloped: bool = (value.level == 0 and value.corners.max() > 0.001) if version <= LEGACY_VERSION else (value.corners.max() - value.corners.min() > 0.0001 or absf(value.corners[0] - value.level) > 0.0001)
 			result.border[column] = value.level
-			if value.level == 0 and value.corners.max() > 0.001:
+			if sloped:
 				result.border_shapes[cell] = value.corners
 			if not bounds.has_point(column):
 				continue
 			result.heights[column] = value.level
 			result.ground[cell] = true
-			if value.level == 0 and value.corners.max() > 0.001:
+			if sloped:
 				result.shapes[cell] = value.corners
 				continue
 			if value.level > 0:
@@ -106,7 +138,7 @@ static func generate_region(seed_: int, bounds: Rect2i, _erosion_steps := EROSIO
 			var roll := Random.world_fraction(x, z, seed_, 302)
 			var clear := true
 			for offset in [Vector2(-1, -1), Vector2(1, -1), Vector2(1, 1), Vector2(-1, 1)]:
-				var nearby := sample(Vector2(x, z) + offset, buttes)
+				var nearby := sample(Vector2(x, z) + offset, buttes, version)
 				if nearby.level > 0 or nearby.corners.max() > 0.001:
 					clear = false
 			if clear and bushes.has(column):

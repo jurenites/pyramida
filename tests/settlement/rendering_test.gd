@@ -70,7 +70,7 @@ func run() -> void:
 		model.workers[0].cargo = resource
 		view.sync(model, 0, 0)
 		var cargo: Node3D = view.actors[0].cargo
-		check(cargo.name == ("FoodCrate" if resource == "food" else "WaterBucket"), "Worker displays distinct %s cargo" % resource)
+		check(cargo.name == ("CarriedBerries" if resource == "food" else "WaterBucket"), "Worker displays distinct %s cargo" % resource)
 		check(cargo.get_parent().name == "CargoSocket", "Cargo attaches to authored character socket")
 		var kind := "food_crate" if resource == "food" else "water_bucket"
 		var document := GLTFDocument.new()

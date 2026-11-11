@@ -13,6 +13,12 @@ static func footprints(world) -> Dictionary:
 	for plan: Dictionary in world.plans.values():
 		if int(plan.get("installed", 0)) > 0 and not plan.get("deconstruction", false):
 			_add(result, plan.kind, plan.cell, plan.get("placement_offset", Vector3.ZERO), int(plan.direction))
+	for room in world.room_site.get("built",[]):
+		for raw in room.cells:
+			if int(raw[1])!=0: continue
+			for cell: Vector3i in world.Rooms.tile_nodes(world,world.Rooms.Layout.vec(raw)):
+				if not result.has(cell): result[cell]=[]
+				result[cell].append(Rect2(Vector2(cell.x-0.5,cell.z-0.5),Vector2.ONE))
 	return result
 
 static func _add(result: Dictionary, kind: String, cell: Vector3i, offset: Vector3, direction: int) -> void:

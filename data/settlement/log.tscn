@@ -1,7 +1,7 @@
 [gd_scene format=3]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_lmh4x"]
-albedo_color = Color(0.45490196, 0.31764707, 0.24313726, 1)
+albedo_color = Color(0.59607846, 0.41568628, 0.29411766, 1)
 roughness = 0.92
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_6x3ta"]
@@ -12,7 +12,7 @@ radial_segments = 8
 rings = 1
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_0dg5q"]
-albedo_color = Color(0.73333335, 0.5686275, 0.4, 1)
+albedo_color = Color(0.81960785, 0.654902, 0.45882353, 1)
 roughness = 0.92
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_wbhn3"]

@@ -13,6 +13,11 @@ const Jobs = preload("res://scripts/settlement/job_system.gd")
 const RETIRED_BUILDINGS := {"archer_hut": 10, "wall": 1, "gate": 3, "watch_tower": 5, "brick_road": 1}
 
 static func snapshot(world) -> Dictionary:
+	return encode_capture(capture(world))
+
+# Copy mutable containers on main; the worker only encodes these detached values.
+# Object references are opaque lookup keys: their saved values are frozen here.
+static func capture(world) -> Dictionary:
 	var inventories := {"well": world.well_inventory}
 	for cell: Vector3i in world.wells:
 		if world.wells[cell] != world.well_inventory:
@@ -26,6 +31,7 @@ static func snapshot(world) -> Dictionary:
 	for cell: Vector3i in world.deposits:
 		inventories["deposit:%s" % cell] = world.deposits[cell].inventory
 	for plan: Dictionary in world.plans.values():
+		if plan.has("delivered"): inventories["site:%s" % plan.id] = plan.delivered
 		if not plan.has("relocation"): continue
 		inventories["relocation:%s" % plan.id] = plan.relocation.parts
 		for field: String in plan.relocation.payload:
@@ -36,16 +42,19 @@ static func snapshot(world) -> Dictionary:
 	var inventory_data := {}
 	for key: String in inventories:
 		var inventory = inventories[key]
-		references[inventory] = key
+		references[inventory] = {"type": "inventory", "v": key}
 		inventory_data[key] = {"amounts": inventory.amounts, "reservations": inventory.reservations, "capacity": inventory.capacity}
-	return {"version": 5, "inventories": _encode(inventory_data, references), "world": _encode({
-		"explored": world.exploration.snapshot(),
+		if not inventory.slots.is_empty(): inventory_data[key]["slots"] = inventory.slots
+	var state := {
+		"roof_rain":world.roof_rain, "home_utilities":world.home_utilities, "room_site":world.room_site, "bridges": world.bridges, "explored": world.exploration.snapshot(),
 		"discovered_resources": world.discovered_resources,
+		"unlocked_materials": world.unlocked_materials,
 		"deposits": world.deposits, "birth_clock": world.birth_clock,
-		"grid_version": 3, "platform_tiers": true,
+		"grid_version": 3, "platform_tiers": true, "reviewed_balance": 1,
 		"level_height": Grid.LEVEL_HEIGHT,
 		"streaming": {"enabled": world.streaming_enabled, "loaded": world.loaded_chunks, "dormant": world.dormant_chunks},
 		"difficulty": world.difficulty, "world_seed": world.world_seed, "generator_version": world.generator_version,
+		"terrain_excavations": world.terrain_excavations,
 		"soil_enabled": world.soil_enabled, "soil_cuts": world.soil_cuts,
 		"surface_edits": world.surface_edits, "volume_edits": world.volume_edits, "terrain_shapes": world.terrain_shapes, "terrain_ramps": world.terrain_ramps, "water_sources": world.water_sources,
 		"water_orders": world.water_orders, "weather": world.weather, "vines": world.vines,
@@ -54,9 +63,24 @@ static func snapshot(world) -> Dictionary:
 		"ground": world.ground, "platforms": world.platforms, "stairs": world.stairs, "stores": world.stores,
 		"construction_materials": world.construction_materials, "buildings": world.buildings, "wells": world.wells, "plans": world.plans, "soil_beds": world.soil_beds, "gardens": world.gardens, "trees": world.trees, "workers": world.workers,
 		"child_play": world.child_play, "time": world.time, "meals_eaten": world.meals_eaten, "deliveries": world.deliveries,
-		"next_plan_id": world.next_plan_id, "consumption_clock": world.consumption_clock}, references)}
+		"next_plan_id": world.next_plan_id, "consumption_clock": world.consumption_clock}
+	_capture_labour(state.workers, references)
+	_capture_labour(state.plans, references)
+	return {"inventories": inventory_data.duplicate(true), "world": state.duplicate(true), "references": references}
 
-static func restore(model, data: Dictionary) -> bool:
+static func _capture_labour(value: Variant, references: Dictionary) -> void:
+	if value is Dictionary:
+		for child: Variant in value.values(): _capture_labour(child, references)
+	elif value is Array:
+		for child: Variant in value: _capture_labour(child, references)
+	elif value is Object and value.get_script() == Labour:
+		references[value] = {"type": "labour", "v": [value.required_seconds, value.applied_seconds]}
+
+static func encode_capture(frozen: Dictionary) -> Dictionary:
+	return {"version": 5, "inventories": _encode(frozen.inventories, frozen.references),
+		"world": _encode(frozen.world, frozen.references)}
+
+static func restore(model, data: Dictionary, validate_only := false) -> bool:
 	if (data.get("version") != 1 and data.get("version") != 2 and data.get("version") != 3 and data.get("version") != 4 and data.get("version") != 5) or not data.has("inventories") or not data.has("world"):
 		return false
 	var inventory_data: Variant = _decode(data.inventories, {})
@@ -73,6 +97,11 @@ static func restore(model, data: Dictionary) -> bool:
 		inventory.amounts = entry.amounts
 		inventory.reservations = entry.reservations
 		inventory.capacity = int(entry.get("capacity", 32))
+		if entry.has("slots"):
+			if not entry.slots is Array or entry.slots.size() != inventory.capacity: return false
+			for slot: Variant in entry.slots:
+				if not slot is String: return false
+				inventory.slots.append(slot)
 		if not _valid_inventory(inventory):
 			return false
 		references[key] = inventory
@@ -117,6 +146,11 @@ static func restore(model, data: Dictionary) -> bool:
 	if not world.get("platform_tiers", false):
 		for plan: Dictionary in world.plans.values():
 			if plan.kind == "platform": plan.platform_tier = 2
+	if not model.Rooms.valid(world.get("room_site",{}),world.plans): return false
+	if not preload("res://scripts/settlement/home_assembly.gd").valid(world.get("home_utilities",{"next_id":1,"services":{}}),world.buildings,world.plans): return false
+	if not world.get("bridges", {}) is Dictionary: return false
+	for id: Variant in world.get("bridges", {}):
+		if not id is int or id < 1 or not model.RopeBridges.valid_record(world.bridges[id]): return false
 	if not _valid_world(world):
 		return false
 	if data.version < 3:
@@ -154,6 +188,10 @@ static func restore(model, data: Dictionary) -> bool:
 	for resource: Variant in discovered:
 		if resource not in Economy.RESOURCES or discovered[resource] != true:
 			return false
+	var unlocked: Variant = world.get("unlocked_materials", {})
+	if not unlocked is Dictionary: return false
+	for resource: Variant in unlocked:
+		if resource not in Economy.RESOURCES or unlocked[resource] != true: return false
 	var exploration = preload("res://scripts/settlement/exploration.gd").new()
 	if world.has("explored") and not exploration.restore(world.explored):
 		return false
@@ -162,6 +200,11 @@ static func restore(model, data: Dictionary) -> bool:
 		return false
 	var child_play: Variant = world.get("child_play", {"games": [], "next_scan": 8.0})
 	if not model.ChildPlay.valid(child_play, world.workers): return false
+	# Menu listings and backup rotation need every integrity check, but no
+	# terrain meshes, soil samples, navigation graph or migration side effects.
+	if validate_only:
+		model.difficulty = world.get("difficulty", "normal")
+		return true
 	model.child_play = child_play.duplicate(true)
 	model.child_players.clear()
 	model.streaming_enabled = streaming.enabled
@@ -171,6 +214,12 @@ static func restore(model, data: Dictionary) -> bool:
 	model.terrain_revision += 1
 	model.exploration = exploration
 	model.discovered_resources = discovered.duplicate()
+	model.unlocked_materials = unlocked.duplicate()
+	# Recover completed producers from older saves, including ones being moved.
+	for building: Dictionary in world.buildings.values(): model.unlock_production(building.kind)
+	for plan: Dictionary in world.plans.values():
+		var building: Dictionary = plan.get("relocation", {}).get("payload", {}).get("buildings", {})
+		if not building.is_empty(): model.unlock_production(building.kind)
 	for cell: Vector3i in world.deposits:
 		Economy.upgrade_stone(world.deposits[cell], cell, world.world_seed)
 	model.deposits = world.deposits
@@ -178,6 +227,8 @@ static func restore(model, data: Dictionary) -> bool:
 	model.difficulty = world.get("difficulty", "normal")
 	model.world_seed = world.world_seed
 	model.generator_version = world.generator_version
+	model.terrain_excavations = world.get("terrain_excavations",[])
+	for cut: Dictionary in model.terrain_excavations: cut.yaw=float(cut.yaw)
 	model.terrain_ramps = world.terrain_ramps
 	model.soil_enabled = world.get("soil_enabled", false)
 	model.soil_cuts = world.get("soil_cuts", {})
@@ -192,21 +243,32 @@ static func restore(model, data: Dictionary) -> bool:
 	model.weather.remainder = float(model.weather.remainder)
 	model.terrain_heights.clear()
 	for cell: Vector3i in world.ground:
-		model.terrain_heights[Vector2i(cell.x, cell.z)] = cell.y
+		model.terrain_heights[Vector2i(cell.x, cell.z)] = maxi(cell.y,int(model.terrain_heights.get(Vector2i(cell.x,cell.z),-16384)))
 	model.ground = world.ground
 	model.Soil.rebuild(model)
 	model.construction_materials = world.get("construction_materials", {})
 	model.buildings = world.buildings
 	model.wells = world.wells
+	for cell: Vector3i in model.wells:
+		model.wells[cell].capacity = maxi(model.wells[cell].total(), model.Hydrology.capacity(model, cell, model.Hydrology.units(model.buildings.get(cell, {}))))
 	model.platforms = world.platforms
 	model.stairs = world.stairs
 	model.stores = world.stores
+	for cell: Vector3i in model.stores:
+		if model.buildings.get(cell, {}).get("kind") == "stone_storage": model.stores[cell].enable_slots()
 	for inventory in model.stores.values():
 		model.track_store_resources(inventory)
 		# Older saves kept spent resources as zero-valued inventory entries.
 		if not world.has("discovered_resources"):
 			for resource: String in inventory.amounts:
 				model.discover_resource(resource)
+	preload("res://scripts/settlement/home_assembly.gd").reset_cache()
+	model.home_utilities = world.get("home_utilities",{"next_id":1,"services":{}})
+	model.roof_rain = world.get("roof_rain",preload("res://scripts/settlement/roof_rain.gd").fresh())
+	for field in ["junctions","wet"]:
+		if not model.roof_rain.has(field): model.roof_rain[field]={}
+	model.room_site = world.get("room_site",{})
+	model.bridges = world.get("bridges", {})
 	model.plans = world.plans
 	model.crop_light_cache.clear()
 	model.crop_light_revision = -1
@@ -219,6 +281,7 @@ static func restore(model, data: Dictionary) -> bool:
 	model.vine_discovered = world.vine_discovered
 	model.trees = world.trees
 	model.workers.assign(world.workers)
+	model.ledge_escape_checks.clear()
 	for worker: Dictionary in model.workers:
 		Citizens.restore_defaults(worker)
 		# Old configurable gathering batches become one-item actions. Already
@@ -248,6 +311,11 @@ static func restore(model, data: Dictionary) -> bool:
 		model.remove_stump(cell, false)
 	_remove_retired_monument_jobs(model)
 	_remove_retired_buildings(model)
+	if not world.has("reviewed_balance"): Economy.ensure_hay_source(model)
+	model.exploration.configure_islands(model)
+	# Existing saves retain their explored cells and open their occupied islands.
+	for worker: Dictionary in model.workers:
+		model.exploration.reveal_island(worker.position)
 	if world.has("explored"):
 		for worker: Dictionary in model.workers:
 			model.exploration.last_positions[worker.id] = model.exploration.Mask.cell_at(worker.position)
@@ -327,9 +395,7 @@ static func _encode(value: Variant, references: Dictionary) -> Variant:
 		return items
 	if value is Object:
 		if references.has(value):
-			return {"type": "inventory", "v": references[value]}
-		if value.get_script() == Labour:
-			return {"type": "labour", "v": [value.required_seconds, value.applied_seconds]}
+			return references[value]
 		return null
 	return value
 
@@ -373,6 +439,17 @@ static func _decode(value: Variant, references: Dictionary) -> Variant:
 	return null
 
 static func _valid_inventory(inventory) -> bool:
+	if not inventory.slots.is_empty():
+		if inventory.slots.size() != inventory.capacity: return false
+		var counts := {}
+		for resource: String in inventory.slots:
+			if resource.is_empty(): continue
+			if resource not in Economy.RESOURCES: return false
+			counts[resource] = int(counts.get(resource, 0)) + 1
+		for resource: String in counts:
+			if counts[resource] != inventory.count(resource): return false
+		for resource: String in inventory.amounts:
+			if inventory.count(resource) != int(counts.get(resource, 0)): return false
 	if inventory.capacity < 1 or inventory.capacity > 10000:
 		return false
 	var total := 0
@@ -391,7 +468,7 @@ static func _valid_inventory(inventory) -> bool:
 	return true
 
 static func _valid_world(world: Dictionary) -> bool:
-	var compatible_costs := Catalog.COSTS.merged(RETIRED_BUILDINGS)
+	var compatible_costs := Catalog.COSTS.merged(RETIRED_BUILDINGS).merged(preload("res://scripts/settlement/room_construction.gd").COSTS)
 	var material_history: Variant = world.get("construction_materials", {})
 	if not material_history is Dictionary: return false
 	for cell: Variant in material_history:
@@ -408,12 +485,16 @@ static func _valid_world(world: Dictionary) -> bool:
 			if not value: return false
 		elif not value is int or value < 1 or value > 2: return false
 	for building: Variant in world.buildings.values():
+		if building is Dictionary and building.has("deck_phase") and (building.get("kind") != "support" or not building.deck_phase is int or building.deck_phase not in [0, 1]): return false
+		if building is Dictionary and building.has("house_tier") and (building.get("kind") != "house" or not building.house_tier is int or building.house_tier not in [1, 2, 3]): return false
 		if building is Dictionary and building.has("storage_tier") and (not building.storage_tier is int or building.storage_tier not in [1, 2, 3]): return false
 		if building is Dictionary and building.has("mill_tier") and (not building.mill_tier is int or building.mill_tier not in [1, 2, 3]): return false
 		if building is Dictionary and building.has("sawmill_tier") and (not building.sawmill_tier is int or building.sawmill_tier < 1 or building.sawmill_tier > 3): return false
 		if not building is Dictionary or building.get("kind") not in compatible_costs or building.get("direction") not in [0, 1, 2, 3]:
 			return false
 		if not Desires.valid(building.get("desires", {})): return false
+		if building.has("assembly_exemplar") and not preload("res://scripts/settlement/material_exemplars.gd").valid(building.assembly_exemplar): return false
+		if building.kind == "support" and not preload("res://scripts/settlement/support_runtime.gd").valid(building): return false
 		if not Catalog.valid_placement_offset(building.kind, building.get("placement_offset", Vector3.ZERO)):
 			return false
 	for cell: Vector3i in world.wells:
@@ -441,9 +522,26 @@ static func _valid_world(world: Dictionary) -> bool:
 		if not garden is Dictionary:
 			return false
 		if garden.get("species", "vegetables") not in ["grass", "vegetables"]: return false
+		if garden.has("first_growth") and not garden.first_growth is bool: return false
 		for key in ["water", "growth", "food", "reserved"]:
 			if not garden.get(key) is int and not garden.get(key) is float:
 				return false
+		if garden.has("field_layout"):
+			var layout: Variant = garden.field_layout
+			if not layout is Dictionary or layout.get("kind") != "hay_field" or layout.get("direction") not in [0, 1, 2, 3]: return false
+			if not layout.get("placement_offset", Vector3.ZERO) is Vector3: return false
+			if not Catalog.valid_placement_offset("hay_field", layout.get("placement_offset", Vector3.ZERO)): return false
+		if garden.has("field_materials"):
+			if not garden.field_materials is Dictionary: return false
+			for resource in garden.field_materials:
+				var amount: Variant = garden.field_materials[resource]
+				if resource not in Economy.RESOURCES or not amount is int or amount < 0 or amount > 10000: return false
+		if garden.has("quarter_growth") or garden.has("quarter_water"):
+			for property in ["quarter_growth", "quarter_water"]:
+				if not garden.get(property) is Array or garden[property].size() != 4: return false
+				for value in garden[property]:
+					if not (value is float or value is int) or not is_finite(float(value)) or value < 0: return false
+					if property == "quarter_water" and value not in [0, 1]: return false
 		if garden.has("standing_quarters"):
 			var mask: Variant = garden.standing_quarters
 			if not (mask is int or mask is float) or mask != int(mask) or mask < 0 or mask > 15: return false
@@ -454,12 +552,28 @@ static func _valid_world(world: Dictionary) -> bool:
 		var plan: Variant = world.plans[id]
 		if not plan is Dictionary or plan.get("id") != id or plan.get("kind") not in compatible_costs.merged({"tree": 0, "berry": 0, "vine_tree": 0}) or not plan.get("cell") is Vector3i:
 			return false
+		if plan.kind == "support" and not preload("res://scripts/settlement/support_runtime.gd").valid(plan): return false
 		if not Catalog.valid_placement_offset(plan.kind, plan.get("placement_offset", Vector3.ZERO)):
 			return false
 		for key in ["installed", "required", "reserved", "direction"]:
 			if not plan.get(key) is int or plan[key] < 0:
 				return false
 		var valid_cost: bool = (plan.kind == "hay_barn" and plan.required == 8) or (plan.kind == "windmill" and not plan.has("mill_tier") and plan.required == 10) or plan.required == compatible_costs.get(plan.kind, 0) or (plan.kind == "stockpile" and plan.required == 2)
+		if plan.kind == "rope_bridge":
+			if not preload("res://scripts/settlement/rope_bridges.gd").valid_record(plan.get("bridge")): return false
+			var expected: Dictionary = preload("res://scripts/settlement/rope_bridges.gd").record_cost(plan.bridge)
+			valid_cost = plan.cell == plan.bridge.a and plan.materials == expected and plan.required == int(expected.plank) + int(expected.rope)
+		if plan.has("delivered"):
+			if not plan.delivered is Object or plan.delivered.get_script() != Inventory: return false
+			for resource: String in plan.delivered.amounts:
+				if plan.delivered.count(resource) + int(plan.used.get(resource, 0)) > int(plan.materials.get(resource, 0)): return false
+		if plan.has("dropped_cargo"):
+			if plan.dropped_cargo != true or plan.kind != "stockpile" or not preload("res://scripts/settlement/deconstruction.gd").is_salvage(plan) or plan.get("materials") != {}: return false
+			valid_cost = plan.required == 0
+		if plan.has("parts_owner"):
+			if not plan.get("dropped_cargo", false) or not plan.parts_owner is int or not world.plans.has(plan.parts_owner) or not world.plans[plan.parts_owner].has("relocation"): return false
+		if plan.kind in preload("res://scripts/settlement/room_construction.gd").COSTS:
+			valid_cost=plan.required>0 and plan.required<=(512 if plan.kind in ["room_utility","home_utility","rain_fitting"] else 24)
 		if plan.has("relocation") and not _valid_relocation(plan, world): return false
 		if plan.kind == "platform" and (not plan.get("platform_tier", 1) is int or plan.get("platform_tier", 1) not in [1, 2]): return false
 		if plan.kind == "stone_storage":
@@ -479,13 +593,21 @@ static func _valid_world(world: Dictionary) -> bool:
 		if plan.has("bush_payload") and (plan.kind != "seed_bush" or not preload("res://scripts/settlement/bush_transplants.gd").valid(plan.bush_payload)): return false
 		if plan.has("collect_bush"):
 			if plan.collect_bush != true or plan.kind != "berry" or not plan.has("relocation") or plan.relocation.stage != "dismantle" or plan.cell != plan.relocation.source or world.deposits.get(plan.cell, {}).get("kind") != "berry": return false
+		if plan.has("house_tier") and (plan.kind != "house" or not plan.house_tier is int or plan.house_tier not in [1, 2, 3]): return false
+		if plan.has("house_upgrade") and (plan.house_upgrade != true or plan.kind != "house" or plan.has("relocation") or world.buildings.get(plan.cell, {}).get("kind") != "house" or int(plan.get("house_tier", 0)) != preload("res://scripts/settlement/house_tiers.gd").tier(world.buildings[plan.cell]) + 1): return false
 		if plan.has("goods_upgrade") and (plan.goods_upgrade != true or plan.kind not in ["goods_rack", "small_warehouse"]): return false
 		if plan.has("shell_kind"):
 			if plan.kind != "waterworks" or plan.shell_kind not in Catalog.ROOFS or plan.shell_kind in ["well", "waterworks"]: return false
 			valid_cost = plan.required == Catalog.COSTS[plan.shell_kind]
 		if plan.has("reserved_root") and (plan.kind != "seed_vine" or plan.reserved_root != true): return false
 		if plan.kind == "vine_tree":
-			if plan.get("collect_vine") != true or not plan.has("relocation") or plan.relocation.stage != "dismantle" or plan.cell != plan.relocation.source or not world.vines.has(plan.cell): return false
+			if not plan.has("relocation") or plan.required != 0: return false
+			if plan.get("collect_vine", false):
+				if plan.collect_vine != true or plan.relocation.stage != "dismantle" or plan.cell != plan.relocation.source or not world.vines.has(plan.cell): return false
+			else:
+				if plan.cell == plan.relocation.source: return false
+				if plan.relocation.stage == "dismantle" and not world.vines.has(plan.relocation.source): return false
+				if plan.relocation.stage == "rebuild" and not plan.relocation.payload.has("vines"): return false
 		elif plan.has("collect_vine"): return false
 		if plan.kind in Catalog.SEEDS:
 			if not plan.get("sowing") is Object or plan.sowing.get_script() != Labour: return false
@@ -493,6 +615,17 @@ static func _valid_world(world: Dictionary) -> bool:
 		elif plan.has("sowing"): return false
 		if plan.kind in ["tree", "berry"] and not plan.has("relocation"): return false
 		if plan.has("deconstruction") and (plan.deconstruction != true or not plan.has("relocation") or plan.kind not in Catalog.COSTS or plan.cell != plan.relocation.source): return false
+		if plan.get("reviewed", false):
+			if not Catalog.Reviewed.has(plan.kind): return false
+			# Saved recipes survive later balance changes; material totals checked below.
+			valid_cost = plan.required >= 0 and plan.required <= 10000
+		if plan.has("shared_frame"):
+			if plan.kind != "house" or plan.has("relocation") or not plan.shared_frame is Dictionary: return false
+			var frame: Dictionary = plan.shared_frame
+			if not frame.get("posts") is int or frame.posts < 2 or frame.posts > 4: return false
+			if not frame.get("providers") is Array or frame.providers.is_empty() or frame.providers.size() > 4: return false
+			for provider: Variant in frame.providers:
+				if not provider is Vector3i or world.buildings.get(provider, {}).get("kind") != "house" or provider.y != plan.cell.y: return false
 		if not Catalog.in_bounds(plan.cell) or not valid_cost or plan.installed + plan.reserved > plan.required or plan.direction > 3:
 			return false
 		if plan.has("materials"):
@@ -518,8 +651,15 @@ static func _valid_world(world: Dictionary) -> bool:
 		if not worker is Dictionary or worker.get("id") != index or not worker.get("cell") is Vector3i or not worker.get("position") is Vector3:
 			return false
 		if not Desires.valid(worker.get("desires", {})): return false
+		for field in ["wet_steps","slip_remaining"]:
+			var value: Variant=worker.get(field,0)
+			if not (value is int or value is float) or not is_finite(value) or value<0 or value>12: return false
+		if worker.has("assigned_workplace") and not worker.assigned_workplace is Vector3i: return false
+		if worker.has("assigned_water_source") and (not worker.assigned_water_source is Vector3i or worker.get("role") != "hauler"): return false
+		if worker.has("cargo_food") and worker.cargo_food != "bread": return false
 		if not worker.position.is_finite() or not worker.get("job") is Dictionary or not worker.get("route") is Array:
 			return false
+		if not preload("res://scripts/settlement/citizen_ledge_escape.gd").valid(worker): return false
 		if worker.get("cargo") not in ([""] + Economy.RESOURCES) or not worker.get("route_index") is int:
 			return false
 		if not worker.get("cargo_amount", 1) is int or worker.get("cargo_amount", 1) < 1 or worker.get("cargo_amount", 1) > preload("res://scripts/settlement/balance.gd").MAX_ITEMS:
@@ -543,6 +683,7 @@ static func _valid_world(world: Dictionary) -> bool:
 		for tag in ["relocation_cargo", "plant_plan_id"]:
 			if worker.has(tag) and (not worker[tag] is int or not world.plans.has(worker[tag]) or not world.plans[worker[tag]].has("relocation")): return false
 		var job: Dictionary = worker.job
+		if job.has("direct_water") and (job.kind != "collect_water" or job.direct_water != true): return false
 		# Read-only compatibility for saves from configurable gathering batches.
 		if job.has("collection_amount") and (not job.collection_amount is int or job.collection_amount < 1 or job.collection_amount > preload("res://scripts/settlement/balance.gd").MAX_ITEMS): return false
 		if job.has("salvage_plan_id"):
@@ -554,7 +695,7 @@ static func _valid_world(world: Dictionary) -> bool:
 			return false
 		if job.is_empty():
 			continue
-		if job.get("kind") not in ["build", "water", "harvest", "fell", "restock", "eat", "collect_water", "gather", "process", "monument", "move", "relocate"] or job.get("phase") not in ["pickup", "travel", "work", "collect", "store"]:
+		if job.get("kind") not in ["extract", "delivery", "build", "water", "harvest", "fell", "restock", "eat", "collect_water", "gather", "process", "monument", "move", "relocate"] or job.get("phase") not in ["pickup", "travel", "work", "collect", "store"]:
 			return false
 		if not job.get("target") is Vector3i or not job.get("labour") is Object or job.labour.get_script() != Labour:
 			return false
@@ -563,8 +704,14 @@ static func _valid_world(world: Dictionary) -> bool:
 			if job.kind != "harvest" or not (quarter is int or quarter is float) or quarter != int(quarter) or quarter < 0 or quarter >= 4: return false
 		if (job.phase == "pickup" or (job.phase == "collect" and job.kind in ["fell", "collect_water", "gather"])) and (not job.get("source") is Object or job.source.get_script() != Inventory):
 			return false
-		if job.kind in ["build", "relocate"] and not world.plans.has(job.get("plan_id")):
+		if job.kind in ["build", "delivery", "relocate"] and not world.plans.has(job.get("plan_id")):
 			return false
+		if job.kind == "delivery":
+			if job.get("resource") != worker.cargo or not job.get("amount") is int or job.amount < 1 or job.amount != int(worker.get("cargo_amount", 1)): return false
+			if job.phase != "travel" or int(world.plans[job.plan_id].get("claims", {}).get(job.resource, 0)) < job.amount: return false
+		if job.kind == "extract":
+			var kind: String = world.buildings.get(job.target, {}).get("kind", "")
+			if kind not in Economy.EXTRACTORS or job.get("output") != Economy.EXTRACTORS[kind].output: return false
 		if job.kind == "process":
 			if job.get("output") not in Economy.RESOURCES or not job.get("yield") is int or job.yield < 1 or job.yield > preload("res://scripts/settlement/balance.gd").MAX_ITEMS:
 				return false
@@ -583,12 +730,13 @@ static func _valid_terrain(world: Dictionary) -> bool:
 	for key in ["terrain_ramps", "water_sources", "water_orders", "weather"]:
 		if not world.get(key) is Dictionary:
 			return false
+	if not preload("res://scripts/settlement/solid_islands.gd").valid(world.get("terrain_excavations",[])): return false
 	if not world.get("world_seed") is int or not world.get("generator_version") is int:
 		return false
 	var columns := {}
 	for cell: Vector3i in world.ground:
 		var column := Vector2i(cell.x, cell.z)
-		if not preload("res://scripts/settlement/terrain_editor.gd").valid_cell(cell) or columns.has(column):
+		if not preload("res://scripts/settlement/terrain_editor.gd").valid_cell(cell) or (columns.has(column) and not (preload("res://scripts/settlement/solid_islands.gd").enabled(world))):
 			return false
 		if world.get("surface_edits", {}).has(column) and world.surface_edits[column] != cell.y: return false
 		columns[column] = true
@@ -600,15 +748,29 @@ static func _valid_terrain(world: Dictionary) -> bool:
 			return false
 	for cell: Variant in world.water_sources:
 		var source: Variant = world.water_sources[cell]
-		if not world.ground.has(cell) or not source is Dictionary or source.get("kind") not in ["puddle", "stream"]:
+		if not source is Dictionary or source.get("kind") not in ["puddle", "stream", "cistern", "vase", "barrel", "basin"]:
 			return false
+		if source.kind in ["puddle","stream"] and not world.ground.has(cell): return false
 		var inventory: Variant = source.get("inventory")
 		if not inventory is Object or inventory.get_script() != Inventory:
 			return false
-		if inventory.capacity > 3 or inventory.total() != inventory.count("water"):
+		if inventory.capacity > (24 if source.kind in ["cistern","basin"] else 3) or inventory.total() != inventory.count("water"):
 			return false
+		if source.kind=="cistern":
+			var services: Dictionary=world.get("room_site",{}).get("utilities",{}).merged(world.get("home_utilities",{}).get("services",{}))
+			if not source.get("owner") is int or not services.has(source.owner) or not services[source.owner].rain or inventory.capacity not in [2,24]: return false
+			if source.owner>=1000000000:
+				var cells: Array=world.buildings.keys().filter(func(at):return world.buildings[at].get("home_uid",-1)==source.owner)
+				if cells.size()!=1 or cell!=services[source.owner].get("barrel_cell"): return false
+				continue
+			var owners: Array=world.room_site.design.filter(func(entry):return entry.uid==source.owner)
+			if owners.size()!=1: return false
+			var layout=preload("res://scripts/settlement/room_layout.gd")
+			var expected: Vector3i=world.room_site.origin+layout.vec(owners[0].cells[0])*2+layout.rotate_point(Vector3i(0,0,2),owners[0].generated.yaw)
+			if cell!=expected: return false
+	if not preload("res://scripts/settlement/roof_rain.gd").valid(world.get("roof_rain",preload("res://scripts/settlement/roof_rain.gd").fresh()),world.plans,world.water_sources): return false
 	for cell: Variant in world.water_orders:
-		if (not world.water_sources.has(cell) and not world.wells.has(cell)) or not world.water_orders[cell] is int or world.water_orders[cell] < 0 or world.water_orders[cell] > (world.wells[cell].capacity if world.wells.has(cell) else 3):
+		if (not world.water_sources.has(cell) and not world.wells.has(cell)) or not world.water_orders[cell] is int or world.water_orders[cell] < 0 or world.water_orders[cell] > (world.wells[cell].capacity if world.wells.has(cell) else world.water_sources[cell].inventory.capacity):
 			return false
 	var weather: Dictionary = world.weather
 	for key in ["seconds", "rain_count"]:
@@ -655,11 +817,17 @@ static func _valid_shapes(world: Dictionary) -> bool:
 		return false
 	for cell: Variant in world.terrain_shapes:
 		var corners: Variant = world.terrain_shapes[cell]
-		if not cell is Vector3i or not world.ground.has(cell) or cell.y != 0 or not corners is Array or corners.size() != 4:
+		if not cell is Vector3i or not world.ground.has(cell) or not corners is Array or (corners.size()!=4 and not (int(world.get("generator_version",0))>=23 and corners.size()==5)):
 			return false
+		var minimum:=float(cell.y)
+		var maximum:=float(preload("res://scripts/settlement/world_generator.gd").MAX_HEIGHT)
+		if preload("res://scripts/settlement/solid_islands.gd").enabled(world) and cell.y==0: minimum-=0.65 if world.generator_version>=17 else 0.071
+		if corners.size()==5:
+			minimum=float(cell.y)-0.44; maximum=minf(maximum,float(cell.y)+0.44)
 		for height: Variant in corners:
-			if not (height is float or height is int) or not is_finite(float(height)) or height < 0 or height > 2.6:
+			if not (height is float or height is int) or not is_finite(float(height)) or height<minimum or height>maximum:
 				return false
+
 	return true
 
 static func _upgrade_half_grid(world: Dictionary) -> Dictionary:
@@ -743,8 +911,9 @@ static func _valid_relocation(plan: Dictionary, world: Dictionary) -> bool:
 	if not is_finite(move.labour.required_seconds) or move.labour.required_seconds <= 0 or not is_finite(move.labour.applied_seconds) or move.labour.applied_seconds < 0 or move.labour.applied_seconds > move.labour.required_seconds: return false
 	if not move.get("payload") is Dictionary: return false
 	for field: Variant in move.payload:
-		if field not in ["buildings", "platforms", "stairs", "stores", "wells", "gardens", "trees", "deposits", "soil_beds"]: return false
+		if field not in ["buildings", "platforms", "stairs", "stores", "wells", "gardens", "trees", "deposits", "soil_beds", "vines"]: return false
 		var value: Variant = move.payload[field]
+		if field == "vines" and (plan.kind != "vine_tree" or not preload("res://scripts/settlement/vines.gd").valid({move.source: value})): return false
 		if field == "soil_beds" and (plan.kind != "soil_bed" or not value is Dictionary or value.get("materials") != Catalog.recipe("soil_bed")): return false
 		if field in ["stores", "wells"] and (not value is Object or value.get_script() != Inventory): return false
 		if field in ["trees", "deposits"] and (not value is Dictionary or not value.get("inventory") is Object or value.inventory.get_script() != Inventory): return false

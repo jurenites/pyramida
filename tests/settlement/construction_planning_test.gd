@@ -117,14 +117,14 @@ func run() -> void:
 	for panel in house_node.get_node("Roof").get_children(): check(panel.is_visible_in_tree(), "Every future upper roof panel remains visible")
 	view.planning = false
 	view.sync(world, 0, -1)
-	for panel in view.entity_views["building:%s" % lower.cell].get_node("Roof").get_children(): check(panel.is_visible_in_tree(), "Inspection restores the existing lower roof")
+	check(view.entity_views["building:%s" % lower.cell].has_node("JoinedRoof") and view.entity_views["building:%s" % lower.cell].get_node("JoinedRoof").find_children("Slope_*", "MeshInstance3D", true, false).size() == 4, "Inspection restores the procedural lower roof")
 	view.planning = true
 	view.sync(world, 0, -1)
 	check(world.delete_plan(upper.id), "Cancel future upper floor")
 	view.sync(world, 0, -1)
 	built_node = view.entity_views["building:%s" % lower.cell]
 	check_opacity(built_node, false)
-	for panel in built_node.get_node("Roof").get_children(): check(panel.is_visible_in_tree(), "Cancelling restores the solid lower roof")
+	check(built_node.has_node("JoinedRoof") and built_node.get_node("JoinedRoof").find_children("Slope_*", "MeshInstance3D", true, false).size() == 4, "Cancelling restores the procedural lower roof")
 	upper = queue(world, "house", Vector3i(0, 2, 0))
 	view.sync(world, 0, -1)
 	world._complete_plan(upper)

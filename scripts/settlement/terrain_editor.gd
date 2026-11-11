@@ -9,6 +9,8 @@ static func valid_cell(surface_cell: Vector3i) -> bool:
 	return absi(surface_cell.x) <= Catalog.WORLD_LIMIT and absi(surface_cell.z) <= Catalog.WORLD_LIMIT and surface_cell.y >= MIN_HEIGHT and surface_cell.y <= MAX_HEIGHT
 
 static func edit_error(world, surface_cell: Vector3i, tool_kind: String, require_revealed := true) -> String:
+	if preload("res://scripts/settlement/solid_islands.gd").enabled(world): return "Terrain is shaped by construction"
+	if world.RopeBridges.protects(world, surface_cell, true): return "Move or remove the attached bridge first"
 	if tool_kind not in TOOL_KINDS or not world.ground.has(surface_cell): return "Choose exposed sand"
 	if require_revealed and not world.exploration.contains(Vector3(surface_cell)): return "Choose exposed sand"
 	var next_cell := surface_cell + (Vector3i.DOWN if tool_kind == "terrain_dig" else Vector3i.UP)
@@ -20,6 +22,10 @@ static func edit_error(world, surface_cell: Vector3i, tool_kind: String, require
 	# Never undermine foundations, plants, sources or planned structures. Check
 	# their horizontal footprints at every height, including elevated supports.
 	var edit_rect := Rect2(Vector2(surface_cell.x, surface_cell.z) - Vector2.ONE * 0.499, Vector2.ONE * 0.998)
+	for room in world.room_site.get("design",[]):
+		for raw in room.cells:
+			var cell: Vector3i=world.Rooms.base(world,world.Rooms.Layout.vec(raw))
+			if edit_rect.intersects(Rect2(Vector2(cell.x-0.5,cell.z-0.5),Vector2(2,2))): return "This space is occupied"
 	for field_name in ["buildings", "platforms", "stairs", "stores", "wells", "gardens", "soil_beds", "trees", "deposits", "vines", "water_sources"]:
 		for occupied_cell: Vector3i in world.get(field_name):
 			if abs(occupied_cell.x - surface_cell.x) > 3 or abs(occupied_cell.z - surface_cell.z) > 3: continue

@@ -57,6 +57,8 @@ func run() -> void:
 	var builder: Dictionary = other.workers[0]
 	var resource: String = other.Jobs.needed_material(working_plan)
 	var stock = other.stores.values()[0]
+	# New games no longer supply logs; this test explicitly provides one delivery.
+	stock.store(resource)
 	check(stock.reserve(builder.id, resource), "Foundation work uses a real construction delivery")
 	builder.cargo = stock.pickup(builder.id)
 	other.Jobs.claim_material(working_plan, resource, 1)

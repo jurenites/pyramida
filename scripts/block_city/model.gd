@@ -1,9 +1,12 @@
 extends RefCounted
 ## Colour-only construction lab. No money, building types, upgrades or switch state.
+const Frame=preload("res://scripts/block_city/hall_frame.gd")
+const Buildings=preload("res://scripts/block_city/building_identity.gd")
 const Utilities = preload("res://scripts/block_city/utility_network.gd")
 const Land = preload("res://scripts/block_city/land.gd")
 const Cable = preload("res://scripts/block_city/cable.gd")
 const Navigation = preload("res://scripts/block_city/room_navigation.gd")
+const StairGeometry = preload("res://scripts/block_city/stair_geometry.gd")
 const CONCRETE_WALL := Color("c5c8c3")
 const CONCRETE_COLUMN := Color("a5aaa4")
 const CONCRETE_FLOOR := Color("858b85")
@@ -180,7 +183,7 @@ func fit_issues(cells: Array, occ: Dictionary, paths: Dictionary, underground: b
 func fits(cells: Array, occ: Dictionary, paths: Dictionary, underground: bool, role := "room", check_cables := true) -> bool:
 	return fit_issues(cells,occ,paths,underground,role,check_cables).is_empty()
 
-func support(cells: Array, occ: Dictionary, underground: bool, role := "room") -> Dictionary:
+func support(cells: Array, occ: Dictionary, underground: bool, role := "room", frame_cells: Array = []) -> Dictionary:
 	# Braced halls can carry vertical loads. New braces still terminate on
 	# a grounded column, never on another cantilever or support beam.
 	occ=occ.duplicate()
@@ -199,7 +202,7 @@ func support(cells: Array, occ: Dictionary, underground: bool, role := "room") -
 		if carried.has(p+step): carried[p]=true
 		if int(occ[p])<0 or int(occ[p])>=rooms.size(): continue
 		var supporting_room: Dictionary=rooms[int(occ[p])]
-		if room_role(supporting_room)=="hall":
+		if room_role(supporting_room)=="hall" or supporting_room.get("frame_cells",[]).has(arr(p)):
 			for brace in supporting_room.braces:
 				if vec(brace[0])==p and primary_material.has(vec(brace[1])): carried[p]=true
 	var bases: Array = []
@@ -221,7 +224,7 @@ func support(cells: Array, occ: Dictionary, underground: bool, role := "room") -
 			continue
 		if anchors.has(p): continue
 		var found := false
-		if not anchors.is_empty() or role=="hall":
+		if not anchors.is_empty() or role=="hall" or frame_cells.has(arr(p)):
 			for d in DIRECTIONS:
 				if primary_material.has(p+step+d):
 					braces.append([arr(p),arr(p+step+d)])
@@ -234,6 +237,10 @@ func landing(card: Dictionary, x: int, z: int, yaw := 0, underground := false, t
 	if carve: return hall_cut(card,x,z,yaw,underground,target_y)
 	var form := oriented(card, yaw)
 	var occ := occupied()
+	if target_y!=-100 and room_role(card)=="room" and not card.get("no_infill",false):
+		var requested: Array=form.cells.map(func(cell):return cell+Vector3i(x,target_y,z))
+		if requested.any(func(cell):return occ.has(cell) and room_role(rooms[int(occ[cell])])=="hall"):
+			return Frame.plan(self,card,x,z,yaw,target_y)
 	var paths := reserved()
 	var max_y := 0
 	for p in form.cells: max_y = maxi(max_y, p.y)
@@ -319,6 +326,7 @@ func hall_cut(card: Dictionary, x: int, z: int, yaw: int, underground: bool, y: 
 				cursor+=1
 			var part: Dictionary = original.duplicate(true)
 			part.cells=component.map(func(cell): return arr(cell))
+			if part.has("frame_cells"): part.frame_cells=part.frame_cells.filter(func(raw):return part.cells.has(raw))
 			part.braces=original.braces.filter(func(brace): return component.has(vec(brace[0])))
 			var found := false
 			for cell in component:
@@ -339,7 +347,8 @@ func hall_cut(card: Dictionary, x: int, z: int, yaw: int, underground: bool, y: 
 	var proposed: Array = rooms.filter(func(room): return not result.affected.has(int(room.id))).duplicate(true)
 	proposed.append_array(result.remnants)
 	proposed.append({"id":proposed.size(),"shape":card.shape,"color":card.color,"cells":cells.map(func(cell): return arr(cell)),
-		"door":arr(result.door),"normal":arr(result.normal),"braces":result.braces,"access_path":[]})
+		"door":arr(result.door),"normal":arr(result.normal),"braces":result.braces,"access_path":[],
+		"building_id":Buildings.assign(self,{"shape":card.shape,"cells":cells.map(func(cell):return arr(cell))},rooms)})
 	for id in proposed.size(): proposed[id].id=id
 	result.proposed_rooms=proposed
 	result.ok=true
@@ -371,6 +380,7 @@ func tint(_card: Dictionary) -> Color:
 	return STAIR_COLOR
 
 func snapshot() -> Dictionary:
+	Buildings.ensure(self)
 	return {"version": 2, "transformer_cell":arr(transformer_cell), "owned_plots":owned_plots.duplicate(), "utility_links":utility_links.duplicate(true), "rooms": rooms.duplicate(true), "cables": cables.duplicate(true),
 		"queue": queue.duplicate(true), "basement_queue": basement_queue.duplicate(true),
 		"turn": turn, "shape_uses": shape_uses.duplicate(true)}
@@ -380,6 +390,7 @@ func restore(state: Dictionary) -> void:
 	owned_plots=state.get("owned_plots",[Land.START]).duplicate()
 	utility_links=state.get("utility_links",[]).duplicate(true)
 	rooms = state.rooms.duplicate(true)
+	Buildings.ensure(self)
 	transformer_cell=vec(state.transformer_cell) if state.has("transformer_cell") else starter_transformer_cell(rooms)
 	cables = state.cables.duplicate(true)
 	queue = state.queue.duplicate(true)
@@ -412,20 +423,25 @@ func fail(message: String) -> bool:
 	error = message
 	return false
 
-func drop(x: int, z: int, yaw := 0, underground := false, target_y := -100, carve := false) -> bool:
+func drop(x: int, z: int, yaw := 0, underground := false, target_y := -100, carve := false, preferred_building := 0) -> bool:
 	var card := current(underground)
 	var p := landing(card, x, z, yaw, underground, target_y, carve)
 	if not p.ok: return fail(p.reason)
+	Buildings.ensure(self)
+	var ownership:=Buildings.assign(self,{"shape":card.shape,"cells":p.cells.map(func(cell):return arr(cell))},rooms,preferred_building)
 	checkpoint()
-	if p.get("carve",false):
+	if p.get("infill",false):
+		rooms=p.proposed_rooms.duplicate(true)
+	elif p.get("carve",false):
 		var kept: Array = rooms.filter(func(room): return not p.affected.has(int(room.id)))
 		kept.append_array(p.remnants)
 		rooms=kept
 		for id in rooms.size(): rooms[id].id=id
 	var cells: Array = []
 	for c in p.cells: cells.append(arr(c))
-	rooms.append({"id": rooms.size(), "color": card.color, "shape": card.shape, "cells": cells,
-		"door": arr(p.door), "normal": arr(p.normal), "braces": p.braces, "access_path": []})
+	if not p.get("infill",false):
+		rooms.append({"id": rooms.size(), "building_id":ownership, "color": card.color, "shape": card.shape, "cells": cells,
+			"door": arr(p.door), "normal": arr(p.normal), "braces": p.braces, "access_path": []})
 	utility_links=Utilities.prune(self,utility_links)
 	if not defer_analysis: apply_connection_colors()
 	turn += 1
@@ -459,6 +475,7 @@ func relocation_context(id: int):
 
 func relocation_plan(id: int, x: int, z: int, yaw: int, target_y: int) -> Dictionary:
 	var card := relocation_card(id)
+	card.no_infill=true
 	var trial=relocation_context(id)
 	var y := int(card.origin.y) if target_y==-100 else target_y
 	var result: Dictionary=trial.landing(card,x,z,yaw,y<0,y)
@@ -472,6 +489,7 @@ func relocation_plan(id: int, x: int, z: int, yaw: int, target_y: int) -> Dictio
 	trial.apply_connection_colors()
 	var mapping := {}
 	for index in original.cells.size(): mapping[vec(original.cells[index])]=result.cells[index]
+	if moved.has("frame_cells"): moved.frame_cells=moved.frame_cells.map(func(raw):return arr(mapping[vec(raw)]))
 	trial.utility_links=Utilities.prune(trial,Utilities.transform(utility_links,mapping,yaw))
 	trial.cables=cables.duplicate(true)
 	for cable in trial.cables:
@@ -491,7 +509,7 @@ func relocation_plan(id: int, x: int, z: int, yaw: int, target_y: int) -> Dictio
 		var other_occ: Dictionary=occ.duplicate()
 		for cell in cells: other_occ.erase(cell)
 		result.issues.append_array(trial.fit_issues(cells,other_occ,paths,cells[0].y<0,room_role(room),false))
-		var structure: Dictionary=trial.support(cells,other_occ,cells[0].y<0,room_role(room))
+		var structure: Dictionary=trial.support(cells,other_occ,cells[0].y<0,room_role(room),room.get("frame_cells",[]))
 		result.issues.append_array(structure.issues)
 		room.braces=structure.braces
 	for cable in trial.cables:
@@ -538,7 +556,7 @@ func removal_plan(id: int) -> Dictionary:
 		var cells: Array=room.cells.map(func(raw):return vec(raw))
 		var other_occ: Dictionary=occ.duplicate()
 		for cell in cells: other_occ.erase(cell)
-		var structure: Dictionary=trial.support(cells,other_occ,cells[0].y<0,room_role(room))
+		var structure: Dictionary=trial.support(cells,other_occ,cells[0].y<0,room_role(room),room.get("frame_cells",[]))
 		result.issues.append_array(structure.issues)
 		room.braces=structure.braces
 	# Remove incident wires, then orphaned downstream links. Other powered
@@ -975,6 +993,13 @@ func load_state(state) -> bool:
 		if not valid_card(r, true) or not r.has_all(["id", "cells", "door", "normal", "braces", "access_path"]): return false
 		if r.id != i or not r.cells is Array or (r.cells.size() < 1 or r.cells.size() > 6) or not valid_point(r.door) or not valid_point(r.normal): return false
 		if not DIRECTIONS.has(vec(r.normal)) or not r.braces is Array or not r.access_path is Array: return false
+		if r.has("building_id"):
+			var owner=r.building_id
+			if (not owner is int and not owner is float) or int(owner)!=owner or owner<1 or owner>1000000000: return false
+		if r.has("frame_cells"):
+			if not r.frame_cells is Array: return false
+			for raw in r.frame_cells:
+				if not valid_point(raw) or not r.cells.has(raw): return false
 		if r.has("groups"):
 			if not r.groups is Array: return false
 			var unique_groups: Dictionary={}
@@ -1059,6 +1084,21 @@ func path_to(room: Dictionary, port: Dictionary = {}) -> Array:
 func room_role(room: Dictionary) -> String:
 	return str(shape_for(room.shape).get("role", "room"))
 
+func quarter_stair(room: Dictionary) -> bool:
+	return room_role(room)=="stairs" and int(shape_for(room.shape).get("turn_degrees",180))==90
+
+func roof_cells(room_set: Array) -> Dictionary:
+	var occupied_cells: Dictionary={}
+	var roofs: Dictionary={}
+	for room in room_set:
+		for raw in room.cells: occupied_cells[vec(raw)]=true
+	for room in room_set:
+		if room_role(room) not in ["room","hall"]: continue
+		for raw in room.cells:
+			var top:=vec(raw)+Vector3i.UP
+			if not occupied_cells.has(top): roofs[top]=int(room.id)
+	return roofs
+
 func authored_ports(room: Dictionary) -> Array:
 	var result := []
 	var role := room_role(room)
@@ -1072,20 +1112,33 @@ func authored_ports(room: Dictionary) -> Array:
 
 	else:
 		result.append({"cell":vec(room.door),"normal":normal})
-		if role == "stairs": result.append({"cell":vec(room.door)+Vector3i.UP,"normal":normal})
+		if role == "stairs":
+			result[0].across=-0.25
+			result.append({"cell":vec(room.door)+Vector3i.UP,"normal":StairGeometry.exit_normal(normal,quarter_stair(room)),"across":-0.25 if quarter_stair(room) else 0.25})
 	return result
 
 func room_ports(room: Dictionary, room_set: Array = []) -> Array:
 	var result := authored_ports(room)
-	if room_role(room)!="room": return result
+	if room_role(room) not in ["room","hall"]: return result
 	var network: Array=rooms if room_set.is_empty() else room_set
 	# A real doorway aimed at a room creates its matching opening in that wall.
 	for other in network:
 		if other.get("id",-2)==room.get("id",-1) or room_role(other)=="hall": continue
 		for port in authored_ports(other):
+			if room_role(room)=="hall" and room_role(other)=="stairs" and port.cell==vec(other.door)+Vector3i.UP and room.cells.has(arr(port.cell)):
+				for existing in result:
+					if existing.cell==port.cell and existing.normal==port.normal: existing.across=float(port.across)
 			var inside: Vector3i=port.cell+port.normal
-			if room.cells.has(arr(inside)) and not result.any(func(existing):return existing.cell==inside and existing.normal==-port.normal):
-				result.append({"cell":inside,"normal":-port.normal})
+			if not room.cells.has(arr(inside)): continue
+			var matched:=false
+			for existing in result:
+				if existing.cell==inside and existing.normal==-port.normal:
+					if port.has("across"): existing.across=-float(port.across)
+					matched=true
+			if not matched:
+				var reciprocal: Dictionary={"cell":inside,"normal":-port.normal}
+				if port.has("across"): reciprocal.across=-float(port.across)
+				result.append(reciprocal)
 	return result
 
 func connection_colors(room_set: Array = []) -> Dictionary:
@@ -1130,55 +1183,29 @@ func port_linked(room: Dictionary, port: Dictionary, room_set: Array = []) -> bo
 	var occupied_outside:=false
 	for other in network:
 		if other.get("id",-2)==room.get("id",-1): continue
+		if room_role(room)=="stairs" and port.cell==vec(room.door)+Vector3i.UP and other.cells.has(arr(port.cell)) and room_role(other) in ["hall","stairs"]: return true
 		if other.cells.has(arr(outside)): occupied_outside=true
 		if port_matches(other,outside,-port.normal,network): return true
 		if other.get("access_path",[]).has(arr(outside)): return true
 	if occupied_outside: return false
+	if roof_cells(network).has(outside): return true
 	return street(outside) or room.get("access_path",[]).has(arr(outside))
 
 func accessible_rooms(room_set: Array = []) -> Dictionary:
-	var network: Array = rooms if room_set.is_empty() else room_set
-	var reached := {}
-	var ports := []
-	var occ := {}
-	for room in network:
-		for raw in room.cells: occ[vec(raw)]=int(room.id)
-	var paths := {}
-	for room in network:
-		for raw in room.access_path: paths[vec(raw)]=true
-	var edges := {}
-	for room in network:
-		var id := int(room.id)
-		edges[id] = []
-		ports.append(room_ports(room,network))
-		if ports[id].any(func(port):return room.access_path.has(arr(port.cell+port.normal))): reached[id] = true
-		for port in ports[id]:
-			if (street(port.cell+port.normal) or paths.has(port.cell+port.normal)) and not occ.has(port.cell+port.normal): reached[id] = true
-	for room in network:
-		var id := int(room.id)
-		for port in ports[id]:
-			var outside: Vector3i = port.cell+port.normal
-			if not occ.has(outside): continue
-			var other := int(occ[outside])
-			if other!=id and port_matches(network[other],outside,-port.normal,network):
-				edges[id].append(other); edges[other].append(id)
-		# Only contiguous shaft sections form an elevator; never jump a gap.
-		if room_role(room)=="elevator":
-			var above := vec(room.cells[0])+Vector3i.UP
-			if occ.has(above) and room_role(network[int(occ[above])])=="elevator":
-				var other := int(occ[above])
-				edges[id].append(other); edges[other].append(id)
-		# A hall or another stair above the flight gets a real floor opening.
-		if room_role(room)=="stairs":
-			var upper := vec(room.door)+Vector3i.UP
-			if occ.has(upper) and room_role(network[int(occ[upper])]) in ["hall","stairs"]:
-				var other := int(occ[upper])
-				edges[id].append(other); edges[other].append(id)
-	var pending: Array = reached.keys()
+	var network: Array=rooms if room_set.is_empty() else room_set
+	var built: Dictionary=Navigation.build(self,network)
+	var visited: Dictionary={}
+	var pending: Array=[]
+	for entrance in built.entries:
+		visited[entrance.cell]=true
+		pending.append(entrance.cell)
 	while not pending.is_empty():
-		var id: int = pending.pop_front()
-		for other in edges[id]:
-			if not reached.has(other): reached[other]=true; pending.append(other)
+		var at: Vector3i=pending.pop_back()
+		for next in built.graph.get(at,{}):
+			if not visited.has(next): visited[next]=true; pending.append(next)
+	var reached: Dictionary={}
+	for room in network:
+		if visited.has(vec(room.door)): reached[int(room.id)]=true
 	return reached
 
 func has_access(room: Dictionary) -> bool:

@@ -1,0 +1,17 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/settlement/grounded_gait.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+half_step = 0.1
+stance_fraction = 0.6
+clearance = 0.045
+contact_height = 0.03
+cycle_seconds = 0.9
+arm_swing = 0.45
+elbow_bend = 0.65
+torso_twist = 0.065
+head_nod = 0.022
+torso_bob = 0.018
+head_bob = 0.004

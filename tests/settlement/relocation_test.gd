@@ -41,6 +41,7 @@ func _initialize() -> void:
 
 func run() -> void:
 	test_building()
+	test_change_destination()
 	test_reservations_and_handoff()
 	test_plants()
 	test_adjacent_bushes()
@@ -74,6 +75,37 @@ func test_building() -> void:
 	check(world.construction_materials.get(TARGET) == {"log": 5}, "Original recipe persists after relocation")
 	check(world.workers.all(func(worker): return worker.get("home_cell") == TARGET), "Residents retain their home through dismantling, save/load and rebuilding")
 	check(world.stores.has(TARGET) and not world.stores.has(SOURCE), "House food inventory moves with its residents")
+
+func test_change_destination() -> void:
+	var world = fresh()
+	complete(world, "house")
+	check(Move.request(world, SOURCE, TARGET, 0, Vector3.ZERO), "Queue destination to revise")
+	var id: int = world.next_plan_id - 1
+	check(world.order_build(0, id), "Assign builder before revising move")
+	for i in 400:
+		world.tick(0.05)
+		if world.plans[id].relocation.labour.applied_seconds > 0: break
+	var plan: Dictionary = world.plans[id]
+	var progress: float = plan.relocation.labour.applied_seconds
+	check(progress > 0 and plan.relocation.stage == "dismantle", "Dismantling has begun at the original location")
+	check(world.move_plan_error(id, TARGET, 1, Vector3.ZERO).is_empty(), "Current destination can be reused without colliding with its own plan")
+	check(not world.move_plan(id, SOURCE, 0, Vector3.ZERO) and plan.cell == TARGET, "Invalid revision preserves the previous destination")
+	var revised := Vector3i(8, 0, 0)
+	world.exploration.reveal(Nav.point(revised))
+	check(world.move_plan(id, revised, 2, Vector3(0.12, 0, -0.1)), "Revise destination while dismantling")
+	check(world.plans.size() == 1 and world.next_plan_id == id + 1, "Revision keeps the original plan identity")
+	check(plan.relocation.labour.applied_seconds == progress and plan.relocation.owner == 0 and world.workers[0].job.get("plan_id") == id, "Revision preserves applied work and assigned builder")
+	check(world.build_error("house", TARGET).is_empty() and not world.build_error("house", revised).is_empty(), "Revision releases old footprint and reserves the new destination")
+	world = reload_world(world)
+	for i in 400:
+		world.tick(0.05)
+		if world.plans[id].relocation.stage == "rebuild": break
+	check(world.plans[id].relocation.stage == "rebuild" and Move.pending_move(world, SOURCE).is_empty(), "Source editing ends when dismantling finishes")
+	check(not world.move_plan(id, TARGET, 0, Vector3.ZERO) and world.plans[id].cell == revised, "A stale source action cannot redirect recovered parts")
+	advance(world, 100)
+	check(world.buildings.has(revised) and not world.buildings.has(SOURCE) and not world.buildings.has(TARGET), "Saved revised move completes at the new destination")
+	if world.buildings.has(revised):
+		check(world.buildings[revised].direction == 2 and world.buildings[revised].placement_offset.is_equal_approx(Vector3(0.12, 0, -0.1)), "Revised orientation and offset survive rebuilding")
 
 func test_reservations_and_handoff() -> void:
 	var world = fresh()
@@ -191,6 +223,22 @@ func test_controls() -> void:
 	check(game.relocation_source == SOURCE and is_instance_valid(game.preview), "Arrow starts placement preview")
 	game._clear_selection()
 	check(game.relocation_source == null and game.model.plans.is_empty() and game.model.buildings.has(SOURCE), "Cancel preview leaves building intact")
+	check(Move.request(game.model, SOURCE, TARGET, 0, Vector3.ZERO), "Queue a move before reselecting its source")
+	var id: int = game.model.next_plan_id - 1
+	game.selected_object = {"cell": SOURCE, "kind": "house", "entity_key": "building:%s" % SOURCE}
+	game.hud.update(game.model, -1, 1, game.selected_object)
+	check(game.hud.selection_toolbar.visible and game.hud.move_button.visible and not game.hud.move_button.disabled, "Source keeps an enabled Move control after queuing")
+	check(game.hud.copy_button.visible and not game.hud.copy_button.disabled and game._selected_building_kind() == "house", "Source keeps its Copy control")
+	check(game.hud.removal_button.visible and game.hud.removal_button.disabled, "Remove remains visible without allowing a conflicting removal order")
+	game.hud.move_button.pressed.emit()
+	check(game.moving_plan_id == id and game.relocation_source == SOURCE and is_instance_valid(game.preview), "Source Move edits the existing relocation")
+	game._clear_selection()
+	check(game.model.plans[id].cell == TARGET and game.model.buildings.has(SOURCE), "Cancelling revision preserves the queued destination")
+	game.selected_object = {"cell": SOURCE, "kind": "house", "entity_key": "building:%s" % SOURCE}
+	game._begin_relocation()
+	check(game._commit_plan_move(Vector3i(6, 0, 0), Vector3.ZERO), "Source action commits a replacement destination")
+	check(game.model.plans[id].cell == Vector3i(6, 0, 0) and game.model.plans.size() == 1, "Control replaces destination without a second move order")
+	game._clear_selection()
 	game.model.trees[Vector3i(8, 0, 0)] = Chunks.entry("living", "log", 3)
 	game.selected_object = {"cell": Vector3i(8, 0, 0), "kind": "tree", "entity_key": "tree:(8, 0, 0)"}
 	game.model.exploration.reveal(Nav.point(Vector3i(8, 0, 0)))

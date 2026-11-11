@@ -5,6 +5,10 @@ const Icon = preload("res://scripts/settlement/build_icon.gd")
 const Catalog = preload("res://data/settlement/catalog.gd")
 const Piles = preload("res://scripts/settlement/pile_groups.gd")
 const Economy = preload("res://scripts/settlement/economy.gd")
+const HouseSelection = preload("res://scripts/settlement/house_selection.gd")
+const BuildingReadout = preload("res://scripts/settlement/building_readout.gd")
+var benefit: HBoxContainer
+var last_benefit: Array = []
 var title: Label
 var content: VBoxContainer
 var rows: VBoxContainer
@@ -27,6 +31,10 @@ func _init() -> void:
 	rows.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	rows.add_theme_constant_override("separation", Tokens.GAP_UNIT)
 	content.add_child(rows)
+	benefit = BuildingReadout.new()
+	benefit.alignment = BoxContainer.ALIGNMENT_CENTER
+	content.add_child(benefit)
+	benefit.hide()
 	set_black(false)
 
 func set_black(black: bool) -> void:
@@ -46,7 +54,12 @@ func set_black(black: bool) -> void:
 
 func show_info(info: Dictionary, details: bool) -> void:
 	title.text = info.title
-	var values: Array = info.rows if details else []
+	var purpose: Array = info.get("benefit", []) if details else []
+	if purpose != last_benefit:
+		last_benefit = purpose.duplicate(true)
+		benefit.display(purpose, Color.WHITE)
+	benefit.visible = not purpose.is_empty()
+	var values: Array = info.rows if details else info.get("hover_rows",[])
 	if values != last_rows:
 		last_rows = values.duplicate(true)
 		for child in rows.get_children():
@@ -68,6 +81,12 @@ func show_info(info: Dictionary, details: bool) -> void:
 			count.add_theme_font_size_override("font_size", Tokens.WORLD_TOOLTIP_FONT_SIZE)
 			row.add_child(count)
 			rows.add_child(row)
+	var ink := Color.WHITE if black_background else Color("352719")
+	for row in rows.get_children():
+		if row.get_child(0).ink != ink:
+			row.get_child(0).ink = ink
+			row.get_child(0).queue_redraw()
+		row.get_child(1).add_theme_color_override("font_color", ink)
 	rows.visible = not values.is_empty()
 	reset_size()
 
@@ -80,6 +99,7 @@ static func describe(model, target: Dictionary) -> Dictionary:
 	var kind: String = target.kind
 	var cell: Vector3i = target.cell
 	result.title = Catalog.title(kind)
+	if target.has("bridge_id") and model.bridges.has(target.bridge_id): return result
 	# A plan at a resource cell must never inherit that resource's inventory.
 	if str(target.get("entity_key", "")).begins_with("plan:"):
 		for plan: Dictionary in model.plans.values():
@@ -93,13 +113,29 @@ static func describe(model, target: Dictionary) -> Dictionary:
 					return result
 				for resource: String in plan.materials:
 					result.rows.append({"icon": resource, "value": "%d/%d" % [plan.used.get(resource, 0), plan.materials[resource]]})
+				if plan.kind == "well":
+					var incoming := 1
+					if plan.has("relocation"):
+						incoming = model.Hydrology.units(plan.relocation.payload.get("buildings", model.buildings.get(plan.relocation.source, {})))
+					var count: int = incoming + (model.Hydrology.units(model.buildings.get(cell, {})) if model.wells.has(cell) else 0)
+					result.rows.append({"icon":"water", "value":str(model.Hydrology.capacity(model,cell,count))})
 		return result
+	if Economy.is_workplace(kind) and model.buildings.get(cell, {}).get("kind") == kind:
+		result["benefit"] = BuildingReadout.benefit(kind)
+		var assigned := 0
+		for worker: Dictionary in model.workers:
+			# Keep dedicated staff visible during meals, hauling and idle gaps.
+			if worker.get("assigned_workplace") == cell:
+				assigned += 1
+		result.rows.append({"icon": "citizens", "value": str(assigned)})
 	if kind == "tree" and model.trees.has(cell):
 		var tree: Dictionary = model.trees[cell]
 		result.title = TranslationServer.translate("stump_name_text" if tree.inventory.count("log") == 0 else ("dead_tree_name_text" if tree.get("kind", "living") == "dead" else "tree_name_text"))
 		if tree.get("kind") == "palm" and tree.inventory.count("log") > 0: result.title = TranslationServer.translate("palm_name_text")
 		if float(tree.get("seed_growth", 1.0)) < 1.0: result.title = TranslationServer.translate("palm_seedling_name_text" if tree.get("kind") == "palm" else "sapling_name_text")
 		result.rows.append({"icon": "log", "value": "%d/%d" % [tree.inventory.count("log"), tree.inventory.capacity]})
+	elif kind == "hay_field" and model.gardens.has(cell):
+		result.rows.append({"icon": "grain", "value": str(model.gardens[cell].food)})
 	elif model.deposits.has(cell):
 		var deposit: Dictionary = model.deposits[cell]
 		var berry: bool = deposit.kind == "berry"
@@ -109,12 +145,15 @@ static func describe(model, target: Dictionary) -> Dictionary:
 		var inventory = model.wells[cell]
 		result.title = Catalog.title(model.buildings.get(cell, {}).get("kind", "well"))
 		result.rows.append({"icon": "water", "value": "%d/%d" % [inventory.count("water"), inventory.capacity]})
-	elif model.water_sources.has(cell):
+		result.hover_rows = result.rows.duplicate(true)
+	elif model.water_sources.has(cell) and not model.buildings.has(cell):
 		var source: Dictionary = model.water_sources[cell]
 		result.title = TranslationServer.translate("puddle_name_text" if source.kind == "puddle" else "stream_name_text")
 		result.rows.append({"icon": "water", "value": "%d/%d" % [source.inventory.count("water"), source.inventory.capacity]})
 	elif kind == "house":
-		var total: Dictionary = model.Houses.totals(model, cell)
+		var total: Dictionary = model.Houses.totals(model, cell, HouseSelection.members(model, target))
+		if target.get("house_scope") == "floor": result.title = TranslationServer.translate("house_floor_name_text")
+		elif target.get("house_scope") == "room": result.title = TranslationServer.translate("house_room_name_text")
 		result.rows.append({"icon": "citizens", "value": "%d/%d" % [total.residents, total.capacity]})
 		result.rows.append({"icon": "food", "value": "%d/%d" % [total.food, total.food_capacity]})
 	elif Piles.is_pile(model, cell):
@@ -150,9 +189,23 @@ static func person_title(worker: Dictionary) -> String:
 			"water", "harvest": role = "farmer"
 			"gather": role = "miner" if job.get("resource") == "stone" else "forager"
 			"restock", "collect_water": role = "hauler"
-			"process":
-				role = {"plank": "sawyer", "food": "baker", "block": "mason"}.get(job.get("output", ""), "idle")
+			"process", "extract":
+				role = {"plank": "sawyer", "food": "baker", "block": "mason", "flour": "miller", "pottery": "potter", "brick": "kilner", "imbrex": "tiler", "clay": "claydigger", "ore": "prospector"}.get(job.get("output", ""), "idle")
 			_: role = "idle"
 	if role == "idle":
 		return TranslationServer.translate("willager_name_text")
 	return TranslationServer.translate("person_job_%s_text" % role)
+
+static func name_anchor_mesh(node: Node3D, mesh: MeshInstance3D) -> bool:
+	if not mesh.is_visible_in_tree() or mesh.mesh == null: return false
+	var rotor := node.get_node_or_null("WindTower/Rotor")
+	return rotor == null or not rotor.is_ancestor_of(mesh)
+
+static func stationary_height(node: Node3D, fallback: float) -> float:
+	if not node.has_node("WindTower/Rotor"): return fallback
+	var height := 0.0
+	for mesh: MeshInstance3D in node.find_children("*", "MeshInstance3D", true, false):
+		if not name_anchor_mesh(node, mesh): continue
+		var pose := preload("res://scripts/settlement/timber_frame.gd").relative(node, mesh)
+		height = maxf(height, (pose * mesh.get_aabb()).end.y)
+	return height if height > 0 else fallback

@@ -1,10 +1,10 @@
 [gd_scene format=3]
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_3orgk"]
-albedo_color = Color(0.52454907, 0.36580393, 0.25882354, 1)
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_safpk"]
+albedo_color = Color(0.59607846, 0.41568628, 0.29411766, 1)
 roughness = 0.92
 
-[sub_resource type="CylinderMesh" id="CylinderMesh_jbhgj"]
+[sub_resource type="CylinderMesh" id="CylinderMesh_3orgk"]
 top_radius = 0.115
 bottom_radius = 0.115
 height = 0.22
@@ -15,186 +15,220 @@ rings = 1
 albedo_color = Color(0.81960785, 0.654902, 0.45882353, 1)
 roughness = 0.92
 
-[sub_resource type="CylinderMesh" id="CylinderMesh_glmhd"]
+[sub_resource type="CylinderMesh" id="CylinderMesh_jbhgj"]
 top_radius = 0.115
 bottom_radius = 0.115
 height = 0.008
 radial_segments = 7
 rings = 1
 
-[sub_resource type="CylinderMesh" id="CylinderMesh_1t5m8"]
-top_radius = 0.1127
+[sub_resource type="CylinderMesh" id="CylinderMesh_6x3ta"]
+top_radius = 0.115
 bottom_radius = 0.115
-height = 0.88082343
-radial_segments = 7
+height = 0.9
+radial_segments = 8
 rings = 1
 
-[sub_resource type="CylinderMesh" id="CylinderMesh_qjhyh"]
-top_radius = 0.1127
-bottom_radius = 0.1127
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_0blbs"]
+albedo_color = Color(0.59607846, 0.41568628, 0.29411766, 1)
+roughness = 0.92
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_wbhn3"]
+top_radius = 0.084
+bottom_radius = 0.084
 height = 0.012
-radial_segments = 7
+radial_segments = 8
 rings = 1
 
-[sub_resource type="CylinderMesh" id="CylinderMesh_m06qg"]
-top_radius = 0.1104
-bottom_radius = 0.1127
-height = 0.88347334
-radial_segments = 7
-rings = 1
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_x5ns4"]
+albedo_color = Color(0.81960785, 0.654902, 0.45882353, 1)
+roughness = 0.92
 
-[sub_resource type="CylinderMesh" id="CylinderMesh_6t240"]
-top_radius = 0.1104
-bottom_radius = 0.1104
+[sub_resource type="CylinderMesh" id="CylinderMesh_nvsn6"]
+top_radius = 0.084
+bottom_radius = 0.084
 height = 0.012
-radial_segments = 7
+radial_segments = 8
 rings = 1
 
-[sub_resource type="CylinderMesh" id="CylinderMesh_vuo5o"]
+[sub_resource type="CylinderMesh" id="CylinderMesh_glmhd"]
 top_radius = 0.045
 bottom_radius = 0.09
 height = 0.41701323
 radial_segments = 7
 rings = 1
 
-[sub_resource type="CylinderMesh" id="CylinderMesh_j8rsv"]
-top_radius = 0.1081
-bottom_radius = 0.1104
-height = 0.8822697
-radial_segments = 7
-rings = 1
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_pub6r"]
-top_radius = 0.1081
-bottom_radius = 0.1081
-height = 0.012
-radial_segments = 7
-rings = 1
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_o8x1a"]
+[sub_resource type="CylinderMesh" id="CylinderMesh_1t5m8"]
 top_radius = 0.068
 bottom_radius = 0.095
 height = 0.5303771
 radial_segments = 7
 rings = 1
 
-[sub_resource type="CylinderMesh" id="CylinderMesh_7vt38"]
+[sub_resource type="CylinderMesh" id="CylinderMesh_qjhyh"]
 top_radius = 0.025
 bottom_radius = 0.068
 height = 0.47010642
 radial_segments = 7
 rings = 1
 
-[sub_resource type="CylinderMesh" id="CylinderMesh_8t50b"]
+[sub_resource type="CylinderMesh" id="CylinderMesh_m06qg"]
 top_radius = 0.068
 bottom_radius = 0.095
 height = 0.48918295
 radial_segments = 7
 rings = 1
 
-[sub_resource type="CylinderMesh" id="CylinderMesh_enf3x"]
+[sub_resource type="CylinderMesh" id="CylinderMesh_6t240"]
 top_radius = 0.025
 bottom_radius = 0.068
 height = 0.47010642
 radial_segments = 7
 rings = 1
 
-[sub_resource type="CylinderMesh" id="CylinderMesh_qloty"]
+[sub_resource type="CylinderMesh" id="CylinderMesh_vuo5o"]
 top_radius = 0.068
 bottom_radius = 0.095
 height = 0.45221677
 radial_segments = 7
 rings = 1
 
-[sub_resource type="CylinderMesh" id="CylinderMesh_05448"]
+[sub_resource type="CylinderMesh" id="CylinderMesh_j8rsv"]
 top_radius = 0.025
 bottom_radius = 0.068
 height = 0.47010618
 radial_segments = 7
 rings = 1
 
-[node name="DeadTree" type="Node3D" unique_id=2091150836]
+[node name="DeadTree" type="Node3D" unique_id=638709976]
 
-[node name="Stump" type="MeshInstance3D" parent="." unique_id=1889447370]
+[node name="Stump" type="MeshInstance3D" parent="." unique_id=341758715]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.07, 0)
-material_override = SubResource("StandardMaterial3D_3orgk")
-mesh = SubResource("CylinderMesh_jbhgj")
+material_override = SubResource("StandardMaterial3D_safpk")
+mesh = SubResource("CylinderMesh_3orgk")
 
-[node name="StumpCut" type="MeshInstance3D" parent="." unique_id=1861039754]
+[node name="StumpCut" type="MeshInstance3D" parent="." unique_id=8734553]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.182, 0)
 material_override = SubResource("StandardMaterial3D_2171g")
+mesh = SubResource("CylinderMesh_jbhgj")
+
+[node name="Segment1" type="Node3D" parent="." unique_id=519173727]
+
+[node name="Trunk" type="MeshInstance3D" parent="Segment1" unique_id=929186415]
+transform = Transform3D(-0.99927586, -0.03497465, -0.014989138, 0.03519173, -0.99927586, -0.014472122, -0.014472123, -0.014989137, 0.9997829, 0.016053366, 0.6386676, 0.0068800133)
+mesh = SubResource("CylinderMesh_6x3ta")
+surface_material_override/0 = SubResource("StandardMaterial3D_0blbs")
+metadata/timber_stock = "log"
+metadata/timber_cut = false
+metadata/timber_species = "tree"
+
+[node name="BaseCut" type="MeshInstance3D" parent="Segment1" unique_id=1154657649]
+transform = Transform3D(-0.99927586, -0.03497465, -0.014989138, 0.03519173, -0.99927586, -0.014472122, -0.014472123, -0.014989137, 0.9997829, 0.00020982884, 0.18599561, 8.993363e-05)
+visible = false
+mesh = SubResource("CylinderMesh_wbhn3")
+surface_material_override/0 = SubResource("StandardMaterial3D_x5ns4")
+metadata/timber_stock = "log"
+metadata/timber_cut = true
+metadata/timber_species = "tree"
+
+[node name="CutFace" type="MeshInstance3D" parent="Segment1" unique_id=1791226342]
+transform = Transform3D(-0.99927586, -0.03497465, -0.014989138, 0.03519173, -0.99927586, -0.014472122, -0.014472123, -0.014989137, 0.9997829, 0.031896904, 1.0913396, 0.013670092)
+visible = false
+mesh = SubResource("CylinderMesh_nvsn6")
+surface_material_override/0 = SubResource("StandardMaterial3D_x5ns4")
+metadata/timber_stock = "log"
+metadata/timber_cut = true
+metadata/timber_species = "tree"
+
+[node name="Segment2" type="Node3D" parent="." unique_id=1169423934]
+
+[node name="Trunk" type="MeshInstance3D" parent="Segment2" unique_id=1390082846]
+transform = Transform3D(-0.9969515, 0.06978683, 0.034893308, -0.068477914, -0.9969515, 0.03739673, 0.03739673, 0.034893308, 0.99869114, 7.467612e-05, 1.5549359, -0.0022560004)
+mesh = SubResource("CylinderMesh_6x3ta")
+surface_material_override/0 = SubResource("StandardMaterial3D_0blbs")
+metadata/timber_stock = "log"
+metadata/timber_cut = false
+metadata/timber_species = "tree"
+
+[node name="BaseCut" type="MeshInstance3D" parent="Segment2" unique_id=504641195]
+transform = Transform3D(-0.9969515, 0.06978683, 0.034893308, -0.068477914, -0.9969515, 0.03739673, 0.03739673, 0.034893308, 0.99869114, 0.031688094, 1.1033169, 0.013550669)
+visible = false
+mesh = SubResource("CylinderMesh_wbhn3")
+surface_material_override/0 = SubResource("StandardMaterial3D_x5ns4")
+metadata/timber_stock = "log"
+metadata/timber_cut = true
+metadata/timber_species = "tree"
+
+[node name="CutFace" type="MeshInstance3D" parent="Segment2" unique_id=2000925471]
+transform = Transform3D(-0.9969515, 0.06978683, 0.034893308, -0.068477914, -0.9969515, 0.03739673, 0.03739673, 0.034893308, 0.99869114, -0.03153874, 2.006555, -0.01806267)
+visible = false
+mesh = SubResource("CylinderMesh_nvsn6")
+surface_material_override/0 = SubResource("StandardMaterial3D_x5ns4")
+metadata/timber_stock = "log"
+metadata/timber_cut = true
+metadata/timber_species = "tree"
+
+[node name="BrokenBranch" type="MeshInstance3D" parent="Segment2" unique_id=1815875675]
+transform = Transform3D(0.5963872, -0.79134184, 0.13453759, 0.79134184, 0.5515413, -0.26378062, 0.13453759, 0.26378062, 0.9551541, -0.165, 1.595, 0.055)
+material_override = SubResource("StandardMaterial3D_safpk")
 mesh = SubResource("CylinderMesh_glmhd")
 
-[node name="Segment1" type="Node3D" parent="." unique_id=141301663]
+[node name="Segment3" type="Node3D" parent="." unique_id=1845934604]
 
-[node name="Trunk" type="MeshInstance3D" parent="Segment1" unique_id=1060053992]
-transform = Transform3D(0.9992102, 0.03973554, -0.0003384968, -0.03973554, 0.9990651, -0.017029518, -0.0003384968, 0.017029518, 0.9998549, 0.0175, 0.62, 0.0075)
-material_override = SubResource("StandardMaterial3D_3orgk")
+[node name="Trunk" type="MeshInstance3D" parent="Segment3" unique_id=851717537]
+transform = Transform3D(-0.998006, -0.05988027, -0.019960117, 0.060256198, -0.998006, -0.018794874, -0.018794874, -0.019960117, 0.9996241, -0.0044722864, 2.4706213, -0.009110329)
+mesh = SubResource("CylinderMesh_6x3ta")
+surface_material_override/0 = SubResource("StandardMaterial3D_0blbs")
+metadata/timber_stock = "log"
+metadata/timber_cut = false
+metadata/timber_species = "tree"
+
+[node name="BaseCut" type="MeshInstance3D" parent="Segment3" unique_id=1046453955]
+transform = Transform3D(-0.998006, -0.05988027, -0.019960117, 0.060256198, -0.998006, -0.018794874, -0.018794874, -0.019960117, 0.9996241, -0.03159807, 2.0185246, -0.018152263)
+visible = false
+mesh = SubResource("CylinderMesh_wbhn3")
+surface_material_override/0 = SubResource("StandardMaterial3D_x5ns4")
+metadata/timber_stock = "log"
+metadata/timber_cut = true
+metadata/timber_species = "tree"
+
+[node name="CutFace" type="MeshInstance3D" parent="Segment3" unique_id=1802852564]
+transform = Transform3D(-0.998006, -0.05988027, -0.019960117, 0.060256198, -0.998006, -0.018794874, -0.018794874, -0.019960117, 0.9996241, 0.022653496, 2.922718, -6.83954e-05)
+mesh = SubResource("CylinderMesh_nvsn6")
+surface_material_override/0 = SubResource("StandardMaterial3D_x5ns4")
+metadata/timber_stock = "log"
+metadata/timber_cut = true
+metadata/timber_species = "tree"
+
+[node name="Fork" type="MeshInstance3D" parent="Segment3" unique_id=951535352]
+transform = Transform3D(0.7594673, 0.6425476, -0.1016956, -0.6425476, 0.7164711, -0.27166477, -0.1016956, 0.27166477, 0.9570038, 0.17039628, 2.3600001, 0.07204239)
+material_override = SubResource("StandardMaterial3D_safpk")
 mesh = SubResource("CylinderMesh_1t5m8")
 
-[node name="CutFace" type="MeshInstance3D" parent="Segment1" unique_id=68564246]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.035, 1.063, 0.015)
-material_override = SubResource("StandardMaterial3D_2171g")
+[node name="Twig" type="MeshInstance3D" parent="Segment3" unique_id=596555405]
+transform = Transform3D(0.9276241, 0.37225956, -0.030600045, -0.37225956, 0.9146866, -0.15738884, -0.030600045, 0.15738884, 0.9870625, 0.42829335, 2.7649999, 0.18107954)
+material_override = SubResource("StandardMaterial3D_safpk")
 mesh = SubResource("CylinderMesh_qjhyh")
 
-[node name="Segment2" type="Node3D" parent="." unique_id=2066917418]
-
-[node name="Trunk" type="MeshInstance3D" parent="Segment2" unique_id=290324846]
-transform = Transform3D(0.9968549, -0.07923273, -0.0015725474, 0.07923273, 0.99606866, 0.039616365, -0.0015725474, -0.039616365, 0.99921376, 0, 1.5, -0.0025)
-material_override = SubResource("StandardMaterial3D_3orgk")
+[node name="Fork2" type="MeshInstance3D" parent="Segment3" unique_id=691984006]
+transform = Transform3D(0.77988577, -0.60340893, 0.16636051, 0.60340893, 0.6541519, -0.45605153, 0.16636051, 0.45605153, 0.8742661, -0.14758869, 2.4499998, 0.111546315)
+material_override = SubResource("StandardMaterial3D_safpk")
 mesh = SubResource("CylinderMesh_m06qg")
 
-[node name="CutFace" type="MeshInstance3D" parent="Segment2" unique_id=1339499881]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.035, 1.9430001, -0.02)
-material_override = SubResource("StandardMaterial3D_2171g")
+[node name="Twig2" type="MeshInstance3D" parent="Segment3" unique_id=1540878375]
+transform = Transform3D(0.9457025, -0.3224325, 0.041037604, 0.3224325, 0.9146866, -0.2436918, 0.041037604, 0.2436918, 0.9689841, -0.37096614, 2.8249998, 0.28037316)
+material_override = SubResource("StandardMaterial3D_safpk")
 mesh = SubResource("CylinderMesh_6t240")
 
-[node name="BrokenBranch" type="MeshInstance3D" parent="Segment2" unique_id=1209987357]
-transform = Transform3D(0.5963872, -0.79134184, 0.13453759, 0.79134184, 0.5515413, -0.26378062, 0.13453759, 0.26378062, 0.9551541, -0.165, 1.595, 0.055)
-material_override = SubResource("StandardMaterial3D_3orgk")
+[node name="Fork3" type="MeshInstance3D" parent="Segment3" unique_id=1239898777]
+transform = Transform3D(0.9935396, -0.1008702, -0.052002795, 0.1008702, 0.5749455, 0.81195, -0.052002795, -0.81195, 0.5814059, -0.0228076, 2.54, -0.18358871)
+material_override = SubResource("StandardMaterial3D_safpk")
 mesh = SubResource("CylinderMesh_vuo5o")
 
-[node name="Segment3" type="Node3D" parent="." unique_id=1573398408]
-
-[node name="Trunk" type="MeshInstance3D" parent="Segment3" unique_id=1274293479]
-transform = Transform3D(0.9976846, 0.068006426, -0.000771805, -0.068006426, 0.99742734, -0.022668805, -0.000771805, 0.022668805, 0.99974275, -0.005, 2.38, -0.01)
-material_override = SubResource("StandardMaterial3D_3orgk")
+[node name="Twig3" type="MeshInstance3D" parent="Segment3" unique_id=132770795]
+transform = Transform3D(0.9987033, -0.049827084, -0.010437575, 0.049827084, 0.91468656, 0.40108076, -0.010437575, -0.40108076, 0.91598326, -0.05732721, 2.885, -0.4614527)
+material_override = SubResource("StandardMaterial3D_safpk")
 mesh = SubResource("CylinderMesh_j8rsv")
 
-[node name="CutFace" type="MeshInstance3D" parent="Segment3" unique_id=1581193498]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.025, 2.823, 0)
-material_override = SubResource("StandardMaterial3D_2171g")
-mesh = SubResource("CylinderMesh_pub6r")
-
-[node name="Fork" type="MeshInstance3D" parent="Segment3" unique_id=1905299709]
-transform = Transform3D(0.7594673, 0.6425476, -0.1016956, -0.6425476, 0.7164711, -0.27166477, -0.1016956, 0.27166477, 0.9570038, 0.17039628, 2.3600001, 0.07204239)
-material_override = SubResource("StandardMaterial3D_3orgk")
-mesh = SubResource("CylinderMesh_o8x1a")
-
-[node name="Twig" type="MeshInstance3D" parent="Segment3" unique_id=1026754586]
-transform = Transform3D(0.9276241, 0.37225956, -0.030600045, -0.37225956, 0.9146866, -0.15738884, -0.030600045, 0.15738884, 0.9870625, 0.42829335, 2.7649999, 0.18107954)
-material_override = SubResource("StandardMaterial3D_3orgk")
-mesh = SubResource("CylinderMesh_7vt38")
-
-[node name="Fork2" type="MeshInstance3D" parent="Segment3" unique_id=1066639267]
-transform = Transform3D(0.77988577, -0.60340893, 0.16636051, 0.60340893, 0.6541519, -0.45605153, 0.16636051, 0.45605153, 0.8742661, -0.14758869, 2.4499998, 0.111546315)
-material_override = SubResource("StandardMaterial3D_3orgk")
-mesh = SubResource("CylinderMesh_8t50b")
-
-[node name="Twig2" type="MeshInstance3D" parent="Segment3" unique_id=90016425]
-transform = Transform3D(0.9457025, -0.3224325, 0.041037604, 0.3224325, 0.9146866, -0.2436918, 0.041037604, 0.2436918, 0.9689841, -0.37096614, 2.8249998, 0.28037316)
-material_override = SubResource("StandardMaterial3D_3orgk")
-mesh = SubResource("CylinderMesh_enf3x")
-
-[node name="Fork3" type="MeshInstance3D" parent="Segment3" unique_id=1060168863]
-transform = Transform3D(0.9935396, -0.1008702, -0.052002795, 0.1008702, 0.5749455, 0.81195, -0.052002795, -0.81195, 0.5814059, -0.0228076, 2.54, -0.18358871)
-material_override = SubResource("StandardMaterial3D_3orgk")
-mesh = SubResource("CylinderMesh_qloty")
-
-[node name="Twig3" type="MeshInstance3D" parent="Segment3" unique_id=1049669164]
-transform = Transform3D(0.9987033, -0.049827084, -0.010437575, 0.049827084, 0.91468656, 0.40108076, -0.010437575, -0.40108076, 0.91598326, -0.05732721, 2.885, -0.4614527)
-material_override = SubResource("StandardMaterial3D_3orgk")
-mesh = SubResource("CylinderMesh_05448")
-
-[node name="AccessFront" type="Marker3D" parent="." unique_id=2120847421]
+[node name="AccessFront" type="Marker3D" parent="." unique_id=310944768]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.7)

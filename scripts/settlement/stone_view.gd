@@ -180,9 +180,9 @@ static func populate_outcrop(node: Node3D, cell: Vector3i, world_seed: int, capa
 			stone.owner = node
 			index += 1
 
-static func sync(node: Node3D, cell: Vector3i, world_seed: int, inventory, dressed := false) -> void:
+static func sync(node: Node3D, cell: Vector3i, world_seed: int, inventory, dressed := false, eroded := false) -> void:
 	if not dressed and inventory.capacity > 30:
-		sync_volume(node, cell, world_seed, inventory)
+		sync_volume(node, cell, world_seed, inventory, eroded)
 		return
 	var signature := [cell, world_seed, inventory.capacity, dressed]
 	if node.get_meta("stone_signature", []) != signature:
@@ -206,23 +206,25 @@ static func sync(node: Node3D, cell: Vector3i, world_seed: int, inventory, dress
 			shape.shape.size = bounds.size
 			shape.position = bounds.get_center()
 
-static func sync_volume(node: Node3D, cell: Vector3i, world_seed: int, inventory) -> void:
-	var signature := [cell, world_seed, inventory.capacity, inventory.count("stone")]
+static func sync_volume(node: Node3D, cell: Vector3i, world_seed: int, inventory, eroded := false) -> void:
+	var geometry = preload("res://scripts/settlement/eroded_stone.gd") if eroded else Volume
+	var signature := [cell, world_seed, inventory.capacity, inventory.count("stone"), eroded]
 	if node.get_meta("stone_signature", []) == signature: return
 	for child in node.get_children():
 		if child is MeshInstance3D: child.free()
 	var collision_faces := PackedVector3Array()
 	var bounds := AABB()
 	var first := true
-	for section in Volume.sections(cell, world_seed):
+	for section in geometry.sections(cell, world_seed):
 		var remaining := clampi(Volume.logical_amount(cell, world_seed, inventory.count("stone"), inventory.capacity) - int(section.start), 0, section.count)
 		if remaining == 0: continue
-		var faces := Volume.visual_faces(section, remaining)
+		var faces: Array = geometry.visual_faces(section, remaining)
 		var st := SurfaceTool.new()
 		st.begin(Mesh.PRIMITIVE_TRIANGLES)
 		for face in faces:
 			var normal: Vector3 = (face[1] - face[0]).cross(face[2] - face[0]).normalized()
-			var colour := Terrain.STONE_TOP if normal.y > 0.5 else Terrain.STONE_SIDE
+			var colour := Terrain.STONE_TOP if normal.y > 0.5 else Terrain.STONE_SIDE.darkened(0.10 + 0.14 * maxf(0.0, normal.dot(Vector3(0.6, 0, 0.8))))
+			if eroded: colour=Color("8b9380") if normal.y>0.5 else Color("62756d").lightened(0.08*normal.dot(Vector3.RIGHT))
 			for index in range(1, face.size() - 1):
 				# Logical polygons wind outward mathematically; Godot draws
 				# clockwise exteriors. Keep the outward normal for shadow bias.
@@ -231,7 +233,7 @@ static func sync_volume(node: Node3D, cell: Vector3i, world_seed: int, inventory
 				for vertex in [face[0], face[index + 1], face[index]]: st.add_vertex(vertex)
 		var part := MeshInstance3D.new()
 		part.name = "Section%d" % section.start
-		# Share triangle corners within each flat face (24 render vertices per cuboid).
+		# Share triangle corners within each flat terrace facet.
 		st.index()
 		part.mesh = st.commit()
 		part.material_override = material()

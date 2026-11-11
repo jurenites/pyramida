@@ -53,12 +53,13 @@ func _initialize() -> void:
 		var b := route[index]
 		if a.x != b.x and a.z != b.z:
 			check(world.navigation.walkable(Vector3i(a.x, a.y, b.z)) and world.navigation.walkable(Vector3i(b.x, b.y, a.z)), "Diagonal route keeps both building corners clear")
+	world.order_move(0,Vector3i(0,0,3))
 	run_for(world, 2.0)
-	check(world.navigation.walkable(world.workers[0].cell) and world.workers[0].position.distance_to(Vector3.ZERO) > 1.5, "Resident inside a newly completed building walks out")
+	check(world.navigation.walkable(world.workers[0].cell) and world.workers[0].position.distance_to(Vector3.ZERO) > 1.5, "Resident inside a completed Home can leave through its door")
 	var access: Array[Vector3i] = world.navigation.route(Vector3i(-4, 0, 0), Vector3i.ZERO)
 	check(not access.is_empty() and world.navigation.at_access(access.back(), Vector3i.ZERO), "Building interactions stop at an accessible perimeter")
 	world.navigation.update_ground({Vector3i.ZERO: true}, {})
-	check(world.navigation.edges[Vector3i.ZERO].is_empty(), "Streaming cannot reopen a building footprint")
+	check(world.navigation.edges[Vector3i.ZERO]==[Vector3i(0,0,1)], "Streaming preserves the Home doorway without opening its solid walls")
 	var chunk := Vector2i(3, 0)
 	var generated: Dictionary = world.Generator.generate_chunk(world.world_seed, chunk)
 	world.Chunks.integrate(world, chunk, generated)
@@ -102,6 +103,8 @@ func _initialize() -> void:
 	# Equal x/z on different floors must not trigger crowd avoidance.
 	world = fixture(2)
 	world.platforms[Vector3i.UP] = true
+	# Keep the upper floor connected; a stranded resident now deliberately climbs down.
+	world.terrain_ramps[Vector3i(-1, 0, 0)] = Vector3i.UP
 	world.workers[1].cell = Vector3i.UP
 	world.workers[1].position = Nav.point(Vector3i.UP)
 	world.rebuild_navigation()

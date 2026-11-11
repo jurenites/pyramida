@@ -34,12 +34,12 @@ func advance(world, focus: Vector3, radius: int) -> void:
 			nearest = chunk
 			distance = next
 	if is_inf(distance): return
-	task = {"model_id": world.get_instance_id(), "seed": world.world_seed, "difficulty": world.difficulty, "chunk": nearest, "generated": {}}
+	task = {"model_id": world.get_instance_id(), "seed": world.world_seed, "version": world.generator_version, "difficulty": world.difficulty, "chunk": nearest, "generated": {}}
 	# The worker receives its own record; no model, node, inventory or scene ref.
 	task_id = WorkerThreadPool.add_task(_generate.bind(task), false, "Terrain chunk")
 
 static func _generate(record: Dictionary) -> void:
-	record.generated = Generator.generate_chunk(record.seed, record.chunk, record.difficulty)
+	record.generated = Generator.generate_chunk(record.seed, record.chunk, record.difficulty, record.version)
 
 func finish() -> void:
 	if task_id >= 0:

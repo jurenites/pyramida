@@ -7,11 +7,11 @@ const ENCLOSED := ["house", "school", "pantry", "workshop"]
 const BARNS := []
 const STICK = preload("res://data/settlement/stick.tscn")
 const WOOD := Color("80503d")
-const PLAN_TRANSPARENCY := 0.6
+const PLAN_TRANSPARENCY := 0.0
 
 static func preview(node: Node3D) -> void:
 	# Keep the complete authored shape and palette, including the eventual roof.
-	# Instance transparency leaves shared materials and completed floors untouched.
+	# Opaque depth testing hides overlapping interior pieces; outlines mark plans.
 	for mesh: MeshInstance3D in node.find_children("*", "MeshInstance3D", true, false):
 		mesh.transparency = PLAN_TRANSPARENCY
 		mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
@@ -74,7 +74,7 @@ static func prepare(node: Node3D, kind: String, ground_markers := true) -> void:
 	var groups: Array = [[], [], [], []]
 	for mesh: MeshInstance3D in node.find_children("*", "MeshInstance3D", true, false):
 		# Optional stacked decks and living crops are not part of this building's shell.
-		var excluded := _under(mesh, node, "StackSupport") or _under(mesh, node, "Plants")
+		var excluded: bool = mesh.get_meta("pier_hidden_post",false) or _under(mesh, node, "StackSupport") or _under(mesh, node, "Plants")
 		excluded = excluded or (kind == "well" and node.has_meta("well_plan_units") and not mesh.visible)
 		excluded = excluded or (_under(mesh, node, "Roof") and kind not in Catalog.NATURAL_ROOFS)
 		mesh.hide()
@@ -98,7 +98,7 @@ static func prepare(node: Node3D, kind: String, ground_markers := true) -> void:
 		var branch := STICK.instantiate() as Node3D
 		branch.name = "Branch%d" % corners.size()
 		branch.position = point
-		branch.scale = Vector3(corner.x, 1, corner.y)
+		branch.rotation.y = atan2(corner.y, corner.x)
 		markers.add_child(branch)
 		Illustration.apply(branch)
 		corners.append(point)

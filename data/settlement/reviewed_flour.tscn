@@ -1,0 +1,30 @@
+[gd_scene format=3]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_mkhkw"]
+albedo_color = Color(0.9411765, 0.8745098, 0.72156864, 1)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_hcj8j"]
+top_radius = 0.22
+bottom_radius = 0.22
+height = 0.4
+radial_segments = 12
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_tahlr"]
+albedo_color = Color(0.59607846, 0.41568628, 0.29411766, 1)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_b335f"]
+top_radius = 0.11
+bottom_radius = 0.11
+height = 0.06
+radial_segments = 12
+
+[node name="Flour" type="Node3D" unique_id=1501593959]
+
+[node name="Sack" type="MeshInstance3D" parent="." unique_id=1820306081]
+material_override = SubResource("StandardMaterial3D_mkhkw")
+mesh = SubResource("CylinderMesh_hcj8j")
+
+[node name="Tie" type="MeshInstance3D" parent="." unique_id=322588627]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, 0)
+material_override = SubResource("StandardMaterial3D_tahlr")
+mesh = SubResource("CylinderMesh_b335f")

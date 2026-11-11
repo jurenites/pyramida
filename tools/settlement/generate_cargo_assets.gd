@@ -22,6 +22,7 @@ func _initialize() -> void:
 	quit()
 
 func food_crate(parent: Node3D) -> void:
+	parent.set_meta("usage_status", "unused")
 	box(parent, "CrateBase", Vector3(0, 0.025, 0), Vector3(0.52, 0.05, 0.38), WOOD)
 	for x in [-0.24, 0.24]:
 		for z in [-0.17, 0.17]:

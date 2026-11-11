@@ -4,6 +4,20 @@ signal resource_stored(resource: String)
 var amounts: Dictionary = {}
 var reservations: Dictionary = {}
 var capacity := 32
+var slots: Array[String] = [] # Optional stable physical positions (Depot).
+
+func enable_slots() -> void:
+	if not slots.is_empty():
+		if slots.size() < capacity: slots.resize(capacity)
+		return
+	slots.resize(capacity)
+	slots.fill("")
+	var index := 0
+	for resource: String in amounts:
+		for item in count(resource):
+			if index >= slots.size(): return
+			slots[index] = resource
+			index += 1
 
 func count(resource: String) -> int:
 	return int(amounts.get(resource, 0))
@@ -35,6 +49,9 @@ func pickup(owner: int) -> String:
 	if resource.is_empty() or count(resource) <= 0:
 		return ""
 	amounts[resource] = count(resource) - 1
+	if not slots.is_empty():
+		var index := slots.rfind(resource)
+		if index >= 0: slots[index] = ""
 	reservations.erase(owner)
 	return resource
 
@@ -42,6 +59,10 @@ func store(resource: String, amount := 1) -> bool:
 	if amount < 0 or total() + amount > capacity:
 		return false
 	amounts[resource] = count(resource) + amount
+	if not slots.is_empty():
+		for item in amount:
+			var index := slots.find("")
+			if index >= 0: slots[index] = resource
 	if amount > 0:
 		resource_stored.emit(resource)
 	return true

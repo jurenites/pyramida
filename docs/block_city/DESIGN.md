@@ -1,5 +1,13 @@
 # Block City — current direction
 
+## Metric stair prefabs — 30 October 2026
+
+Both confirmed 2×2 m stair layouts are available as one-cell demo prefabs, rising one existing storey (2 m). Keep the existing `stairs` identity for the 180° version and add `stairs_quarter` for the 90° version. The former has two platforms at 1 m and ends directly at its returning flight; the latter has one platform at 1 m, turning treads in the top-right quarter, and a platform at 2 m in the bottom-right quarter. Neither gains an extra platform row. Stair geometry and palette thumbnails share their part definitions.
+
+Use the existing palette to switch variants, R for rotation, and the existing roof/cutaway control for inspection. Tooltip labels distinguish 180° and 90° and show metres without changing other demo dimensions. No new instruction panel or goal display is introduced.
+
+Lower and upper ports carry their actual side offsets; the quarter-turn upper port faces perpendicular to the lower port. Adjacent rooms receive matching offset openings. Exposed room and hall roofs join the walking graph, with rim openings at entrance connections. The roof surface never gives access through the ceiling to the room beneath. Access colors and selected-room distances share this graph. Endpoint mats turn green only when their connection exists and the stair is reachable. Saves retain the shape identifier, and old stairs keep the half-turn behavior. Automatic selection from a requested destination is deferred.
+
 User-confirmed revision, 24 October 2026. This supersedes the initial economy-driven demo documented in [the v1 archive](DESIGN_V1_ARCHIVE.md).
 
 The immediate question is whether placing coloured 3D rooms and connecting their floors feels clear and interesting. Building types, needs, currency, service counts, upgrades, lot purchases and the win condition are deferred. Colours carry visual identity only. There is no production switch, power-load allocation, transformer upgrade or forecast purchase in this version.
@@ -184,3 +192,12 @@ Delete the selected source room with Backspace, whether it is under a move previ
 ## Exposed roof and hall targeting correction — 25 October 2026
 
 Open halls have no roof mesh, so aiming at their floor/interior selects the cell directly above that hall rather than requesting side attachment. Pointing at any exposed roof changes the active storey immediately, even below a nearby taller stack. Empty gaps keep the previous plane; direct surfaces take priority over old issue badges. Keep the surface projection offset separate from the rotation/nudge offset so repeated mouse targeting cannot undo centered rotation. Side platforms remain available on colored room walls, and Shift still requests a hall cut. No new controls or UI.
+
+
+## Proposed universal pipe network
+
+Use one pipe-drawing tool. Pipes are neutral metal until a source connects; that source assigns contents to the entire connected network immediately. Default closed end caps prevent an unfinished route implying a leak. Sources do not require pressure, volume or temperature simulation. Proposed contents: gas yellow, cold water blue, hot water red, sewage brown with a visibly larger diameter. Electrical routes remain cyan and thin, with their distinct electrical fittings.
+
+Dragging onto an existing compatible pipe creates a T junction; crossing another network does not join it. Corners use elbows and diameter changes use reducers. Joining two branches should not automatically enlarge unrelated pipe runs: deliberately upgrade the shared downstream run to a larger trunk, retaining both branch connections. This can later represent appliance capacity with a small count rather than fluid simulation. Two incompatible sources must remain separate and show a local blocked coupling, never silently recolor or mix the networks. Sewage should have its own wide drain route to the road connection. Source direction can later drive sparse moving dots; dots should not imply simulated pressure or electrical electron physics.
+
+Access feedback alternative to prototype: a neutral solid doorway/frame for reachable rooms, diagonal hatching for disconnected rooms, and a local blocked-cell pattern for placement failure. Remove traffic-light doormats only once this visual treatment is selected; avoid consuming fluid colors for access status.

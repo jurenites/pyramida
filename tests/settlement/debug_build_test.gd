@@ -14,6 +14,7 @@ func check(ok: bool, message: String) -> void:
 func fresh():
 	var model = Model.new()
 	model.setup()
+	preload("res://tests/settlement/supplied_pile_fixture.gd").add_to(model)
 	model.trees.clear()
 	model.deposits.clear()
 	model.water_sources.clear()
@@ -37,7 +38,7 @@ func test_free_construction() -> void:
 	var model = fresh()
 	var id: int = model.next_plan_id - 1
 	for store in model.stores.values(): store.amounts.clear()
-	check(not model.debug_mode and not model.debug_finish_plan(id), "Normal play rejects debug completion")
+	check(not model.debug_mode, "Automatic free construction is off by default")
 	model.order_build(0, id)
 	check(model.workers[0].job.is_empty(), "Normal construction still requires materials")
 	model.set_debug_mode(true)
@@ -61,7 +62,7 @@ func test_toggle_off() -> void:
 	check(model.workers[0].job.is_empty() and model.plans[id].reserved == 0, "Turning debug off releases free work claims")
 	check(model.workers[0].assigned_plan_id == id, "Changing mode preserves the player's building order")
 	for tick in 30: model.tick(0.05)
-	check(model.plans[id].installed == 0 and not model.debug_finish_plan(id), "Normal material requirements resume")
+	check(model.plans[id].installed == 0, "Normal material requirements resume")
 	model.set_debug_mode(true)
 	model.order_build(0, id)
 	model = reload_world(model)
@@ -75,8 +76,7 @@ func test_finish_during_delivery() -> void:
 		var stock: int = model.resource_total("log")
 		model.order_build(0, id)
 		if carrying: advance_until(model, func(): return not model.workers[0].cargo.is_empty())
-		# Enable directly to exercise Finish against existing pickup/travel jobs.
-		model.debug_mode = true
+		check(not model.debug_mode, "Manual Finish works without automatic free construction")
 		check(model.debug_finish_plan(id), "Finish completes an active site")
 		check(not model.debug_finish_plan(id), "Repeated click cannot finish a stale plan")
 		check(model.stores.values().all(func(store): return store.reservations.is_empty()), "Finish releases storage reservations")
@@ -93,7 +93,6 @@ func test_finish_during_delivery() -> void:
 
 func test_support_and_other_sites() -> void:
 	var model = fresh()
-	model.set_debug_mode(true)
 	var lower: int = model.next_plan_id - 1
 	check(model.request_build("house", SOURCE + Model.Grid.STOREY), "Queue upper floor on planned support")
 	var upper: int = model.next_plan_id - 1
@@ -112,12 +111,15 @@ func test_controls() -> void:
 	var id: int = game.model.next_plan_id - 1
 	game.selected_object = {"cell": SOURCE, "kind": "house", "entity_key": "plan:%s" % id}
 	game.hud.update(game.model, -1, 1, game.selected_object)
-	check(not game.hud.finish_button.visible, "Debug action is hidden in normal play")
+	check(game.hud.finish_button.visible and not game.hud.finish_button.disabled, "Selected site offers the wand without enabling Debug mode")
 	game.menu.debug_mode.button_pressed = true
 	check(game.model.debug_mode and game.saves.read_settings().debug_mode, "Settings toggle enables and persists debug mode")
+	game.menu.debug_mode.button_pressed = false
+	check(not game.model.debug_mode and not game.saves.read_settings().debug_mode, "Settings toggle disables debug and saves preference")
+	for store in game.model.stores.values(): store.amounts.clear()
 	game.hud.update(game.model, -1, 1, game.selected_object)
 	for frame in 3: await process_frame
-	check(game.hud.finish_button.visible and not game.hud.finish_button.disabled, "Selected site offers Finish in debug mode")
+	check(game.hud.finish_button.visible and not game.hud.finish_button.disabled, "Wand stays available with Debug mode off and empty stores")
 	check(game.hud.finish_button.get_parent() == game.hud.removal_button.get_parent(), "Finish shares Move/Copy/Remove action group")
 	check(is_equal_approx(game.hud.selection_toolbar.get_global_rect().get_center().x, game.hud.root.size.x / 2), "Debug action group remains centered")
 	check(game.hud.finish_button.get_theme_stylebox("normal").border_width_left == 4, "Debug highlight uses shared four-point stroke")
@@ -126,11 +128,21 @@ func test_controls() -> void:
 		await process_frame
 		await RenderingServer.frame_post_draw
 		root.get_texture().get_image().save_png("/tmp/pyramida-debug-finish.png")
-	game.hud.finish_button.pressed.emit()
+	var click := InputEventMouseButton.new()
+	click.position = game.hud.finish_button.get_global_rect().get_center()
+	click.button_index = MOUSE_BUTTON_LEFT
+	click.pressed = true
+	root.push_input(click, true)
+	for frame in 3:
+		game.hud.update(game.model, -1, 1, game.selected_object)
+		await process_frame
+	check(game.hud.finish_button.button_pressed, "Wand stays pressed while the HUD refreshes")
+	click.pressed = false
+	root.push_input(click, true)
 	check(game.model.buildings.has(SOURCE) and not game.world.entity_views.has("plan:%s" % id), "Finish button replaces site with completed building immediately")
 	check(not game.hud.finish_button.visible, "Finish hides after completion")
-	game.menu.debug_mode.button_pressed = false
-	check(not game.model.debug_mode and not game.saves.read_settings().debug_mode, "Settings toggle disables debug and saves preference")
+	check(game.model.resource_total("log") == 0 and game.model.time == 0, "Wand completes instantly without supplies or simulation time")
+	check(not game.model.debug_mode and game.model.workers.all(func(worker): return worker.job.is_empty()), "Wand does not enable free builders or require worker labour")
 	game.free()
 
 func run() -> void:

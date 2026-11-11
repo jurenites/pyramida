@@ -11,7 +11,11 @@ static func sync(node: Node3D, count: int, water: int, capacity: int, wrapped :=
 		child.transform = child.get_meta("well_transform")
 		var part := str(child.name)
 		if part.begins_with("WellStone"):
-			child.visible = tier >= 2 or wrapped
+			child.visible = tier >= 2 or wrapped or child.position.y < 0.1
+			if not wrapped:
+				var lift := 0.45 if tier == 1 else 1.3
+				child.position.y *= lift
+				child.scale.y *= lift
 		elif part in ["WellPost", "WellPost2", "Axle", "Rope", "Canopy"] or part.begins_with("Pot"):
 			child.visible = tier >= 3 and not wrapped
 	if not node.has_node("WellHole"):
@@ -28,18 +32,18 @@ static func sync(node: Node3D, count: int, water: int, capacity: int, wrapped :=
 		material.albedo_color = Color("4c5040")
 		hole.material_override = Illustration.flat(material)
 		node.add_child(hole)
-	node.get_node("WellHole").position.y = 0.025 if tier == 1 and not wrapped else (0.28 if not wrapped else 0.30)
+	node.get_node("WellHole").position.y = 0.025 if tier == 1 and not wrapped else (0.48 if not wrapped else 0.30)
 	node.get_node("WellHole").scale = Vector3.ONE if tier == 1 and not wrapped else Vector3(0.7, 1, 0.7)
 	var surface := node.get_node_or_null("Water") as MeshInstance3D
 	if surface != null:
-		surface.visible = water > 0
+		surface.visible = water > 0 and wrapped
 		surface.position.y = 0.045 if tier == 1 and not wrapped else (0.30 if not wrapped else 0.32)
 		surface.scale.x *= lerpf(0.8, 1.0, float(water) / maxi(1, capacity))
 		surface.scale.z *= lerpf(0.8, 1.0, float(water) / maxi(1, capacity))
 	var body: StaticBody3D = node.get_meta("collider") if node.has_meta("collider") else null
 	if body != null and not wrapped:
 		var collision := body.get_child(0) as CollisionShape3D
-		var height := [0.15, 0.42, 1.85][tier - 1] as float
+		var height := [0.15, 0.52, 1.85][tier - 1] as float
 		collision.shape.size = Vector3(0.95, height, 0.95)
 		collision.position.y = height * 0.5
 

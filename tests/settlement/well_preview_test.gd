@@ -1,0 +1,41 @@
+extends SceneTree
+const Model = preload("res://scripts/settlement/world_model.gd")
+const HUD = preload("res://scripts/settlement/hud.gd")
+const Assets = preload("res://scripts/settlement/asset_library.gd")
+func _initialize() -> void: call_deferred("run")
+func run() -> void:
+	var model = Model.new()
+	model.water_sources[Vector3i.ZERO] = {"kind": "puddle"}
+	var hud := HUD.new(); root.add_child(hud)
+	var camera := Camera3D.new(); root.add_child(camera)
+	camera.position = Vector3(4, 6, 9); camera.look_at(Vector3.ZERO)
+	var preview := Assets.create("well"); root.add_child(preview)
+	await process_frame
+	for distance in [0, 2, 4]:
+		preview.set_meta("expected_water_capacity", model.Hydrology.capacity(model, Vector3i(distance, 0, 0), 1))
+		preview.set_meta("expected_water_yield",model.Hydrology.rain_yield(model,Vector3i(distance,0,0)))
+		hud.update_placement_outline(camera, preview, "well")
+		assert(hud.well_capacity_label.visible)
+		assert(hud.well_capacity_label.text == "+%d water / 4s rain" % {0:3,2:2,4:1}[distance])
+	preview.set_meta("expected_water_capacity", model.Hydrology.capacity(model, Vector3i.ZERO, 2))
+	preview.set_meta("expected_water_yield",model.Hydrology.rain_yield(model,Vector3i.ZERO)*2)
+	hud.update_placement_outline(camera, preview, "well")
+	assert(hud.well_capacity_label.text == "+6 water / 4s rain", "Deepening previews the resulting rain yield")
+	hud.update_placement_outline(camera, preview, "well", false)
+	assert(not hud.well_capacity_label.visible, "Invalid ground hides yield")
+	hud.update_placement_outline(camera, preview, "house")
+	assert(not hud.well_capacity_label.visible, "Other tools hide yield")
+	hud.update_placement_outline(camera)
+	assert(not hud.well_capacity_label.visible, "No preview hides yield")
+	var mill := Assets.create("mill")
+	assert(mill.has_node("WindTower/Rotor") and mill.get_node("WindTower").visible)
+	assert(not mill.get_node("ManualDrive").visible and not mill.get_node("Chair").visible)
+	var rotor: Node3D = mill.get_node("WindTower/Rotor")
+	var angle := rotor.rotation.z
+	preload("res://scripts/settlement/mill_view.gd").animate(mill, 3, 1.0, true)
+	assert(not is_equal_approx(angle, rotor.rotation.z), "Restored sails turn")
+	assert(Model.Economy.RECIPES.mill.input == "grain" and Model.Economy.RECIPES.mill.output == "flour")
+	mill.free(); preview.free(); hud.queue_free(); camera.queue_free()
+	await process_frame
+	print("PASS: Well placement 3/2/1, deepening, hidden states and restored windmill")
+	quit()

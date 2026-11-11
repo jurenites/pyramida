@@ -1,5 +1,6 @@
 extends RefCounted
-## Peaceful village economy. Tuning is ours; the production relationships follow Pyramida.
+## Peaceful village economy. Physical gathering, crafting and town growth.
+const Reviewed = preload("res://scripts/settlement/reviewed_balance.gd")
 const Farming = preload("res://scripts/settlement/farming.gd")
 const Balance = preload("res://scripts/settlement/balance.gd")
 const BUSH_CAPACITY := 3
@@ -7,27 +8,48 @@ const StoneVolume = preload("res://scripts/settlement/stone_volume.gd")
 const Inventory = preload("res://scripts/settlement/inventory.gd")
 const Navigation = preload("res://scripts/settlement/navigation.gd")
 const Vegetation = preload("res://scripts/settlement/vegetation_patches.gd")
-const RESOURCES := ["log", "food", "water", "grain", "plank", "stone", "block", "pottery"]
-const ROLES := ["auto", "builder", "forager", "farmer", "baker", "woodcutter", "sawyer", "miner", "mason", "hauler", "idle"]
-const RECIPES := {
-	"sawmill": {"input": "log", "output": "plank", "role": "sawyer"},
+const RESOURCES := ["log", "food", "water", "grain", "plank", "stone", "block", "pottery", "flour", "clay", "brick", "ore", "imbrex", "rope"]
+const ROLES := ["auto", "builder", "forager", "farmer", "baker", "woodcutter", "sawyer", "miner", "mason", "hauler", "idle", "miller", "potter", "kilner", "claydigger", "prospector", "tiler", "ropemaker"]
+const EXTRACTORS := {"claypit": {"output": "clay", "role": "claydigger"}, "mine": {"output": "ore", "role": "prospector"}}
+static var RECIPES: Dictionary = preload("res://scripts/settlement/reviewed_balance.gd").data.recipes.merged({
+	"rope_maker": {"input": "grain", "output": "rope", "role": "ropemaker"},
 	"windmill": {"input": "grain", "output": "food", "role": "baker"},
-	"masonry": {"input": "stone", "output": "block", "role": "mason"},
-}
-const STORAGE := {"goods_rack": ["pottery"], "small_warehouse": ["pottery"], "stone_storage": ["stone"], "log_shed": ["log"], "hay_barn": ["grain"], "house": ["food"],
-	"stockpile": ["stone", "block", "plank", "water", "pottery"], "mine_camp": ["stone", "block"], "pantry": []}
+}) # Legacy mill saves retain their original recipe.
+const STORAGE := {"tilery": ["clay", "imbrex"], "rope_maker": ["grain", "rope"], "brickyard": ["clay", "brick"], "quarry": ["stone"], "mill": ["grain", "flour"], "bakery": ["flour", "food"], "pottery_workshop": ["clay", "pottery"], "kiln": ["clay", "brick"], "goods_rack": ["pottery"], "small_warehouse": ["pottery"], "stone_storage": ["stone", "block"], "log_shed": ["log", "plank"], "hay_barn": ["grain", "flour"], "house": ["food", "water", "pottery"],
+	"sawmill": ["log", "plank"], "masonry": ["stone", "block"], "windmill": ["grain", "food"], "mine_camp": ["stone", "block"], "pantry": []}
+
+static func ensure_output_stores(world) -> void:
+	for cell: Vector3i in world.buildings:
+		if world.buildings[cell].kind in RECIPES and not world.stores.has(cell):
+			world.add_store(cell)
+			world.stores[cell].capacity = preload("res://scripts/settlement/reviewed_balance.gd").capacity(world.buildings[cell].kind, int(Reviewed.data.production_buffer_default))
+
+static func resource_capacity(world, cell: Vector3i, resource: String) -> int:
+	var kind: String = world.buildings.get(cell, {}).get("kind", "")
+	if kind == "house":
+		if resource == "water": return mini(int(Reviewed.data.vase.house_vases), world.stores[cell].count("pottery")) * int(Reviewed.data.vase.water_capacity)
+		if resource == "pottery": return int(Reviewed.data.vase.house_vases)
+		return {"food": world.Houses.ROOM_FOOD, "pottery": 3}.get(resource, 0)
+	# Inputs cannot fill the space needed for a workshop's own output.
+	if kind in RECIPES: return int(world.stores[cell].capacity / 2)
+	return world.stores[cell].capacity if accepts(world, cell, resource) else 0
+
+static func storage_space(world, cell: Vector3i, resource: String) -> int:
+	var stock = world.stores[cell]
+	return maxi(0, mini(stock.capacity - stock.total(), resource_capacity(world, cell, resource) - stock.count(resource)))
 
 static func food_target(world) -> int:
-	# Two meals in reserve plus the next meal round, so ordinary eating does not
-	# constantly undo growth. Foraging and baking must target the same reserve.
+	# Keep three meal rounds available. Foraging and baking share this target;
+	# population growth depends on housing, independently of stored food.
 	return maxi(6, world.workers.size() * 3)
 
 static func storage_capacity(world, resource: String) -> int:
 	var total := 0
 	for cell: Vector3i in world.stores:
 		var inventory = world.stores[cell]
-		# Legacy supplies remain usable, but unsupported stores gain no new space.
-		total += inventory.capacity if accepts(world, cell, resource) else inventory.count(resource)
+		# Real stores keep their configured limit even when an older save is overfull.
+		# Unhoused legacy supplies remain recoverable without accepting deliveries.
+		total += resource_capacity(world, cell, resource) if world.buildings.has(cell) else inventory.count(resource)
 	return total
 
 static func setup(world) -> void:
@@ -44,10 +66,14 @@ static func setup(world) -> void:
 			if world.ground.has(next) and not world.terrain_shapes.has(next) and not reachable.has(next):
 				reachable[next] = true
 				frontier.append(next)
-	# Resources outside the supplied starting stockpile remain physical, finite stock.
+	seed_hay_patches(world, frontier)
+	# Resources outside the family's house remain physical, finite stock.
 	var berry_centres := [Vector3i(-10, 0, 6), Vector3i(4, 0, 8), Vector3i(10, 0, -8), Vector3i(-16, 0, -8)]
 	for patch in berry_centres.size():
 		seed_berry_patch(world, frontier, berry_centres[patch], patch)
+	if preload("res://scripts/settlement/solid_islands.gd").enabled(world) and world.generator_version>=10:
+		preload("res://scripts/settlement/geological_deposits.gd").seed(world,frontier)
+		return
 	for spec in [[7, 3], [-7, 5], [11, -5], [-12, -8]]:
 		var cell := nearest_free(world, frontier, Vector3i(spec[0] * 2, 0, spec[1] * 2))
 		if cell == Vector3i.ZERO:
@@ -117,7 +143,7 @@ static func capacity(world) -> int:
 	return count_buildings(world, "house") * world.Houses.ROOM_RESIDENTS
 
 static func accepts(world, cell: Vector3i, resource: String) -> bool:
-	var kind: String = world.buildings.get(cell, {}).get("kind", "stockpile")
+	var kind: String = world.buildings.get(cell, {}).get("kind", "")
 	return resource in STORAGE.get(kind, [])
 
 static func irrigated(world, cell: Vector3i) -> bool:
@@ -130,7 +156,7 @@ static func irrigated(world, cell: Vector3i) -> bool:
 	return false
 
 static func field_resource(world, cell: Vector3i) -> String:
-	return "grain" if world.buildings.get(cell, {}).get("kind") == "hay_field" or world.gardens.get(cell, {}).get("species") == "grass" else "food"
+	return "grain" if Farming.is_hay(world, cell) or world.gardens.get(cell, {}).get("species") == "grass" else "food"
 
 # A growth interval adds one capacity slot and one berry, never two berries.
 # Mature full bushes do not bank time toward an instant refill after picking.
@@ -158,31 +184,36 @@ static func grow_bush(deposit: Dictionary, delta: float) -> bool:
 static func tick(world, delta: float) -> void:
 	for cell: Vector3i in world.deposits:
 		var deposit: Dictionary = world.deposits[cell]
-		if deposit.kind == "berry" and not world.Relocation.locked(world, cell) and float(deposit.get("seed_growth", 1.0)) >= 1.0 and grow_bush(deposit, delta * Farming.light_rate(world, cell)):
+		if deposit.kind != "berry" or float(deposit.get("seed_growth", 1.0)) < 1.0: continue
+		# Full bushes cannot grow. Avoid scanning construction plans and testing
+		# shade for every mature bush across all loaded chunks on every tick.
+		var inventory = deposit.inventory
+		if inventory.capacity >= BUSH_CAPACITY and inventory.total() >= inventory.capacity and deposit.regrowth == 0.0:
+			continue
+		if not world.Relocation.locked(world, cell) and grow_bush(deposit, delta * Farming.light_rate(world, cell)):
 			world.revision += 1
 	for cell: Vector3i in world.gardens:
-		if field_resource(world, cell) == "grain" and irrigated(world, cell) and world.gardens[cell].water == 0:
+		if not Farming.is_hay(world, cell) and field_resource(world, cell) == "grain" and irrigated(world, cell) and world.gardens[cell].water == 0:
 			world.gardens[cell].water = 1
-	# A food shortage pauses earned progress instead of erasing it every meal.
+	# Completed, reachable housing enables growth even when food stores are empty.
 	if world.workers.size() >= mini(capacity(world), 30):
 		world.birth_clock = 0.0
 		return
-	if world.resource_total("food") < world.workers.size() * 2: return
 	var home: Variant = null
-	var arrival: Variant = null
+	var parent_cell := Vector3i.ZERO
 	for cell: Vector3i in world.buildings:
 		if world.buildings[cell].kind != "house" or world.Relocation.locked(world, cell) or world.Houses.room_occupancy(world, cell) >= world.Houses.ROOM_RESIDENTS: continue
 		for worker: Dictionary in world.workers:
 			if not world.can_control(worker): continue
-			var route: Array[Vector3i] = world.navigation.route(worker.cell, cell)
-			if not route.is_empty():
+			if world.navigation.can_reach(worker.cell, cell):
 				home = cell
-				arrival = route.back()
+				parent_cell = worker.cell
 				break
 		if home != null: break
 	if home == null: return
 	world.birth_clock += delta
 	if world.birth_clock < Balance.number("birth_interval_seconds"): return
+	var arrival: Vector3i = world.navigation.route(parent_cell, home).back()
 	var id: int = world.workers.size()
 	world.workers.append({"id": id, "cell": arrival, "home_cell": home, "position": world.navigation.surface_point(arrival), "route": [], "route_index": 0,
 		"job": {}, "cargo": "", "status": "growing up", "distance": 0.0, "hunger": 0.0,
@@ -197,3 +228,31 @@ static func upgrade_stone(deposit: Dictionary, cell: Vector3i, world_seed: int) 
 	var capacity := StoneVolume.capacity(cell, world_seed)
 	inventory.amounts["stone"] = roundi(float(inventory.count("stone")) / 6.0 * capacity)
 	inventory.capacity = capacity
+
+static func is_workplace(kind: String) -> bool:
+	return kind in RECIPES or kind in EXTRACTORS or kind == "quarry"
+
+static func workplace_role(kind: String) -> String:
+	if kind == "quarry": return "miner"
+	return str(RECIPES.get(kind, EXTRACTORS.get(kind, {})).get("role", "idle"))
+
+static func seed_hay_patches(world, candidates: Array[Vector3i]) -> void:
+	# Natural grass breaks Field -> Hay -> Field startup dependence.
+	if world.gardens.values().any(func(crop): return crop.get("species") == "grass" or crop.has("field_layout")) or count_buildings(world, "hay_field") > 0: return
+	for desired in [Vector3i(-3, 0, 8), Vector3i(3, 0, 6), Vector3i(9, 0, 2)]:
+		var cell := nearest_free(world, candidates, desired)
+		if cell == Vector3i.ZERO: continue
+		world.gardens[cell] = {"species": "grass", "water": 0, "growth": 0.0, "food": Farming.HARVEST, "reserved": -1}
+
+static func ensure_hay_source(world) -> void:
+	if world.workers.is_empty() or world.resource_total("grain") > 0 or count_buildings(world, "hay_field") > 0 or world.gardens.values().any(func(crop): return crop.get("species") == "grass"): return
+	var frontier: Array[Vector3i] = world.navigation.access_cells(world.workers[0].cell)
+	var seen := {}; var candidates: Array[Vector3i] = []; var cursor := 0
+	for cell in frontier: seen[cell] = true
+	while cursor < frontier.size():
+		var cell := frontier[cursor]; cursor += 1
+		if world.ground.has(cell): candidates.append(cell)
+		for neighbour: Vector3i in world.navigation.edges.get(cell, []):
+			if seen.has(neighbour): continue
+			seen[neighbour] = true; frontier.append(neighbour)
+	seed_hay_patches(world, candidates)

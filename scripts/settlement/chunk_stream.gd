@@ -36,8 +36,15 @@ static func required(world, focus: Vector3, radius: int) -> Dictionary:
 		for key in ["target", "garden", "store", "source_cell"]:
 			var cell: Variant = worker.job.get(key)
 			if cell is Vector3i: add_radius(wanted, cell, 1)
+	if not world.room_site.is_empty():
+		for room in world.room_site.design:
+			for raw in room.cells: add_radius(wanted,world.Rooms.base(world,world.Rooms.Layout.vec(raw)),1)
 	for collection in [world.buildings, world.platforms, world.stairs, world.stores, world.wells, world.gardens, world.soil_beds, world.water_orders]:
 		for cell: Vector3i in collection: add_radius(wanted, cell, 1)
+	for cell: Vector3i in world.roof_rain.tanks: add_radius(wanted,cell,1)
+	for joint in world.roof_rain.get("junctions",{}).values(): add_radius(wanted,joint.cell,1)
+	for pipe in world.roof_rain.pipes.values():
+		for point: Vector3 in pipe.path: add_radius(wanted,Vector3i(point.round()),1)
 	for cell: Vector3i in world.vines:
 		if not world.vines[cell].get("wild", false): add_radius(wanted, cell, 1)
 	for plan: Dictionary in world.plans.values():
@@ -81,12 +88,16 @@ static func update(world, focus: Vector3, radius := 3, budget := 1, required_chu
 			changed = true
 	if changed:
 		world.terrain_revision += 1
-		world.navigation.update_ground(added, removed, world.Soil.walking_shapes(world))
+		if world.SolidIslands.enabled(world): world.rebuild_navigation()
+		else: world.navigation.update_ground(added, removed, world.Soil.walking_shapes(world))
 		world.revision += 1
 	return changed
 
 static func chunk_surfaces(world, chunk: Vector2i) -> Dictionary:
 	var surfaces := {}
+	if world.SolidIslands.enabled(world):
+		for cell: Vector3i in world.ground:
+			if chunk_for(cell)==chunk: surfaces[cell]=true
 	var origin := chunk * Generator.CHUNK_SIZE
 	for x in range(origin.x, origin.x + Generator.CHUNK_SIZE):
 		for z in range(origin.y, origin.y + Generator.CHUNK_SIZE):
@@ -101,13 +112,15 @@ static func chunk_surfaces(world, chunk: Vector2i) -> Dictionary:
 static func integrate(world, chunk: Vector2i, generated: Dictionary) -> void:
 	if world.loaded_chunks.has(chunk): return
 	load_chunk(world, chunk, generated)
-	world.navigation.update_ground(chunk_surfaces(world, chunk), {}, world.Soil.walking_shapes(world))
+	if world.SolidIslands.enabled(world): world.rebuild_navigation()
+	else: world.navigation.update_ground(chunk_surfaces(world, chunk), {}, world.Soil.walking_shapes(world))
 	world.terrain_revision += 1
 	world.revision += 1
 
 static func populate(world, generated: Dictionary) -> void:
 	for cell: Vector3i in generated.water:
 		var kind: String = generated.water[cell]
+		if kind=="puddle" and world.roof_rain.primary: continue
 		world.water_sources[cell] = entry(kind, "water", 3 if kind == "puddle" else 2)
 	for cell: Vector3i in generated.nature:
 		world.navigation.blocked[cell] = true
@@ -145,7 +158,7 @@ static func entry(kind: String, resource: String, capacity: int) -> Dictionary:
 
 static func load_chunk(world, chunk: Vector2i, generated: Dictionary = {}) -> void:
 	if world.loaded_chunks.has(chunk): return
-	if generated.is_empty(): generated = Generator.generate_chunk(world.world_seed, chunk, world.difficulty)
+	if generated.is_empty(): generated = Generator.generate_chunk(world.world_seed, chunk, world.difficulty, world.generator_version)
 	world.ground.merge(generated.ground)
 	world.terrain_heights.merge(generated.heights)
 	world.terrain_shapes.merge(generated.shapes)
@@ -205,12 +218,13 @@ static func unload_chunk(world, chunk: Vector2i) -> void:
 			world.get(field).erase(cell)
 			if field in ["trees", "deposits"]: world.navigation.blocked.erase(cell)
 	var origin := chunk * Generator.CHUNK_SIZE
+	for floor_cell: Vector3i in world.ground.keys():
+		if chunk_for(floor_cell)!=chunk: continue
+		world.soil_shapes.erase(floor_cell)
+		world.terrain_shapes.erase(floor_cell)
+		world.ground.erase(floor_cell)
 	for x in range(origin.x, origin.x + Generator.CHUNK_SIZE):
-		for z in range(origin.y, origin.y + Generator.CHUNK_SIZE):
-			world.soil_shapes.erase(world.surface_at(x, z))
-			world.terrain_shapes.erase(world.surface_at(x, z))
-			world.ground.erase(world.surface_at(x, z))
-			world.terrain_heights.erase(Vector2i(x, z))
+		for z in range(origin.y, origin.y + Generator.CHUNK_SIZE): world.terrain_heights.erase(Vector2i(x,z))
 	world.loaded_chunks.erase(chunk)
 	world.chunk_details.erase(chunk)
 	world.dormant_chunks[chunk] = record
@@ -218,7 +232,7 @@ static func unload_chunk(world, chunk: Vector2i) -> void:
 static func valid_state(state: Variant, world: Dictionary) -> bool:
 	if not state is Dictionary or not state.get("enabled") is bool or not state.get("loaded") is Dictionary or not state.get("dormant") is Dictionary:
 		return false
-	if state.enabled and world.generator_version != Generator.VERSION: return false
+	if state.enabled and (world.generator_version < Generator.LEGACY_VERSION or world.generator_version > Generator.VERSION): return false
 	if not state.enabled: return state.loaded.is_empty() and state.dormant.is_empty()
 	for chunk: Variant in state.loaded.keys() + state.dormant.keys():
 		if not chunk is Vector2i or not Catalog.in_bounds(Vector3i(chunk.x * Generator.CHUNK_SIZE, 0, chunk.y * Generator.CHUNK_SIZE)):
@@ -227,16 +241,16 @@ static func valid_state(state: Variant, world: Dictionary) -> bool:
 		if state.loaded[chunk] != true or state.dormant.has(chunk): return false
 	for cell: Vector3i in world.ground:
 		if not state.loaded.has(chunk_for(cell)): return false
-	if world.get("difficulty", "normal") == "easy":
+	if world.get("difficulty", "normal") == "easy" or preload("res://scripts/settlement/solid_islands.gd").enabled(world):
 		# Coastal chunks include nonwalkable sea. Validate their actual land mask.
 		var expected := 0
 		for chunk: Vector2i in state.loaded:
 			var origin := chunk * Generator.CHUNK_SIZE
-			for x in range(origin.x, origin.x + Generator.CHUNK_SIZE):
-				for z in range(origin.y, origin.y + Generator.CHUNK_SIZE):
-					if x <= preload("res://scripts/settlement/greece_landscape.gd").coast(z, world.world_seed):
-						expected += 1
-						if not world.ground.has(Vector3i(x, int(world.get("surface_edits", {}).get(Vector2i(x, z), 0)), z)): return false
+			var generated := Generator.generate_chunk(world.world_seed,chunk,world.difficulty,world.generator_version)
+			for cell: Vector3i in generated.ground:
+				expected += 1
+				var level := int(world.get("surface_edits",{}).get(Vector2i(cell.x,cell.z),cell.y))
+				if not world.ground.has(Vector3i(cell.x,level,cell.z)): return false
 		if world.ground.size() != expected: return false
 	elif world.ground.size() != state.loaded.size() * Generator.CHUNK_SIZE * Generator.CHUNK_SIZE: return false
 	for chunk: Vector2i in state.dormant:

@@ -1,8 +1,10 @@
 extends SceneTree
 ## Headless CPU timings, not rendered FPS. Optional pre-change navigation/model scripts:
 ## -- --baseline-navigation=/absolute/navigation.gd --baseline-model=/absolute/world_model.gd
+## --profile-ticks adds inclusive CPU scopes for the five slowest ticks.
 const Model = preload("res://scripts/settlement/world_model.gd")
 const Navigation = preload("res://scripts/settlement/navigation.gd")
+const Perf = preload("res://scripts/settlement/performance_log.gd")
 
 func _initialize() -> void:
 	var baseline_nav: Script
@@ -29,18 +31,33 @@ func measure_citizens(nav_script: Script, model_script: Script) -> Dictionary:
 		worker.cell += Vector3i(id, 0, 0)
 		worker.position = Navigation.point(worker.cell)
 		world.workers.append(worker)
+	# Clones cannot all keep the original citizen's household allocation.
+	world.Houses.reconcile(world)
 	var times: Array[int] = []
+	var slow_ticks: Array[Dictionary] = []
+	var profile_ticks := OS.get_cmdline_user_args().has("--profile-ticks")
+	var previous_profiling := Perf.enabled
+	Perf.enabled = profile_ticks
 	var started := Time.get_ticks_usec()
 	for step in 1200:
+		if profile_ticks: Perf.reset()
 		var before := Time.get_ticks_usec()
 		world.tick(0.05)
 		times.append(Time.get_ticks_usec() - before)
+		if profile_ticks and (slow_ticks.size() < 5 or times.back() > int(slow_ticks.back().us)):
+			slow_ticks.append({"step": step, "us": times.back(), "profile": Perf.summary()})
+			slow_ticks.sort_custom(func(a, b): return a.us > b.us)
+			if slow_ticks.size() > 5: slow_ticks.pop_back()
 	var elapsed := Time.get_ticks_usec() - started
+	Perf.enabled = previous_profiling
 	times.sort()
-	return {"cells": world.navigation.surfaces.size(), "citizens": world.workers.size(), "simulation_seconds": 60,
+	var report := {"cells": world.navigation.surfaces.size(), "citizens": world.workers.size(), "simulation_seconds": 60,
 		"total_ms": elapsed / 1000.0, "worst_tick_ms": times.back() / 1000.0,
 		"p99_tick_ms": times[1188] / 1000.0, "searches": world.navigation.searches_built,
-		"deliveries": world.deliveries, "meals": world.meals_eaten}
+		"deliveries": world.deliveries, "meals": world.meals_eaten,
+		"state_sha256": JSON.stringify(world.snapshot()).sha256_text()}
+	if profile_ticks: report.slow_ticks = slow_ticks
+	return report
 
 func measure_routes(nav_script: Script) -> Dictionary:
 	var nav = nav_script.new()

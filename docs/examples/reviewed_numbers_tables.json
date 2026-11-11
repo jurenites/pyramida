@@ -1,0 +1,440 @@
+[
+  {
+    "sheet": "Tier 1",
+    "table": "Table 1",
+    "rows": [
+      [
+        "Name",
+        "Size",
+        "Input",
+        "Verb",
+        "Store",
+        "Output",
+        "[Hay] cost",
+        "[Log] cost",
+        "[Plank] cost",
+        "[Stone] cost",
+        "[Slab] cost",
+        "[Clay] cost",
+        "[Brick] cost"
+      ],
+      [
+        "[House]",
+        "2 X 2 X 2",
+        "[Vase+Water][Food]",
+        null,
+        null,
+        null,
+        2.0,
+        2.0,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      [
+        "[Support]",
+        "1 X 1 X 1",
+        null,
+        null,
+        null,
+        null,
+        null,
+        2.0,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      [
+        "[Stair]",
+        "1 X 1 X 1",
+        null,
+        null,
+        null,
+        null,
+        null,
+        1.0,
+        1.0,
+        null,
+        null,
+        null,
+        null
+      ],
+      [
+        "[Road] (stone)",
+        "1 X 1 X 1",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        1.0,
+        null,
+        null,
+        null
+      ],
+      [
+        "[Sawmill]",
+        "2 X 3 X 2",
+        "[Log]",
+        "saw",
+        4.0,
+        "[Plank]",
+        null,
+        4.0,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      [
+        "[Shed]",
+        "1 X 2 X 1",
+        "[Log], [Plank]",
+        "store",
+        8.0,
+        "[Log], [Plank]",
+        null,
+        2.0,
+        1.0,
+        null,
+        null,
+        null,
+        null
+      ],
+      [
+        "[Barn]",
+        "1 X 2 X 1",
+        "[Hay],[Flour]",
+        "store",
+        8.0,
+        "[Hay],[Flour]",
+        2.0,
+        2.0,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      [
+        "[Depot]",
+        "3 X 3 X 2",
+        "[Stone], [Slab]",
+        "store",
+        18.0,
+        "[Stone], [Slab]",
+        null,
+        null,
+        3.0,
+        3.0,
+        null,
+        null,
+        null
+      ],
+      [
+        "[Brickyard]",
+        "3 X 3 X 2",
+        "[Clay], [Brick]",
+        "store",
+        18.0,
+        "[Clay], [Brick]",
+        null,
+        null,
+        null,
+        3.0,
+        null,
+        3.0,
+        null
+      ],
+      [
+        "[Well]",
+        "1 X 1 X 2",
+        null,
+        "store",
+        3.0,
+        "[Water]",
+        null,
+        2.0,
+        null,
+        4.0,
+        null,
+        null,
+        null
+      ],
+      [
+        "[Field]",
+        "4 X 4 X 1",
+        "[Hay]",
+        "harvest",
+        null,
+        "[Hay]",
+        4.0,
+        1.0,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      [
+        "[Mill]",
+        "3 X 3 X 2",
+        "[Hay]",
+        "mill",
+        null,
+        "[Flour]",
+        null,
+        null,
+        4.0,
+        4.0,
+        null,
+        null,
+        null
+      ],
+      [
+        "[Bakery]",
+        "2 X 3 X 2",
+        "[Flour]",
+        "bake",
+        null,
+        "[Food]",
+        4.0,
+        null,
+        null,
+        4.0,
+        null,
+        null,
+        null
+      ],
+      [
+        "[Quarry]",
+        "3 X 3 X 2",
+        "[Stone]",
+        "mine, store",
+        4.0,
+        "[Stone]",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      [
+        "[Masonry]",
+        "3 X 3 X 2",
+        "[Stone]",
+        "cut",
+        null,
+        "[Slab]",
+        null,
+        4.0,
+        4.0,
+        null,
+        null,
+        null,
+        null
+      ],
+      [
+        "[Claypit]",
+        "3 X 3 X 2",
+        null,
+        null,
+        null,
+        "[Clay]",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      [
+        "[Pottery]",
+        "2 X 3 X 2",
+        "[Clay]",
+        "make",
+        null,
+        "[Vase]",
+        null,
+        null,
+        null,
+        4.0,
+        null,
+        4.0,
+        null
+      ],
+      [
+        "[Kiln]",
+        "2 X 3 X 2",
+        "[Clay]",
+        "fire",
+        null,
+        "[Brick]",
+        null,
+        null,
+        null,
+        null,
+        4.0,
+        4.0,
+        null
+      ],
+      [
+        "[Mine]",
+        "3 X 3 X 2",
+        null,
+        " mine",
+        null,
+        "[Ore]",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    ]
+  },
+  {
+    "sheet": "Water and storage",
+    "table": "Table 1",
+    "rows": [
+      [
+        "Name",
+        "Rule",
+        "Value",
+        "Unit / note",
+        null
+      ],
+      [
+        "[Vase]",
+        "stores",
+        1.0,
+        "[Water]",
+        null
+      ],
+      [
+        "[House]",
+        "stores [Vase]",
+        3.0,
+        "vases",
+        null
+      ],
+      [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      [
+        "[Puddle]",
+        "fills from \"rain\" event",
+        3.0,
+        "[Water]",
+        null
+      ],
+      [
+        "[Puddle]",
+        "stores",
+        3.0,
+        "[Water]",
+        null
+      ],
+      [
+        "[Well] on a [Puddle]",
+        "depth: 2m stores",
+        3.0,
+        "[Water]",
+        null
+      ],
+      [
+        "[Well] on a [Puddle]",
+        "depth: 4m stores",
+        6.0,
+        "[Water]",
+        null
+      ],
+      [
+        "[Well] on a [Puddle]",
+        "depth: 8m stores",
+        9.0,
+        "[Water]",
+        null
+      ],
+      [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      [
+        "[Well] distance: 2m from a [Puddle]",
+        "depth: 2m stores",
+        2.0,
+        "[Water]",
+        null
+      ],
+      [
+        "[Well] distance: 4m from a [Puddle]",
+        "depth: 2m stores",
+        1.0,
+        "[Water]",
+        null
+      ],
+      [
+        "[Well]",
+        "evaporation",
+        0.0,
+        "[Water]",
+        null
+      ],
+      [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      [
+        "[Well] anywhere",
+        "depth: 2m",
+        1.0,
+        "[Water]",
+        null
+      ],
+      [
+        "[Well] anywhere",
+        "depth: 4m",
+        3.0,
+        "[Water]",
+        null
+      ],
+      [
+        "[Well] anywhere",
+        "depth: 8m",
+        6.0,
+        "[Water]",
+        null
+      ],
+      [
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    ]
+  }
+]

@@ -3,10 +3,16 @@ extends RefCounted
 const Generator = preload("res://scripts/settlement/nature_generator.gd")
 const LOGS_PER_TREE := 3
 const STUMP_HEIGHT := 0.18
-const LOG_HEIGHT := 0.88
+const LOG_HEIGHT := Generator.LOG_LENGTH
 
 static func asset(tree: Dictionary) -> String:
 	return {"dead": "dead_tree", "palm": "palm"}.get(tree.get("kind", "living"), "tree")
+
+static func fully_revealed(node: Node3D, exploration) -> bool:
+	# The picking box already follows the visible crown and remaining trunk sections.
+	var shape: CollisionShape3D = node.get_meta("collider").get_child(0)
+	var size: Vector3 = shape.shape.size
+	return exploration.contains_bounds(shape.global_transform * AABB(-size * 0.5, size))
 
 static func sync(node: Node3D, tree: Dictionary) -> void:
 	if tree.has("appearance_seed") and node.get_meta("nature_seed", -1) != int(tree.appearance_seed):
@@ -27,21 +33,13 @@ static func sync(node: Node3D, tree: Dictionary) -> void:
 				child.visible = amount == 3 or bounds.get_center().y < STUMP_HEIGHT + amount * LOG_HEIGHT
 	else:
 		_sync_segments(node, amount)
-	if node.has_meta("nature_seed"):
-		_sync_generated_bounds(node)
-		return
-	if node.has_meta("collider"):
-		var shape: CollisionShape3D = node.get_meta("collider").get_child(0)
-		var height := STUMP_HEIGHT + amount * LOG_HEIGHT
-		if amount == LOGS_PER_TREE:
-			height = 3.15 if tree.get("kind", "living") == "dead" else 3.72
-		shape.shape.size.y = height
-		shape.position.y = height * 0.5
+	_sync_generated_bounds(node)
 
 static func _sync_segments(node: Node3D, amount: int) -> void:
 	for index in LOGS_PER_TREE:
 		node.get_node("Segment%d" % (index + 1)).visible = index < amount
-		node.get_node("Segment%d/CutFace" % (index + 1)).visible = index == amount - 1
+		var cut := node.get_node_or_null("Segment%d/CutFace" % (index + 1)) as Node3D
+		if cut != null: cut.visible = index == amount - 1
 	node.get_node("StumpCut").visible = amount == 0
 
 static func _sync_generated_bounds(node: Node3D) -> void:

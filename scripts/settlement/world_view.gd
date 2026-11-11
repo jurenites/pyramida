@@ -2,7 +2,6 @@ extends Node3D
 const Perf = preload("res://scripts/settlement/performance_log.gd")
 const Houses = preload("res://scripts/settlement/house_groups.gd")
 const HouseShell = preload("res://scripts/settlement/house_shell.gd")
-const Piles = preload("res://scripts/settlement/pile_groups.gd")
 const Economy = preload("res://scripts/settlement/economy.gd")
 const Catalog = preload("res://data/settlement/catalog.gd")
 const Navigation = preload("res://scripts/settlement/navigation.gd")
@@ -12,12 +11,15 @@ const TreeView = preload("res://scripts/settlement/tree_view.gd")
 const StoneView = preload("res://scripts/settlement/stone_view.gd")
 const WorkerView = preload("res://scripts/settlement/worker_view.gd")
 const Construction = preload("res://scripts/settlement/construction_site_view.gd")
+const Timber = preload("res://scripts/settlement/timber_kit.gd")
 var planning := false
+var bridge_view: Node3D
 var last_planning := false
 var planned_decks: Dictionary = {}
 var fog_enabled := false
 var scenery: Node3D
 var water_view: Node3D
+var roof_rain_view: Node3D
 var architecture: Node3D
 var actors: Array[Node3D] = []
 var route_strokes: Array[PackedVector3Array] = []
@@ -29,12 +31,16 @@ var show_routes := false
 var garden_views: Dictionary = {}
 var store_views: Dictionary = {}
 var tree_views: Dictionary = {}
+var growing_trees: Array[Vector3i] = []
+var growing_bushes: Array[Vector3i] = []
 var display_level := 3
 var cutaway := false
 var entity_views: Dictionary = {}
 var _wanted: Dictionary = {}
+var timber_motion: Node3D
 
 func setup(model) -> void:
+	bridge_view = Node3D.new(); add_child(bridge_view)
 	scenery = Node3D.new()
 	scenery.set_script(preload("res://scripts/settlement/scenery_view.gd"))
 	add_child(scenery)
@@ -42,6 +48,7 @@ func setup(model) -> void:
 	water_view = Node3D.new()
 	water_view.set_script(preload("res://scripts/settlement/water_view.gd"))
 	add_child(water_view)
+	roof_rain_view=preload("res://scripts/settlement/roof_rain_view.gd").new(); add_child(roof_rain_view)
 	for worker in model.workers:
 		var view := Node3D.new()
 		view.set_script(WorkerView)
@@ -50,6 +57,9 @@ func setup(model) -> void:
 		actors.append(view)
 	architecture = Node3D.new()
 	add_child(architecture)
+	timber_motion = preload("res://scripts/settlement/timber_motion.gd").new()
+	add_child(timber_motion)
+	timber_motion.view = self
 	sync(model, 0, -1)
 
 func _place(kind: String, cell: Vector3i, asset_kind := "") -> Node3D:
@@ -74,14 +84,25 @@ func _place(kind: String, cell: Vector3i, asset_kind := "") -> Node3D:
 	return node
 
 func sync(model, delta: float, selected: int) -> void:
+	timber_motion.bind_model(model)
 	if last_model_id != model.get_instance_id():
 		last_model_id = model.get_instance_id()
 		last_revision = -1
-	if appearance_revision != Assets.Appearance.revision or last_planning != planning:
-		last_planning = planning
+	if last_revision != model.revision or appearance_revision != Assets.Appearance.revision or last_planning != planning:
+		timber_motion.before_rebuild()
+	if appearance_revision != Assets.Appearance.revision:
 		for node in entity_views.values(): node.free()
 		entity_views.clear()
 		appearance_revision = Assets.Appearance.revision
+		last_revision = -1
+	if last_planning != planning:
+		last_planning = planning
+		# Only worksites switch between staged construction and a finished ghost.
+		# Reconciliation handles merged decks and roof visibility in place.
+		for key: String in entity_views.keys():
+			if not key.begins_with("plan:"): continue
+			entity_views[key].free()
+			entity_views.erase(key)
 		last_revision = -1
 	if last_revision != model.revision:
 		planned_decks = model.Planning.platforms(model) if planning else {}
@@ -93,12 +114,14 @@ func sync(model, delta: float, selected: int) -> void:
 		Perf.end("view.water", started)
 		started = Perf.begin()
 		_rebuild(model)
+		preload("res://scripts/settlement/rope_visuals.gd").sync(bridge_view, model)
 		visibility_state.clear()
 		Perf.end("view.entities", started)
 		last_revision = model.revision
 	var dynamic_started := Perf.begin()
 	# Applied labour advances between model revisions; reveal only the pieces earned by work.
 	for plan: Dictionary in model.plans.values():
+		if plan.kind in model.Rooms.COSTS or plan.kind == "rope_bridge": continue
 		if model.Deconstruction.is_salvage(plan): continue
 		if planning and Construction.applies(plan): continue
 		if plan.kind == "platform" and entity_views.has("plan:%s" % plan.id): model.Platforms.sync(entity_views["plan:%s" % plan.id], int(plan.get("platform_tier", 1)))
@@ -106,12 +129,13 @@ func sync(model, delta: float, selected: int) -> void:
 			Construction.sync(entity_views["plan:%s" % plan.id], plan, model.workers)
 	for cell: Vector3i in model.buildings:
 		var building: Dictionary = model.buildings[cell]
-		if building.kind != "windmill": continue
+		if building.kind not in ["windmill", "mill"]: continue
 		var key := "building:%s" % cell
 		if not entity_views.has(key): continue
 		var working: bool = model.workers.any(func(worker): return worker.job.get("kind") == "process" and worker.job.get("target") == cell and worker.job.get("phase") == "work") and Economy.production_speed(model, cell) > 0
 		preload("res://scripts/settlement/mill_view.gd").animate(entity_views[key], int(building.get("mill_tier", 3)), delta, working)
 	# The clock advances even when no inventory or structure changes.
+	roof_rain_view.sync(model)
 	scenery.update_lighting(model.time)
 	while actors.size() > model.workers.size():
 		actors.pop_back().free()
@@ -129,50 +153,68 @@ func sync(model, delta: float, selected: int) -> void:
 		var garden: Dictionary = model.gardens[cell]
 		var plants := garden_views[cell].get_node("Plants") as Node3D
 		if garden.get("species") == "grass":
-			plants.scale.y = 1.0 if garden.food > 0 else lerpf(0.08, 1.0, clampf(garden.growth / model.Farming.Balance.number("crop_growth_seconds"), 0.0, 1.0))
-			for index in plants.get_child_count(): plants.get_child(index).visible = garden.food == 0 or index % 3 < garden.food
+			preload("res://scripts/settlement/plant_view.gd").sync_grass(garden_views[cell], model, cell)
 			continue
-		var hay: bool = model.buildings.get(cell, {}).get("kind") == "hay_field"
+		var hay: bool = model.Farming.is_hay(model, cell)
+		if hay:
+			preload("res://scripts/settlement/hay_surface.gd").animate(model, cell, garden_views[cell])
+			continue
 		var growth: float = 1.0 if garden.food > 0 else (0.06 + garden.growth / 24.0 * 0.94 if hay else 0.25 + garden.growth / 24.0 * 0.75)
 		plants.scale.y = growth
 		plants.position.y = 0.012 if hay else 0.30 * (1.0 - growth)
 		if hay:
 			sync_hay_quarters(plants, garden)
-	for cell: Vector3i in tree_views:
+	# Mature scenery changes on model revisions; only seedlings need frame updates.
+	for cell: Vector3i in growing_trees:
 		TreeView.sync(tree_views[cell], model.trees[cell])
-	for cell: Vector3i in model.deposits:
-		var deposit: Dictionary = model.deposits[cell]
-		if deposit.kind == "berry" and deposit.has("seed_growth"):
-			var key := "deposit:%s" % cell
-			if entity_views.has(key): entity_views[key].scale = Vector3.ONE * lerpf(0.18, 1.0, deposit.seed_growth)
+	for cell: Vector3i in growing_bushes:
+		entity_views["deposit:%s" % cell].scale = Vector3.ONE * lerpf(0.18, 1.0, model.deposits[cell].seed_growth)
 	Perf.end("view.animation", dynamic_started)
 	var visibility_started := Perf.begin()
 	var next_visibility := [last_model_id, model.revision, appearance_revision, model.exploration.revision, fog_enabled, cutaway, display_level]
 	if visibility_state != next_visibility:
 		visibility_state = next_visibility
 		for child: Node3D in architecture.get_children():
-			var cell: Vector3i = child.get_meta("cell", Vector3i.ZERO)
-			child.visible = (not cutaway or cell.y <= display_level) and (not fog_enabled or model.exploration.contains(Navigation.point(cell)))
-			if child.has_meta("collider"):
-				child.get_meta("collider").collision_layer = (2 if child.get_meta("planned", false) else 1) if child.visible and not child.get_meta("relocation_piece", false) else 0
+			_sync_entity_visibility(child, model)
+		for span: Node3D in bridge_view.get_children():
+			var record: Dictionary = model.RopeBridges.get_record(model, span.get_meta("bridge_id"))
+			span.visible = (not cutaway or maxf(record.start.y, record.end.y) <= display_level) and (not fog_enabled or (model.exploration.contains(record.start) and model.exploration.contains(record.end)))
+			for body in span.get_children():
+				if body is StaticBody3D: body.collision_layer = 4 if span.visible else 0
 		for cell: Vector3i in water_view.sources:
 			var source: Node3D = water_view.sources[cell]
 			source.visible = not fog_enabled or model.exploration.contains(Navigation.point(cell))
 			for child in source.get_children():
 				if child is StaticBody3D:
 					child.collision_layer = 1 if source.visible else 0
+	else:
+		# Seedlings can grow into the fog between exploration/model revisions.
+		for cell: Vector3i in growing_trees:
+			_sync_entity_visibility(tree_views[cell], model)
 	Perf.end("view.visibility", visibility_started)
-	var grass_started := Perf.begin()
-	scenery.sync_grass(model, fog_enabled)
-	Perf.end("view.grass", grass_started)
 	_sync_routes(model, selected)
+	timber_motion.advance(delta)
+
+func bridge_node(id: int) -> Node3D:
+	for span: Node3D in bridge_view.get_children():
+		if span.get_meta("bridge_id", -1) == id: return span
+	return null
+
+func _sync_entity_visibility(node: Node3D, model) -> void:
+	var cell: Vector3i = node.get_meta("cell", Vector3i.ZERO)
+	var revealed := true
+	if fog_enabled:
+		revealed = TreeView.fully_revealed(node, model.exploration) if tree_views.get(cell) == node else model.exploration.contains(Navigation.point(cell))
+	node.visible = (not cutaway or cell.y <= display_level) and revealed
+	if node.has_meta("collider"):
+		node.get_meta("collider").collision_layer = (2 if node.get_meta("planned", false) else 1) if node.visible and not node.get_meta("relocation_piece", false) and not node.get_meta("resource_empty", false) else 0
 
 static func sync_hay_quarters(plants: Node3D, crop: Dictionary) -> void:
 	var farming = preload("res://scripts/settlement/farming.gd")
 	var standing: int = farming.standing_quarters(crop)
 	for tuft: Node3D in plants.get_children():
-		var quarter: int = farming.quarter_at(tuft.position)
-		tuft.visible = (standing & (1 << quarter)) != 0 if crop.food > 0 else crop.growth > 0.0
+		var quarter: int = int(tuft.get_meta("hay_quarter", farming.quarter_at(tuft.position)))
+		tuft.visible = (standing & (1 << quarter)) != 0 or float(crop.get("quarter_growth", [crop.growth, crop.growth, crop.growth, crop.growth])[quarter]) > 0.0
 
 func _entity(key: String, kind: String, cell: Vector3i, asset_kind := "", direction := 0) -> Node3D:
 	_wanted[key] = true
@@ -183,31 +225,35 @@ func _entity(key: String, kind: String, cell: Vector3i, asset_kind := "", direct
 	if not entity_views.has(key):
 		var node := _place(kind, cell, variant)
 		node.set_meta("asset", variant)
-		node.visible = not cutaway or cell.y <= display_level
+		node.set_meta("planned", key.begins_with("plan:"))
+		if node.has_meta("collider"):
+			node.get_meta("collider").set_meta("entity_key", key)
 		entity_views[key] = node
 	var result: Node3D = entity_views[key]
-	result.position = Navigation.point(cell)
-	result.visible = not cutaway or cell.y <= display_level
-	result.set_meta("cell", cell)
-	result.set_meta("planned", key.begins_with("plan:"))
-	if result.has_meta("collider"):
-		var body: StaticBody3D = result.get_meta("collider")
-		body.set_meta("cell", cell)
-		body.set_meta("entity_key", key)
-		body.collision_layer = (2 if result.get_meta("planned") else 1) if result.visible else 0
-	result.rotation.y = -direction * PI * 0.5
+	# Plan IDs survive relocation/retargeting, so their cell can change in place.
+	if result.get_meta("cell") != cell:
+		result.set_meta("cell", cell)
+		if result.has_meta("collider"): result.get_meta("collider").set_meta("cell", cell)
+	# Visibility/picking belong to the visibility pass. Resetting them here
+	# briefly reveals every fog-hidden subtree on each inventory update.
+	var angle := -direction * PI * 0.5
+	if not is_equal_approx(result.rotation.y, angle): result.rotation.y = angle
 	return result
 
 func _rebuild(model) -> void:
+	var section_started := Perf.begin()
 	# Reconcile identity, preserving unchanged assets, colliders and materials.
 	_wanted.clear()
 	var dismantling := {}
 	for plan: Dictionary in model.plans.values():
+		if plan.kind in model.Rooms.COSTS or plan.kind == "rope_bridge": continue
 		if plan.get("deconstruction", false) and plan.relocation.stage == "dismantle":
 			dismantling[plan.cell] = true
 	garden_views.clear()
 	store_views.clear()
 	tree_views.clear()
+	growing_trees.clear()
+	growing_bushes.clear()
 	for cell: Vector3i in model.deposits:
 		var deposit: Dictionary = model.deposits[cell]
 		var node := _entity("deposit:%s" % cell, deposit.kind, cell)
@@ -216,8 +262,13 @@ func _rebuild(model) -> void:
 				child.visible = not child.name.begins_with("Berry") or int(str(child.name).trim_prefix("Berry")) < deposit.inventory.count("food")
 		if deposit.kind == "berry":
 			BushView.sync(node, cell, model.world_seed, int(deposit.get("appearance_seed", -1)))
+			if deposit.has("seed_growth"):
+				node.scale = Vector3.ONE * lerpf(0.18, 1.0, deposit.seed_growth)
+				if float(deposit.seed_growth) < 1.0: growing_bushes.append(cell)
 		if deposit.kind == "limestone":
-			StoneView.sync(node, cell, model.world_seed, deposit.inventory)
+			StoneView.sync(node, cell, model.world_seed, deposit.inventory, false, preload("res://scripts/settlement/solid_islands.gd").enabled(model) and model.generator_version>=10)
+	Perf.end("view.reconcile.deposits", section_started)
+	section_started = Perf.begin()
 	for cell: Vector3i in model.platforms:
 		if dismantling.has(cell) or (planning and not planned_decks.has(cell)): continue
 		var deck := _entity("platform:%s" % cell, "platform", cell)
@@ -227,26 +278,27 @@ func _rebuild(model) -> void:
 		var stair := _entity("stairs:%s" % cell, "stairs", cell, "", model.stairs[cell])
 		preload("res://scripts/settlement/construction_variants.gd").stairs(stair, model.navigation.stair_landing(cell, model.stairs[cell]).y - cell.y)
 	for cell: Vector3i in model.stores:
-		if dismantling.has(cell) or model.Houses.is_house(model, cell): continue
+		if dismantling.has(cell): continue
 		var kind: String = model.buildings[cell].kind if model.buildings.has(cell) else "stockpile"
-		var node := _entity("stockpile:%s" % cell, kind, cell, "", int(model.buildings[cell].direction) if model.buildings.has(cell) else 0)
+		if kind == "stockpile" and model.stores[cell].total() == 0: continue
+		var key := "%s:%s" % ["building" if model.buildings.has(cell) and kind not in Catalog.STORAGE else "stockpile", cell]
+		var node := _entity(key, kind, cell, "salvage" if kind == "stockpile" else "", int(model.buildings[cell].direction) if model.buildings.has(cell) else 0)
 		if kind == "hay_barn": preload("res://scripts/settlement/hay_barn_view.gd").sync(model, cell, node)
 		if kind == "stone_storage":
 			var tier := int(model.buildings[cell].get("storage_tier", 1))
-			node.get_node("Beams").visible = tier >= 2
-			node.get_node("Enclosure").visible = tier == 3
+			preload("res://scripts/settlement/stone_storage_view.gd").sync(node, tier)
 		store_views[cell] = node
+		if kind == "stone_storage" and node.has_meta("depot_grid"):
+			preload("res://scripts/settlement/stone_storage_view.gd").sync_stock(node, model.stores[cell], cell, model.world_seed)
+			continue
+		for child in node.get_children():
+			if child.has_meta("timber_overflow_slot") and int(child.get_meta("timber_overflow_slot")) >= model.stores[cell].count("log"): child.free()
 		if not node.has_meta("logs"):
 			var log_nodes: Array[Node3D] = []
 			for index in 12:
 				var log_node := Assets.create("log")
 				log_node.set_meta("variation_exempt", true)
-				# Four logs per discrete stack layer.
-				@warning_ignore("integer_division")
-				log_node.position = Vector3(0, 0.18 + (index / 4) * 0.22, -0.42 + (index % 4) * 0.27)
-				if kind == "log_shed":
-					log_node.rotation.y = PI * 0.5
-					log_node.position = Vector3((index % 3 - 1) * 0.23, 0.10 + (index / 6) * 0.23, -0.46 if index % 6 < 3 else 0.46)
+				log_node.transform=preload("res://scripts/settlement/stored_goods_layout.gd").log_pose(kind,index)
 				node.add_child(log_node)
 				log_nodes.append(log_node)
 			node.set_meta("logs", log_nodes)
@@ -259,11 +311,11 @@ func _rebuild(model) -> void:
 		stock.name = "EconomyStock"
 		node.add_child(stock)
 		var slot := 0
-		for resource in ["food", "grain", "plank", "stone", "block", "pottery"]:
+		for resource in ["food", "grain", "plank", "stone", "block", "pottery", "flour", "clay", "brick", "ore", "imbrex"]:
 			var amount: int = model.stores[cell].count(resource)
 			if kind in ["goods_rack", "small_warehouse"]: amount = mini(amount, maxi(0, 8 - slot))
 			for index in (amount if resource in ["stone", "block", "pottery"] else mini(amount, 4)):
-				var cargo := Assets.create(WorkerView.CARGO_ASSETS[resource])
+				var cargo := Assets.create("bread" if resource == "food" else WorkerView.CARGO_ASSETS[resource])
 				cargo.set_meta("resource", resource)
 				if resource in ["stone", "block"]:
 					var stone_mesh: MeshInstance3D = cargo.get_node("Stone")
@@ -272,48 +324,48 @@ func _rebuild(model) -> void:
 					if kind == "stone_storage" and resource == "stone":
 						stone_mesh.scale = Vector3.ONE * 0.7
 						stone_mesh.position.y = -0.15
-				# Six items per layer, arranged in two rows of three.
-				@warning_ignore("integer_division")
-				cargo.position = Vector3((slot % 3 - 1) * 0.42, 0.15 + (slot / 6) * 0.28, (slot / 3 % 2 - 0.5) * 0.48)
-				if kind == "stone_storage": cargo.position = Vector3((slot % 4 - 1.5) * 0.57, 0.18 + (slot / 16) * 0.35, (slot / 4 % 4 - 1.5) * 0.57)
-				if kind == "hay_barn": cargo.position = Vector3(0, 0.15 + (slot / 3) * 0.25, (slot % 3 - 1) * 0.55)
-				cargo.scale = Vector3.ONE * 0.7
-				if kind in ["goods_rack", "small_warehouse"]:
-					cargo.position = Vector3(-0.20 + (slot % 2) * 0.40, 0.14 + (slot / 4) * 0.34, -0.20 + (slot / 2 % 2) * 0.38)
-					cargo.scale = Vector3.ONE * 0.42
-				if resource == "plank":
-					cargo.scale = Vector3.ONE
-					cargo.rotation.y = PI * 0.5
-					cargo.position = Vector3((slot % 3 - 1) * 0.25, 0.14 + (slot / 3) * 0.20, 0)
+				cargo.transform=preload("res://scripts/settlement/stored_goods_layout.gd").cargo_pose(kind,resource,slot)
 				stock.add_child(cargo)
 				slot += 1
-	_sync_pile_corners(model)
+	Perf.end("view.reconcile.stores", section_started)
+	section_started = Perf.begin()
 	for cell: Vector3i in model.soil_beds:
 		if not dismantling.has(cell) or model.Relocation.kind_at(model, cell) != "soil_bed":
 			_entity("soil_bed:%s" % cell, "soil_bed", cell)
 	for cell: Vector3i in model.gardens:
-		if dismantling.has(cell): continue
-		var kind: String = "grass_patch" if model.gardens[cell].get("species") == "grass" else ("hay_field" if model.buildings.has(cell) else "garden")
-		garden_views[cell] = _entity("garden:%s" % cell, kind, cell, "", int(model.buildings[cell].direction) if model.buildings.has(cell) else 0)
-		if kind == "hay_field": preload("res://scripts/settlement/hay_field_view.gd").sync(model, cell, garden_views[cell], dismantling)
+		if dismantling.has(cell) and (not model.Farming.is_hay(model, cell) or model.buildings.get(cell, {}).get("kind") == "hay_field"): continue
+		var kind: String = "grass_patch" if model.gardens[cell].get("species") == "grass" else ("hay_field" if model.Farming.is_hay(model, cell) else "garden")
+		garden_views[cell] = _entity("garden:%s" % cell, kind, cell, "", int(model.Farming.field_layout(model, cell).get("direction", 0)) if kind == "hay_field" else 0)
+		if kind == "hay_field":
+			preload("res://scripts/settlement/hay_field_view.gd").sync(model, cell, garden_views[cell], dismantling)
+			preload("res://scripts/settlement/hay_surface.gd").sync(model, cell, garden_views[cell])
+	Perf.end("view.reconcile.gardens", section_started)
+	section_started = Perf.begin()
 	for cell: Vector3i in model.trees:
 		var node := _entity("tree:%s" % cell, "tree", cell, TreeView.asset(model.trees[cell]))
 		tree_views[cell] = node
+		TreeView.sync(node, model.trees[cell])
+		if float(model.trees[cell].get("seed_growth", 1.0)) < 1.0: growing_trees.append(cell)
 	for cell: Vector3i in model.vines:
 		var vine := _entity("vine:%s" % cell, "vine_tree", cell)
 		preload("res://scripts/settlement/vine_view.gd").sync(vine, model, cell)
+	Perf.end("view.reconcile.nature", section_started)
+	section_started = Perf.begin()
 	for cell: Vector3i in model.wells:
 		if dismantling.has(cell): continue
 		var building: Dictionary = model.buildings.get(cell, {})
 		var kind: String = building.get("kind", "well")
 		var node := _entity("well:%s" % cell, kind, cell, "", int(building.get("direction", 0)))
-		preload("res://scripts/settlement/well_view.gd").sync(node, int(building.get("well_units", 3)), model.wells[cell].count("water"), model.wells[cell].capacity, kind == "waterworks")
+		preload("res://scripts/settlement/well_view.gd").sync(node, model.Hydrology.units(building), model.wells[cell].count("water"), model.wells[cell].capacity, kind == "waterworks")
 	for cell: Vector3i in model.buildings:
 		if dismantling.has(cell): continue
 		var building: Dictionary = model.buildings[cell]
 		if building.kind in Catalog.STORAGE or building.kind in ["hay_field", "well", "waterworks"]:
 			continue
 		var node := _entity("building:%s" % cell, building.kind, cell, "", int(building.direction))
+		if building.kind=="support" and building.has("support_yaw"): node.rotation.y=float(building.support_yaw)
+		if building.kind == "claypit": preload("res://scripts/settlement/claypit_view.gd").sync(node, model, cell)
+		if building.kind == "road": preload("res://scripts/settlement/stone_road.gd").sync(node, cell, model.world_seed, model)
 		if building.kind == "windmill": preload("res://scripts/settlement/mill_view.gd").sync(node, int(building.get("mill_tier", 3)))
 		if building.kind == "sawmill": preload("res://scripts/settlement/sawmill_view.gd").sync(node, int(building.get("sawmill_tier", 2)))
 		if building.kind == "house":
@@ -325,14 +377,17 @@ func _rebuild(model) -> void:
 				var doors: Array = [Houses.SIDES[int(building.direction)]]
 				HouseShell.apply(node, neighbours, doors)
 	for plan: Dictionary in model.plans.values():
+		if plan.kind in model.Rooms.COSTS or plan.kind == "rope_bridge": continue
 		if plan.get("collect_vine", false) or plan.get("collect_bush", false): continue
 		if planning and plan.kind == "platform" and model.Planning.includes(plan) and not planned_decks.has(plan.cell): continue
 		var plant: Dictionary = {}
 		if plan.has("relocation") and model.Relocation.portable_plant(plan):
-			var field: String = {"tree": "trees", "berry": "deposits", "garden": "gardens"}[plan.kind]
+			var field: String = {"tree": "trees", "berry": "deposits", "garden": "gardens", "vine_tree": "vines"}[plan.kind]
 			plant = plan.relocation.payload.get(field, model.get(field).get(plan.relocation.source, {}))
 		var asset_kind := TreeView.asset(plant) if plan.kind == "tree" else ""
+		if plan.kind == "vine_tree": asset_kind = "seed_vine"
 		if plan.has("bush_payload"): asset_kind = "berry"
+		if plan.get("house_upgrade", false): asset_kind = "salvage"
 		if plan.kind == "garden" and plant.get("species") == "grass": asset_kind = "grass_patch"
 		var salvaging: bool = plan.get("deconstruction", false) and plan.relocation.stage == "salvage"
 		var well_count := 0
@@ -343,6 +398,18 @@ func _rebuild(model) -> void:
 			if entity_views.has(key) and entity_views[key].get_meta("well_plan_units", -1) != well_count:
 				entity_views[key].free()
 				entity_views.erase(key)
+		if plan.get("deconstruction", false) and not salvaging:
+			# Keep the actual authored frame while the citizen dismantles it.
+			var plan_key := "plan:%s" % plan.id
+			if not entity_views.has(plan_key):
+				for source_key: String in entity_views.keys():
+					var source: Node3D = entity_views[source_key]
+					if source.get_meta("cell") != plan.relocation.source or source.get_meta("asset") != plan.kind or source.get_meta("planned", false): continue
+					entity_views.erase(source_key)
+					entity_views[plan_key] = source
+					source.set_meta("planned", true)
+					if source.has_meta("collider"): source.get_meta("collider").set_meta("entity_key", plan_key)
+					break
 		var node := _entity("plan:%s" % plan.id, "stockpile" if salvaging else plan.kind,
 			plan.relocation.pickup_cell if salvaging else plan.cell, "salvage" if salvaging else asset_kind, int(plan.direction))
 		if plan.kind == "windmill" and not salvaging and not node.has_meta("construction_parts"):
@@ -364,12 +431,20 @@ func _rebuild(model) -> void:
 			for child in node.get_children():
 				if child is MeshInstance3D and str(child.name).begins_with("Berry"):
 					child.visible = int(str(child.name).trim_prefix("Berry")) < plant.inventory.count("food")
+		if plan.has("delivered"):
+			var slot := 0
+			for resource: String in plan.delivered.amounts:
+				for index in plan.delivered.count(resource):
+					var piece := _entity("staged:%s:%s:%s" % [plan.id, resource, index], "road", plan.cell, "bread" if resource == "food" else WorkerView.CARGO_ASSETS[resource])
+					piece.set_meta("placement_offset", Vector3((slot % 3 - 1) * 0.4, 0.14 + (slot / 3) * 0.18, Catalog.Reviewed.size(plan.kind).z * 0.5 + 0.25) if Catalog.Reviewed.has(plan.kind) else Vector3(0, 0.14, 1.25))
+					piece.set_meta("relocation_piece", true)
+					slot += 1
 		if plan.has("relocation") and plan.relocation.stage in ["rebuild", "salvage"]:
 			var move: Dictionary = plan.relocation
 			var slot := 0
 			for resource: String in move.parts.amounts:
 				for index in move.parts.count(resource):
-					var piece := _entity("parts:%s:%s:%s" % [plan.id, resource, index], "road", move.pickup_cell, WorkerView.CARGO_ASSETS[resource])
+					var piece := _entity("parts:%s:%s:%s" % [plan.id, resource, index], "road", move.pickup_cell, "bread" if resource == "food" else WorkerView.CARGO_ASSETS[resource])
 					# Match the discrete rows and layers used by stored cargo.
 					@warning_ignore("integer_division")
 					piece.set_meta("placement_offset", Vector3((slot % 3 - 1) * 0.4, 0.12 + (slot / 6) * 0.18, (slot / 3 % 2 - 0.5) * 0.4) + (plan.get("placement_offset", Vector3.ZERO) if salvaging else Vector3.ZERO))
@@ -385,19 +460,30 @@ func _rebuild(model) -> void:
 							child.visible = int(str(child.name).trim_prefix("Berry")) < plant.inventory.count("food")
 
 		node.set_meta("placement_offset", Vector3.ZERO if salvaging else plan.get("placement_offset", Vector3.ZERO))
+		if plan.kind=="support" and plan.has("support_yaw"):
+			node.rotation.y=float(plan.support_yaw)
+			preload("res://scripts/settlement/structure_frame.gd").sync_foundation(node, model, plan.cell, plan.get("placement_offset", Vector3.ZERO), float(plan.support_yaw))
+			if node.has_node("Deck"): node.get_node("Deck").rotation.y=(posmod(hash([model.world_seed,plan.cell]),2)+int(plan.direction))*PI/2
 		if plan.kind == "platform" and not salvaging: model.Platforms.sync(node, model.Platforms.tier(planned_decks.get(plan.cell, 1)) if planning else int(plan.get("platform_tier", 1)))
 		if planning and Construction.applies(plan):
 			Construction.preview(node)
+		elif plan.get("house_upgrade", false):
+			# The existing occupied House remains visible throughout the work.
+			pass
 		elif Construction.applies(plan):
 			var marker_base: Vector3i = plan.cell
 			if plan.kind == "platform": marker_base -= Vector3i.UP * int(plan.get("platform_tier", 1))
 			Construction.prepare(node, plan.kind, model.ground.has(marker_base) or model.rock_supports(marker_base))
+		elif plan.get("deconstruction", false):
+			pass # Dismantling retains authored materials and physical stock.
 		elif plan.kind in Catalog.SEEDS:
 			pass # The small, solid seed marker stays legible against sand.
 		elif not node.has_meta("tinted"):
 			Assets.tint(node, Color(0.92, 0.67, 0.46, 1.0) if plan.get("deconstruction", false) else Color(0.75, 0.88, 0.78, 0.23), true)
 			node.set_meta("tinted", true)
 
+	Perf.end("view.reconcile.plans", section_started)
+	section_started = Perf.begin()
 	for key: String in entity_views.keys():
 		if not _wanted.has(key):
 			entity_views[key].free()
@@ -408,11 +494,15 @@ func _rebuild(model) -> void:
 			Assets.Variation.apply(node, node.get_meta("asset"), cell, model.world_seed)
 			var planned: bool = node.get_meta("planned", false)
 			var offset: Vector3 = node.get_meta("placement_offset", Vector3.ZERO) if planned or node.get_meta("relocation_piece", false) else model.buildings.get(cell, {}).get("placement_offset", Vector3.ZERO)
+			if key.begins_with("garden:") and model.Farming.is_hay(model, cell): offset = model.Farming.field_layout(model, cell).get("placement_offset", Vector3.ZERO)
 			if key.begins_with("vine:"): offset = model.vines[cell].get("placement_offset", Vector3.ZERO)
 			if key.begins_with("soil_bed:"): offset = Vector3.ZERO
-			node.position = Navigation.point(cell) + offset
+			var position_ := Navigation.point(cell) + offset
+			if key.begins_with("building:") or key.begins_with("stockpile:") or key.begins_with("plan:") or key.begins_with("platform:") or key.begins_with("stairs:"):
+				position_.y += preload("res://scripts/settlement/structure_elevation.gd").base_shift(model,cell,node.get_meta("asset"),0,offset)
 			if model.ground.has(cell) and (key.begins_with("tree:") or (key.begins_with("deposit:") and model.deposits[cell].kind == "berry") or key.begins_with("vine:") or node.get_meta("asset") in Catalog.SEEDS):
-				node.position.y = model.navigation.surface_height(cell, node.position)
+				position_.y = model.navigation.surface_height(cell, position_)
+			if not node.position.is_equal_approx(position_): node.position = position_
 			if node.has_node("Roof") and not node.has_meta("construction_parts"):
 				var supported: bool = model.Planning.upper_used(model, cell, node.get_meta("asset")) if planning else (not planned and model.needs_stack_support(cell))
 				var natural_roof: bool = node.get_meta("asset") in Catalog.NATURAL_ROOFS or (node.get_meta("asset") == "sawmill" and int(model.buildings.get(cell, {}).get("sawmill_tier", 2)) == 3)
@@ -423,19 +513,32 @@ func _rebuild(model) -> void:
 				for panel: Node3D in node.get_node("Roof").get_children():
 					var panel_offset := panel.position.rotated(Vector3.UP, node.rotation.y)
 					panel.visible = not model.Planning.upper_used(model, cell, node.get_meta("asset"), panel_offset) if planning else (planned or not model.roof_panel_covered(cell, panel_offset))
-
-func _sync_pile_corners(model) -> void:
-	var visited := {}
+			if node.get_meta("asset") in ["log_shed", "hay_barn"] and node.has_node("Canopy") and not node.has_meta("construction_parts"):
+				node.get_node("Canopy").visible = not model.Planning.upper_used(model, cell, "log_shed") if planning else not model.roof_panel_covered(cell, Vector3.ZERO)
+	var connected_frames_started := Perf.begin()
+	preload("res://scripts/settlement/connected_frames.gd").sync(model, store_views)
+	Perf.end("view.placement.connected_frames", connected_frames_started)
+	var structure_frame_started := Perf.begin()
+	preload("res://scripts/settlement/structure_frame.gd").sync(model, entity_views)
+	Perf.end("view.placement.structure_frame", structure_frame_started)
 	for cell: Vector3i in store_views:
-		if visited.has(cell) or not Piles.is_pile(model, cell):
-			continue
-		var members := Piles.members(model, cell)
-		for member in members:
-			visited[member] = true
-			for index in 4:
-				if store_views.has(member): store_views[member].get_node("CornerStone%d" % index).hide()
-		for corner in Piles.outline(members):
-			if store_views.has(corner.cell): store_views[corner.cell].get_node("CornerStone%d" % corner.index).show()
+		var node: Node3D = store_views[cell]
+		if model.buildings.get(cell, {}).get("kind", "") == "log_shed" and not node.has_meta("construction_parts"):
+			preload("res://scripts/settlement/shed_roof.gd").sync(node, hash([model.world_seed, cell]))
+		elif model.buildings.get(cell, {}).get("kind", "") == "hay_barn" and not node.has_meta("construction_parts"):
+			preload("res://scripts/settlement/barn_roof.gd").sync(node, hash([model.world_seed, cell]))
+	var house_posts_started := Perf.begin()
+	preload("res://scripts/settlement/house_posts.gd").sync(model, entity_views)
+	Perf.end("view.placement.house_posts", house_posts_started)
+	var house_roofs_started := Perf.begin()
+	preload("res://scripts/settlement/house_roofs.gd").sync(model, entity_views, planning)
+	Perf.end("view.placement.house_roofs", house_roofs_started)
+	for node: Node3D in entity_views.values():
+		if node.get_meta("planned",false) or node.has_meta("construction_parts"): continue
+		var cell: Vector3i = node.get_meta("cell",Vector3i.ZERO)
+		if model.buildings.has(cell): preload("res://scripts/settlement/rope_visuals.gd").roof_landing(node, model, cell)
+	preload("res://scripts/settlement/home_assembly.gd").sync(model,entity_views)
+	Perf.end("view.reconcile.placement", section_started)
 
 func _sync_routes(model, selected: int) -> void:
 	# Keep navigation in world space; the HUD draws it in logical UI points.

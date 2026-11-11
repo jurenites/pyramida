@@ -2,6 +2,7 @@ extends Node3D
 const AnalysisWorker=preload("res://scripts/block_city/analysis_worker.gd")
 const SurfacePicker=preload("res://scripts/block_city/surface_picker.gd")
 const Utilities=preload("res://scripts/block_city/utility_network.gd")
+const UtilitySound=preload("res://scripts/block_city/utility_sound.gd")
 const UtilityView=preload("res://scripts/block_city/utility_view.gd")
 const UtilityButton=preload("res://scripts/block_city/utility_button.gd")
 const TerrainView=preload("res://scripts/block_city/terrain_view.gd")
@@ -44,6 +45,8 @@ var utility_graph_key:=0
 var utility_ghost: Node3D
 var utility_audio: AudioStreamPlayer
 var utility_notes: Array=[]
+var utility_vent_notes: Array=[]
+var utility_vent_note_index:=0
 var utility_note_index:=0
 var utility_note_time:=0
 var manual_orientation:=false
@@ -83,6 +86,7 @@ var floor_down: Button
 var forced_floor := -100
 var menu: ColorRect
 var note: Label
+var placement_building_id := 0
 var selection_ids: Array=[]
 var selection_kind := ""
 var selection_path: Array=[]
@@ -301,14 +305,8 @@ func setup_utility_ui() -> void:
 		button.pressed.connect(func(): select_utility(kind)); utility_bar.add_child(button)
 	utility_ghost=Node3D.new(); add_child(utility_ghost)
 	utility_audio=AudioStreamPlayer.new(); utility_audio.volume_db=-24; add_child(utility_audio)
-	for frequency in [261.63,293.66,329.63,392.0,440.0]:
-		var sample:=AudioStreamWAV.new(); sample.format=AudioStreamWAV.FORMAT_16_BITS; sample.mix_rate=22050
-		var bytes:=PackedByteArray(); bytes.resize(4410*2)
-		for i in 4410:
-			var t:=float(i)/22050.0
-			var envelope:=minf(1.0,t/0.008)*exp(-t*24.0)
-			bytes.encode_s16(i*2,int(sin(TAU*frequency*t)*envelope*18000))
-		sample.data=bytes; utility_notes.append(sample)
+	utility_notes=UtilitySound.notes()
+	utility_vent_notes=UtilitySound.notes(true)
 
 func refresh_utility_ui() -> void:
 	if utility_bar==null: return
@@ -384,8 +382,13 @@ func cancel_utility_stroke() -> void:
 func play_utility_note() -> void:
 	if utility_audio==null or Time.get_ticks_msec()-utility_note_time<50: return
 	utility_note_time=Time.get_ticks_msec()
-	utility_audio.stream=utility_notes[utility_note_index%utility_notes.size()]
-	utility_note_index+=1; utility_audio.play()
+	if utility_kind=="vent":
+		utility_audio.stream=utility_vent_notes[utility_vent_note_index%utility_vent_notes.size()]
+		utility_vent_note_index+=1
+	else:
+		utility_audio.stream=utility_notes[utility_note_index%utility_notes.size()]
+		utility_note_index+=1
+	utility_audio.play()
 
 func draw_utilities() -> void:
 	var signature:=hash([model.utility_links,analysis_powered,underground,view_mode,forced_floor])
@@ -575,6 +578,16 @@ func select_hit(id: int, additive := false) -> void:
 			for i in path.size():
 				if path[i].kind==selection_kind and path[i].ids==selection_ids and (selection_kind!="group" or path[i].get("group")==selection_path[-1].get("group")):
 					depth=mini(i+1,path.size()-1); break
+		elif selection_kind!="multi" and not selection_path.is_empty():
+			# Keep the shared ancestors when switching to a sibling floor or group.
+			# A different building has no shared building scope, so starts there.
+			var shared:=0
+			for i in mini(selection_path.size(),path.size()):
+				var before: Dictionary=selection_path[i]
+				var after: Dictionary=path[i]
+				if before.kind!=after.kind or before.ids!=after.ids or before.get("group")!=after.get("group"): break
+				shared+=1
+			depth=mini(shared,path.size()-1)
 		selection_path=path.slice(0,depth+1)
 		selection_ids=path[depth].ids.duplicate(); selection_kind=path[depth].kind
 		selected=id if selection_kind=="room" else -1
@@ -632,7 +645,7 @@ func refresh_edit_preview() -> void:
 			if cable.get("source_device","")=="transformer": moved.source_cell=Model.arr(at)
 			PowerView.draw(self,ghost,moved)
 		xray_preview(ghost); refresh_floor_tools(); overlay.queue_redraw(); return
-	preview=Editor.plan(model,edit_ids,Vector3i(anchor.x,snap_y,anchor.y),yaw,edit_action=="copy")
+	preview=Editor.plan(model,edit_ids,Vector3i(anchor.x,snap_y,anchor.y),yaw,edit_action=="copy",selection_kind)
 	if edit_ids.size()==1 and not entry_override.is_empty():
 		var card: Dictionary=model.relocation_card(edit_ids[0]); card.merge(entry_override,true)
 		var form: Dictionary=model.oriented(card,yaw)
@@ -653,6 +666,11 @@ func refresh_edit_preview() -> void:
 	for cell in changed:
 		for direction in Model.DIRECTIONS+[Vector3i.ZERO,Vector3i.UP,Vector3i.DOWN]:
 			if existing.has(cell+direction): affected[int(existing[cell+direction])]=true
+	if preview.get("frame_infill",false):
+		# Infill can split/remove hall records and renumber their neighbors.
+		for node in geometry.get_children(): node.hide()
+		affected.clear()
+		for room in preview.proposed_rooms: affected[int(room.id)]=true
 	var context:=Node3D.new(); context.name="EditContext"; ghost.add_child(context)
 	for id in affected:
 		if preview.ids.has(id): continue
@@ -690,6 +708,7 @@ func refresh_ui() -> void:
 	view.cells = model.oriented(held_card(), yaw).cells
 	view.tint = model.tint(held_card())
 	view.role = model.room_role(held_card())
+	view.quarter_stair = model.quarter_stair(held_card())
 	view.modulate.a = 1.0 if holding else 0.4
 	view.gui_input.connect(func(event):
 		if event is InputEventMouseButton and event.pressed and event.button_index==MOUSE_BUTTON_LEFT and not menu.visible:
@@ -814,6 +833,11 @@ func footprint_extent() -> Vector2i:
 	return Vector2i(extent.x,extent.z)
 
 func set_holding(value: bool) -> void:
+	if value and not selection_ids.is_empty():
+		Model.Buildings.ensure(model)
+		var owner: int=model.rooms[int(selection_ids[0])].building_id
+		placement_building_id=owner if selection_ids.all(func(id):return int(model.rooms[int(id)].building_id)==owner) else 0
+	elif not value or not holding: placement_building_id=0
 	utility_kind=""; cancel_utility_stroke()
 	selection_ids=[]; selection_path=[]; selection_kind=""
 	wire_drag={}; wire_dragging=false
@@ -1166,7 +1190,11 @@ func draw_rooms() -> void:
 		var id:=int(room.id); var neighbors: Dictionary={}
 		for raw in room.cells:
 			var cell:=Model.vec(raw)
-			for direction in Model.DIRECTIONS+[Vector3i.UP,Vector3i.DOWN]:
+			var directions: Array=Model.DIRECTIONS+[Vector3i.UP,Vector3i.DOWN]
+			for direction in Model.DIRECTIONS:
+				directions.append(direction+Vector3i.UP)
+				directions.append(direction+Vector3i.DOWN)
+			for direction in directions:
 				if occ.has(cell+direction): neighbors[occ[cell+direction]]=model.rooms[int(occ[cell+direction])]
 		var signature:=hash([room,neighbors,view_mode,underground,reached.has(id),room.cells.any(func(raw):return powered.has(Model.vec(raw)))])
 		var existing:=geometry.get_node_or_null("Room%d" % id)
@@ -1245,6 +1273,8 @@ func refresh_preview() -> void:
 		if not preview.cells.is_empty():
 			var room := {"shape":held_card().shape,"color":held_card().color,
 				"cells":preview.cells.map(func(p): return Model.arr(p)),"door":Model.arr(preview.door),"normal":Model.arr(preview.normal)}
+			if preview.get("carve",false) and preview.ok:
+				room.id=preview.proposed_rooms.size()-1; room.access_path=[]
 			if moving_id>=0:
 				room.id=moving_id
 				room.access_path=preview.get("proposed_rooms",model.rooms)[moving_id].access_path
@@ -1435,7 +1465,7 @@ func drop() -> void:
 		persist()
 		return
 	constrain_first_room()
-	if not model.drop(anchor.x,anchor.y,yaw,underground,snap_y,carve_hall):
+	if not model.drop(anchor.x,anchor.y,yaw,underground,snap_y,carve_hall,placement_building_id):
 		note.text=""
 		refresh_preview()
 		return
@@ -1443,6 +1473,7 @@ func drop() -> void:
 	manual_orientation=false
 	var was_carving := carve_hall
 	selected = model.rooms.size()-1
+	placement_building_id=int(model.rooms[selected].building_id)
 	reset_placement_aim(true)
 	refresh()
 	persist()
@@ -1750,7 +1781,7 @@ func position_anchor(screen: Vector2) -> bool:
 			elif not underground and hall_surface:
 				# Halls have no roof mesh. Their floor/interior still identifies
 				# the cell to stack on, not a sidewall for bracket attachment.
-				next_y=int(hit.cell.y)+1
+				next_y=int(hit.cell.y) if model.room_role(held_card())=="room" and hit.surface!="roof" else int(hit.cell.y)+1
 				side_anchor=Vector2i(hit.cell.x,hit.cell.z)
 			elif not underground and hit.normal==Vector3i.UP:
 				next_y=int(hit.cell.y)+1

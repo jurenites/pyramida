@@ -34,7 +34,7 @@ var sound_effects: HSlider
 var sound_effects_value: Label
 var current_page := "home"
 var pending_slot := -1
-var selected_difficulty := "normal"
+var selected_difficulty := "easy"
 var active_slot := -1
 var has_session := false
 var continue_slot := -1
@@ -108,6 +108,13 @@ func _ready() -> void:
 	add_button("resume", "settlement_menu_resume_text", "home", continue_game)
 	add_button("settlements", "settlement_menu_slots_text", "home", func(): show_page("slots"))
 	add_button("settings", "settlement_menu_settings_text", "home", func(): show_page("settings"))
+	# Match the third slot's row so Back and Quit share the same click area.
+	var quit_spacer := Control.new()
+	quit_spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	quit_spacer.custom_minimum_size.y = buttons.settings.get_combined_minimum_size().y
+	pages.home.add_child(quit_spacer)
+	buttons.settings.minimum_size_changed.connect(func():
+		quit_spacer.custom_minimum_size.y = buttons.settings.get_combined_minimum_size().y)
 	add_button("quit", "settlement_menu_quit_text", "home", func(): quit_requested.emit())
 	# Reserve Continue's row so Play, slot one and Sand share a click position.
 	for page in ["slots", "difficulty"]:
@@ -122,7 +129,7 @@ func _ready() -> void:
 		var item := add_button("slot_%d" % slot, "", "slots", func(): choose_slot(slot))
 		slots.append(item)
 	add_button("slots_back", "settlement_menu_back_text", "slots", func(): show_page("settings" if current_page == "delete_slots" else "home"))
-	for difficulty in ["normal", "easy", "hard"]:
+	for difficulty in ["easy", "normal", "hard"]:
 		var item := add_button(difficulty, "settlement_difficulty_" + difficulty + "_text", "difficulty", func(): pass)
 		item.tooltip_text = tr("settlement_difficulty_" + difficulty + "_tooltip_text")
 		item.disabled = difficulty == "hard"
@@ -297,7 +304,7 @@ func open_menu(entries: Array[Dictionary], session: bool, slot: int, settings: D
 	slot_caption.text = tr("settlement_menu_active_text") % [slot + 1, _slot_landscape(entries[slot])] if slot >= 0 else tr("settlement_menu_tagline_text")
 	status.text = ""
 	visible = true
-	show_page("home" if session else "slots")
+	show_page("home")
 
 func refresh_entries(entries: Array[Dictionary]) -> void:
 	slot_entries = entries

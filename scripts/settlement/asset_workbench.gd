@@ -503,6 +503,7 @@ func choose_library(id: String) -> void:
 	host._refresh()
 
 func library_title(id: String) -> String:
+	if id in Kit.UNUSED_ASSETS: return Kit.title(id)
 	if id == active_asset and scopes.is_empty(): return host.draft.name
 	return assets[id].name if assets.has(id) else Kit.title(id).capitalize()
 

@@ -114,10 +114,14 @@ func _ready() -> void:
 		pieces.fit()
 
 func open_layout() -> void:
-	# Older callers now land in the same asset editor.
-	visible = true
-	scene_view.render_target_update_mode = SubViewport.UPDATE_ALWAYS
-	pieces.activate()
+	if is_instance_valid(layout_sandbox): return
+	layout_sandbox = preload("res://scenes/settlement/BuildingLayoutSandbox.tscn").instantiate()
+	add_child(layout_sandbox)
+	visible = false
+	scene_view.render_target_update_mode = SubViewport.UPDATE_DISABLED
+	layout_sandbox.finished.connect(func(_to_editor):
+		layout_sandbox = null
+		open())
 
 func _style(colour: Color) -> StyleBoxFlat:
 	var style := StyleBoxFlat.new()
@@ -301,6 +305,7 @@ func _create_interface() -> void:
 	header.add_theme_constant_override("separation", 12 * VisualTokens.GAP_UNIT)
 	layout.add_child(header)
 	_label(header, "Blueprints")
+	_button(header, "Arrange", open_layout)
 	back_to_assets = _button(header, "Assets", pieces.activate)
 	var spacer := Control.new()
 	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -567,7 +572,7 @@ func _create_interface() -> void:
 	dialog_theme.set_color("font_color", "Label", Color("ffe6b5"))
 	file_dialog.theme = dialog_theme
 	file_dialog.access = FileDialog.ACCESS_FILESYSTEM
-	file_dialog.filters = PackedStringArray(["*.pyrstructure ; Pyramida structure workshop"])
+	file_dialog.filters = PackedStringArray(["*.pyrstructure ; Town structure workshop"])
 	file_dialog.size = Vector2i(850, 580)
 	file_dialog.file_selected.connect(func(path):
 		if file_dialog.file_mode == FileDialog.FILE_MODE_SAVE_FILE:
@@ -597,7 +602,7 @@ func _create_world() -> void:
 	var light := DirectionalLight3D.new()
 	light.rotation_degrees = Vector3(-52, -28, 0)
 	light.light_energy = 1.1
-	light.shadow_enabled = true
+	preload("res://scripts/settlement/illustration_style.gd").configure_sun(light)
 	scene_root.add_child(light)
 	camera = Camera3D.new()
 	camera.projection = Camera3D.PROJECTION_ORTHOGONAL
@@ -666,7 +671,7 @@ func _redraw() -> void:
 	overlay.placement_edges.assign(Overlay.PlacementOutline.cell_edges(preview.cells, cutoff) if _placing_building() else [])
 	overlay.placement_visible = _placing_building() and hovered != null
 	if move_index >= 0: overlay.selected = -1
-	Illustration.apply(geometry)
+	Illustration.apply(geometry, false, true)
 	hover_mesh = View.box(geometry, Vector3(0.98, 0.98 if mode == 0 else 0.025, 0.98), Vector3.ZERO, Color(0.3, 0.55, 0.48, 0.3))
 	hover_mesh.visible = false
 

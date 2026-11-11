@@ -1,0 +1,21 @@
+[gd_scene format=3]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ii7ks"]
+albedo_color = Color(0.7647059, 0.654902, 0.5254902, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_dimtb"]
+size = Vector3(0.96, 0.08, 0.96)
+
+[node name="Road" type="Node3D" unique_id=1572137872]
+metadata/reviewed_model = true
+
+[node name="Floor" type="MeshInstance3D" parent="." unique_id=799053331]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.04, 0)
+material_override = SubResource("StandardMaterial3D_ii7ks")
+mesh = SubResource("BoxMesh_dimtb")
+
+[node name="AccessFront" type="Marker3D" parent="." unique_id=1617299153]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1)
+
+[node name="RoofSocket" type="Marker3D" parent="." unique_id=2098907854]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)

@@ -12,17 +12,7 @@ static func cells(model, ids: Array) -> Array:
 	return result
 
 static func building(model, id: int) -> Array:
-	var occ: Dictionary=model.occupied()
-	var found: Array=[id]; var pending: Array=[id]
-	while not pending.is_empty():
-		var current: int=pending.pop_front()
-		for raw in model.rooms[current].cells:
-			for direction in Model.DIRECTIONS+[Vector3i.UP,Vector3i.DOWN]:
-				var next: Vector3i=Model.vec(raw)+direction
-				if occ.has(next) and not found.has(int(occ[next])):
-					found.append(int(occ[next])); pending.append(int(occ[next]))
-	found.sort()
-	return found
+	return Model.Buildings.members(model,id)
 
 static func path(model, id: int) -> Array:
 	if id<0 or id>=model.rooms.size(): return []
@@ -78,22 +68,9 @@ static func group_rooms(model, ids: Array) -> int:
 	return next
 
 static func validate(trial) -> Array:
-	var issues: Array=[]; var seen: Dictionary={}
-	for room in trial.rooms:
-		for raw in room.cells:
-			var p:=Model.vec(raw)
-			if seen.has(p): issues.append({"cell":p,"kind":"occupied"})
-			seen[p]=true
-	var occ: Dictionary=trial.occupied()
+	var issues: Array=Model.Frame.structure_issues(trial)
 	issues.append_array(trial.transformer_plan(trial.transformer_cell).issues)
-	for room in trial.rooms:
-		var points: Array=room.cells.map(func(raw):return Model.vec(raw))
-		var others: Dictionary=occ.duplicate()
-		for p in points: others.erase(p)
-		issues.append_array(trial.fit_issues(points,others,trial.reserved(),points[0].y<0,trial.room_role(room),false))
-		var support: Dictionary=trial.support(points,others,points[0].y<0,trial.room_role(room))
-		issues.append_array(support.issues); room.braces=support.braces
-
+	var occ: Dictionary=trial.occupied()
 	for cable in trial.cables:
 		for pair in [["cell","normal"],["source_cell","source_normal"]]:
 			if cable.has(pair[0]):
@@ -106,23 +83,27 @@ static func validate(trial) -> Array:
 
 	return issues
 
-static func plan(model, ids: Array, target: Vector3i, yaw: int, copy: bool) -> Dictionary:
+static func plan(model, ids: Array, target: Vector3i, yaw: int, copy: bool, source_scope := "") -> Dictionary:
 	var hand:=card(model,ids)
 	var rotated: Array=hand.cells.map(func(raw):return Model.rotate_point(Model.vec(raw),yaw))
 	var minimum: Vector3i=rotated[0]
 	for p in rotated: minimum=minimum.min(p)
 	var mapping: Dictionary={}
 	for p in cells(model,ids): mapping[p]=Model.rotate_point(p-hand.origin,yaw)-minimum+target
-	var trial=Model.new("",model.config)
+	var trial=model.get_script().new("",model.config)
 	trial.restore(model.snapshot())
+	var owners: Dictionary=Model.Buildings.copy_owners(model,ids,mapping,source_scope=="building") if copy else {}
 	var edited: Array=[]; var result_ids: Array=[]
 	var group_map: Dictionary={}; var next:=next_group(model)
 	for id in ids:
 		var room: Dictionary=model.rooms[id].duplicate(true)
 		room.cells=room.cells.map(func(raw):return Model.arr(mapping[Model.vec(raw)]))
+		if room.has("frame_cells"): room.frame_cells=room.frame_cells.map(func(raw):return Model.arr(mapping[Model.vec(raw)]))
 		room.door=Model.arr(mapping[Model.vec(room.door)])
 		room.normal=Model.arr(Model.rotate_point(Model.vec(room.normal),yaw)); room.access_path=[]
+		if room.has("generated"): room.generated.yaw=posmod(int(room.generated.yaw)+yaw,4)
 		if copy:
+			room.building_id=owners[int(room.building_id)]
 			var groups: Array=[]
 			for group in room.get("groups",[]):
 				if not model.rooms.all(func(member):return not member.get("groups",[]).has(group) or ids.has(int(member.id))): continue
@@ -139,12 +120,15 @@ static func plan(model, ids: Array, target: Vector3i, yaw: int, copy: bool) -> D
 				if cable.has(pair[0]) and mapping.has(Model.vec(cable[pair[0]])):
 					cable[pair[0]]=Model.arr(mapping[Model.vec(cable[pair[0]])])
 					cable[pair[1]]=Model.arr(Model.rotate_point(Model.vec(cable[pair[1]]),yaw))
+	var infill: Dictionary=Model.Frame.replace(trial,edited)
+	result_ids=edited.map(func(room):return int(room.id))
 	trial.utility_links=Utilities.prune(trial,trial.utility_links if copy else Utilities.transform(trial.utility_links,mapping,yaw))
 	trial.align_transformer_bundles()
 	var issues:=validate(trial)
+	issues.append_array(infill.issues)
 	if trial.rooms.size()>256: issues.append({"cell":target,"kind":"bounds"})
 	trial.apply_connection_colors()
-	return {"ok":issues.is_empty(),"issues":issues,"origin":target,"cells":cells(trial,result_ids),"edited":edited,"ids":result_ids,"proposed_rooms":trial.rooms,"proposed_cables":trial.cables,"proposed_utilities":trial.utility_links,"braces":[],"reason":"" if issues.is_empty() else "Placement blocked"}
+	return {"ok":issues.is_empty(),"issues":issues,"origin":target,"cells":cells(trial,result_ids),"edited":edited,"frame_infill":not infill.affected.is_empty(),"ids":result_ids,"proposed_rooms":trial.rooms,"proposed_cables":trial.cables,"proposed_utilities":trial.utility_links,"braces":[],"reason":"" if issues.is_empty() else "Placement blocked"}
 
 static func commit(model, result: Dictionary) -> bool:
 	if not result.get("ok",false): return false
@@ -155,7 +139,7 @@ static func commit(model, result: Dictionary) -> bool:
 	return true
 
 static func removal(model, ids: Array) -> Dictionary:
-	var trial=Model.new("",model.config)
+	var trial=model.get_script().new("",model.config)
 	trial.restore(model.snapshot())
 	trial.rooms=trial.rooms.filter(func(room):return not ids.has(int(room.id)))
 	for i in trial.rooms.size(): trial.rooms[i].id=i

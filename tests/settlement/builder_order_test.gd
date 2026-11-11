@@ -13,6 +13,7 @@ func check(ok: bool, message: String) -> void:
 func fresh():
 	var model = Model.new()
 	model.setup()
+	preload("res://tests/settlement/supplied_pile_fixture.gd").add_to(model)
 	for worker in model.workers:
 		model.set_role(worker.id, "idle")
 	model.request_build("platform", Vector3i(0, 1, 0))
@@ -126,6 +127,7 @@ func test_player_command() -> void:
 	game.slot_directory = "/tmp/pyramida-builder-order-%d" % Time.get_ticks_usec()
 	root.add_child(game)
 	game.speed = 0
+	preload("res://tests/settlement/supplied_pile_fixture.gd").add_to(game.model)
 	await process_frame
 	for worker in game.model.workers:
 		game.model.set_role(worker.id, "idle")

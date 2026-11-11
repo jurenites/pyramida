@@ -1,0 +1,33 @@
+Room construction integration — 30 October 2026
+
+Implemented flow: main-game workers build a two-storey hall frame, infill a room and U-turn stair, construct a bed, and a citizen reaches it. One logical cell = 2 m on all axes.
+
+Latest focused checks:
+- room_construction_test.gd: PASS (material hauling, support, infill, door paths, all four stair rotations, ascent/descent, rendered height, save/reload, invalid saved metadata).
+- room_editor_test.gd: PASS (real settlement scene, first placement, hierarchy, floor copy, protected edits, bed preview and geometry cache).
+- Rendered four main-game views: room-frame-planned.png, room-frame-built.png, room-upstairs-bed.png, room-house-roofed.png.
+- Block City regression suite: 38/38 PASS.
+- Settlement regression suite: 81/98 PASS.
+
+Remaining settlement checks:
+- tests/settlement/well_test.gd
+- tests/settlement/asset_multiselect_test.gd
+- tests/settlement/asset_grouping_test.gd
+- tests/settlement/planting_test.gd
+- tests/settlement/relocation_test.gd
+- tests/settlement/structure_workshop_test.gd
+- tests/settlement/automatic_roof_test.gd
+- tests/settlement/new_game_test.gd
+- tests/settlement/ui_scale_test.gd
+- tests/settlement/economy_test.gd
+- tests/settlement/terrain_runtime_test.gd
+- tests/settlement/world_generation_test.gd
+- tests/settlement/simulation_test.gd
+- tests/settlement/builder_order_test.gd
+- tests/settlement/runtime_test.gd
+- tests/settlement/building_placement_test.gd
+- tests/settlement/simulation_speed_test.gd
+
+Baseline comparison: the integration-touched scripts/settlement files were replaced with their HEAD versions only in /tmp/pyramida-room-baseline. The working checkout was not reset. The same assertion failures reproduced in the previous code for well, planting, asset multiselect/grouping, structure workshop, new game, UI scale, economy, terrain runtime, world generation, simulation, builder order, runtime and building placement. The previous automatic-roof test produced the same script error; relocation also exceeded 240 seconds. Simulation-speed baseline result: TIMEOUT: previous settlement code also exceeded 240 seconds
+
+Scope limits: completed structural moves/demolition, furniture copying, elevator integration, utilities, sleeping needs and population capacity are not part of this milestone. Untouched plans remain editable. Main settlement saves persist room work; play_rooms.sh uses a temporary unsaved practice fixture.

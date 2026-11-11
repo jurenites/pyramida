@@ -1,0 +1,2092 @@
+{
+  "format_version": 1,
+  "design_date": "2026-11-06",
+  "runtime_enabled": false,
+  "purpose": "Documentation example; unset quantities and requirements prevent runtime activation.",
+  "rules": {
+    "primary_input_types_per_recipe": 1,
+    "output_types_per_recipe": 1,
+    "cargo_types_per_worker": 1,
+    "production_actions_per_workplace": 1,
+    "null_numeric_values": "unresolved_not_zero",
+    "dimensions_order": "width_depth_height",
+    "coordinate_axes": {
+      "x": "horizontal",
+      "y": "up",
+      "z": "horizontal"
+    },
+    "world_cell_size_m": 1,
+    "machine_power_policy": "not_required_by_default_review_later",
+    "additional_material_inputs_allowed": false,
+    "production_recipes_per_workplace": 1,
+    "in_game_recipe_selection": false,
+    "default_worker_slots": 1,
+    "default_power_required": false
+  },
+  "resources": {
+    "food": {
+      "label": "Food",
+      "status": "requested",
+      "physical_form": "stored_food",
+      "tags": [
+        "consumable"
+      ],
+      "unit": null,
+      "icon_id": "bread",
+      "model_id": "bread"
+    },
+    "water": {
+      "label": "Water",
+      "status": "requested",
+      "physical_form": "liquid",
+      "tags": [
+        "consumable"
+      ],
+      "unit": null,
+      "icon_id": "droplet"
+    },
+    "money": {
+      "label": "Money",
+      "status": "requested",
+      "physical_form": "ledger",
+      "tags": [
+        "consumable"
+      ],
+      "unit": null,
+      "icon_id": "gold_coin"
+    },
+    "electricity": {
+      "label": "Electricity",
+      "status": "requested",
+      "physical_form": "network",
+      "tags": [
+        "energy"
+      ],
+      "unit": null
+    },
+    "natural_gas": {
+      "label": "Gas",
+      "status": "requested",
+      "physical_form": "gas",
+      "tags": [
+        "energy"
+      ],
+      "unit": null
+    },
+    "log": {
+      "label": "Log",
+      "status": "requested",
+      "physical_form": "solid",
+      "tags": [
+        "energy",
+        "construction",
+        "material"
+      ],
+      "unit": null
+    },
+    "charcoal": {
+      "label": "Charcoal",
+      "status": "requested",
+      "physical_form": "solid",
+      "tags": [
+        "energy"
+      ],
+      "unit": null
+    },
+    "oil": {
+      "label": "Oil",
+      "status": "requested",
+      "physical_form": "liquid",
+      "tags": [
+        "energy"
+      ],
+      "unit": null
+    },
+    "berries": {
+      "label": "Berries",
+      "status": "requested",
+      "physical_form": "solid",
+      "tags": [
+        "food_input"
+      ],
+      "unit": null
+    },
+    "hay": {
+      "label": "Hay",
+      "status": "requested",
+      "physical_form": "solid",
+      "tags": [
+        "material",
+        "roof"
+      ],
+      "unit": null
+    },
+    "plank": {
+      "label": "Plank",
+      "status": "requested",
+      "physical_form": "solid",
+      "tags": [
+        "construction",
+        "roof"
+      ],
+      "unit": null
+    },
+    "stone": {
+      "label": "Stone",
+      "status": "requested",
+      "physical_form": "solid",
+      "tags": [
+        "material",
+        "construction"
+      ],
+      "unit": null
+    },
+    "slab": {
+      "label": "Slab",
+      "status": "requested",
+      "physical_form": "solid",
+      "tags": [
+        "construction"
+      ],
+      "unit": null
+    },
+    "concrete": {
+      "label": "Concrete",
+      "status": "deferred",
+      "physical_form": "solid",
+      "tags": [
+        "construction"
+      ],
+      "unit": null,
+      "notes": "Requested simplified dry construction mix; Water is added during construction. Final naming undecided."
+    },
+    "clay": {
+      "label": "Clay",
+      "status": "requested",
+      "physical_form": "solid",
+      "tags": [
+        "material"
+      ],
+      "unit": null
+    },
+    "brick": {
+      "label": "Brick",
+      "status": "requested",
+      "physical_form": "solid",
+      "tags": [
+        "construction"
+      ],
+      "unit": null
+    },
+    "pot": {
+      "label": "Vase",
+      "status": "requested",
+      "physical_form": "solid",
+      "tags": [
+        "crafted_item"
+      ],
+      "unit": null,
+      "notes": "Reusable vessel for carrying and storing Water; capacity and filling rules unresolved."
+    },
+    "flour": {
+      "label": "Flour",
+      "status": "requested",
+      "physical_form": "solid",
+      "tags": [
+        "food_intermediate"
+      ],
+      "unit": null
+    },
+    "tile": {
+      "label": "Tile",
+      "status": "proposed",
+      "physical_form": "solid",
+      "tags": [
+        "roof"
+      ],
+      "unit": null
+    },
+    "ore": {
+      "label": "Ore",
+      "status": "deferred",
+      "physical_form": "solid",
+      "tags": [
+        "material"
+      ],
+      "unit": null
+    },
+    "iron": {
+      "label": "Iron",
+      "status": "deferred",
+      "physical_form": "solid",
+      "tags": [
+        "material"
+      ],
+      "unit": null
+    },
+    "tool": {
+      "label": "Tool",
+      "status": "deferred",
+      "physical_form": "solid",
+      "tags": [
+        "crafted_item"
+      ],
+      "unit": null
+    },
+    "sheet": {
+      "label": "Sheet",
+      "status": "deferred",
+      "physical_form": "solid",
+      "tags": [
+        "roof",
+        "construction"
+      ],
+      "unit": null
+    }
+  },
+  "sources": {
+    "bush": {
+      "label": "Bush",
+      "origin": "natural",
+      "status": "requested",
+      "variants": [
+        "berry"
+      ],
+      "renewal_policy": null
+    },
+    "grass": {
+      "label": "Grass",
+      "origin": "natural",
+      "status": "requested",
+      "variants": [
+        "wild"
+      ],
+      "renewal_policy": null
+    },
+    "tree": {
+      "label": "Tree",
+      "origin": "natural",
+      "status": "requested",
+      "variants": [
+        "living",
+        "dead"
+      ],
+      "renewal_policy": null
+    },
+    "mountain": {
+      "label": "Mountain",
+      "origin": "natural",
+      "status": "requested",
+      "variants": [
+        "stone",
+        "ore"
+      ],
+      "variant_status": {
+        "stone": "requested",
+        "ore": "proposed"
+      },
+      "renewal_policy": null
+    },
+    "dirt": {
+      "label": "Dirt",
+      "origin": "natural",
+      "status": "requested",
+      "variants": [
+        "clay"
+      ],
+      "renewal_policy": null
+    },
+    "crop": {
+      "label": "Crop",
+      "origin": "cultivated",
+      "status": "proposed",
+      "variants": [
+        "hay"
+      ],
+      "renewal_policy": null,
+      "host_building_id": "hay_field"
+    },
+    "puddle": {
+      "label": "Puddle",
+      "origin": "natural",
+      "status": "requested",
+      "resource_id": "water",
+      "refill_source": "rain",
+      "refill_rate": null
+    }
+  },
+  "actions": {
+    "gather": {
+      "label": "Gather",
+      "behavior_family": "gather"
+    },
+    "saw": {
+      "label": "Saw",
+      "behavior_family": "process"
+    },
+    "cut": {
+      "label": "Cut",
+      "behavior_family": "process"
+    },
+    "crush": {
+      "label": "Crush",
+      "behavior_family": "process"
+    },
+    "fire": {
+      "label": "Fire",
+      "behavior_family": "process"
+    },
+    "make": {
+      "label": "Make",
+      "behavior_family": "process"
+    },
+    "mill": {
+      "label": "Mill",
+      "behavior_family": "process"
+    },
+    "bake": {
+      "label": "Bake",
+      "behavior_family": "process"
+    },
+    "forge": {
+      "label": "Forge",
+      "behavior_family": "process"
+    },
+    "smelt": {
+      "label": "Smelt",
+      "behavior_family": "process"
+    },
+    "char": {
+      "label": "Char",
+      "behavior_family": "process"
+    },
+    "convert": {
+      "label": "Convert",
+      "behavior_family": "process"
+    },
+    "generate": {
+      "label": "Generate",
+      "behavior_family": "energy_conversion"
+    },
+    "drive": {
+      "label": "Drive",
+      "behavior_family": "mechanical_service"
+    }
+  },
+  "buildings": {
+    "room": {
+      "label": "Room",
+      "status": "requested",
+      "kind": "room",
+      "dimensions_m": {
+        "width_m": 2,
+        "depth_m": 2,
+        "height_m": 2
+      },
+      "primary_action_id": null,
+      "required_utility_ids": [],
+      "fixed_recipe_id": null,
+      "recipe_selection_in_game": false,
+      "worker_slots": 1,
+      "power_connection": {
+        "required": false,
+        "service_id": null,
+        "demand_while_working": null,
+        "contract_status": "deferred"
+      }
+    },
+    "shed": {
+      "label": "Shed",
+      "status": "requested",
+      "kind": "storage",
+      "dimensions_m": {
+        "width_m": 1,
+        "depth_m": 2,
+        "height_m": 1
+      },
+      "primary_action_id": null,
+      "required_utility_ids": [],
+      "placement_modes": [
+        "standalone",
+        "inside_room"
+      ],
+      "fixed_recipe_id": null,
+      "recipe_selection_in_game": false,
+      "worker_slots": 1,
+      "power_connection": {
+        "required": false,
+        "service_id": null,
+        "demand_while_working": null,
+        "contract_status": "deferred"
+      },
+      "accepted_resource_ids": [
+        "log",
+        "plank"
+      ],
+      "dimensions_exclude_roof": true,
+      "placement_target": "align footprint and origin to body bounds"
+    },
+    "platform": {
+      "label": "Platform",
+      "status": "requested",
+      "kind": "structure",
+      "dimensions_m": {
+        "width_m": 2,
+        "depth_m": 2,
+        "height_m": 1
+      },
+      "primary_action_id": null,
+      "required_utility_ids": [],
+      "fixed_recipe_id": null,
+      "recipe_selection_in_game": false,
+      "worker_slots": 1,
+      "power_connection": {
+        "required": false,
+        "service_id": null,
+        "demand_while_working": null,
+        "contract_status": "deferred"
+      }
+    },
+    "stairs": {
+      "label": "Stairs",
+      "status": "requested",
+      "kind": "connector",
+      "dimensions_m": {
+        "width_m": 2,
+        "depth_m": 2,
+        "height_m": 2
+      },
+      "primary_action_id": null,
+      "required_utility_ids": [],
+      "rise_m": 2,
+      "notes": "Ramp cells rise 1 m; validate landings, shaft openings and clearance independently of bounds.",
+      "fixed_recipe_id": null,
+      "recipe_selection_in_game": false,
+      "worker_slots": 1,
+      "power_connection": {
+        "required": false,
+        "service_id": null,
+        "demand_while_working": null,
+        "contract_status": "deferred"
+      }
+    },
+    "hay_field": {
+      "label": "Field",
+      "status": "requested",
+      "kind": "cultivated_source",
+      "dimensions_m": {
+        "width_m": 4,
+        "depth_m": 4,
+        "height_m": 1
+      },
+      "primary_action_id": "gather",
+      "required_utility_ids": [],
+      "source_id": "crop",
+      "fixed_recipe_id": "harvest_hay",
+      "recipe_selection_in_game": false,
+      "worker_slots": 1,
+      "power_connection": {
+        "required": false,
+        "service_id": null,
+        "demand_while_working": null,
+        "contract_status": "deferred"
+      },
+      "upgrade_tiers": [
+        {
+          "tier": 1,
+          "work_seconds": null,
+          "input_amount": null,
+          "output_amount": null,
+          "upgrade_cost": null
+        },
+        {
+          "tier": 2,
+          "work_seconds": null,
+          "input_amount": null,
+          "output_amount": null,
+          "upgrade_cost": null
+        },
+        {
+          "tier": 3,
+          "work_seconds": null,
+          "input_amount": null,
+          "output_amount": null,
+          "upgrade_cost": null
+        }
+      ]
+    },
+    "sawmill": {
+      "label": "Sawmill",
+      "status": "requested",
+      "kind": "production",
+      "dimensions_m": {
+        "width_m": 2,
+        "depth_m": 2,
+        "height_m": 2
+      },
+      "primary_action_id": "saw",
+      "required_utility_ids": [],
+      "dimensions_status": "proposed",
+      "power_connection": {
+        "required": false,
+        "service_id": null,
+        "demand_while_working": null,
+        "contract_status": "deferred"
+      },
+      "fixed_recipe_id": "saw_plank",
+      "recipe_selection_in_game": false,
+      "worker_slots": 1,
+      "upgrade_tiers": [
+        {
+          "tier": 1,
+          "work_seconds": null,
+          "input_amount": null,
+          "output_amount": null,
+          "upgrade_cost": null
+        },
+        {
+          "tier": 2,
+          "work_seconds": null,
+          "input_amount": null,
+          "output_amount": null,
+          "upgrade_cost": null
+        },
+        {
+          "tier": 3,
+          "work_seconds": null,
+          "input_amount": null,
+          "output_amount": null,
+          "upgrade_cost": null
+        }
+      ]
+    },
+    "masonry": {
+      "label": "Masonry",
+      "status": "requested",
+      "kind": "production",
+      "dimensions_m": {
+        "width_m": 2,
+        "depth_m": 2,
+        "height_m": 2
+      },
+      "primary_action_id": "cut",
+      "required_utility_ids": [],
+      "power_connection": {
+        "required": false,
+        "service_id": null,
+        "demand_while_working": null,
+        "contract_status": "deferred"
+      },
+      "fixed_recipe_id": "cut_slab",
+      "recipe_selection_in_game": false,
+      "worker_slots": 1,
+      "upgrade_tiers": [
+        {
+          "tier": 1,
+          "work_seconds": null,
+          "input_amount": null,
+          "output_amount": null,
+          "upgrade_cost": null
+        },
+        {
+          "tier": 2,
+          "work_seconds": null,
+          "input_amount": null,
+          "output_amount": null,
+          "upgrade_cost": null
+        },
+        {
+          "tier": 3,
+          "work_seconds": null,
+          "input_amount": null,
+          "output_amount": null,
+          "upgrade_cost": null
+        }
+      ]
+    },
+    "kiln": {
+      "label": "Kiln",
+      "status": "requested",
+      "kind": "production",
+      "dimensions_m": {
+        "width_m": 2,
+        "depth_m": 2,
+        "height_m": 2
+      },
+      "primary_action_id": "fire",
+      "required_utility_ids": [],
+      "power_connection": {
+        "required": false,
+        "service_id": null,
+        "demand_while_working": null,
+        "contract_status": "deferred"
+      },
+      "fixed_recipe_id": "fire_brick",
+      "recipe_selection_in_game": false,
+      "worker_slots": 1,
+      "upgrade_tiers": [
+        {
+          "tier": 1,
+          "work_seconds": null,
+          "input_amount": null,
+          "output_amount": null,
+          "upgrade_cost": null
+        },
+        {
+          "tier": 2,
+          "work_seconds": null,
+          "input_amount": null,
+          "output_amount": null,
+          "upgrade_cost": null
+        },
+        {
+          "tier": 3,
+          "work_seconds": null,
+          "input_amount": null,
+          "output_amount": null,
+          "upgrade_cost": null
+        }
+      ]
+    },
+    "pottery": {
+      "label": "Pottery",
+      "status": "requested",
+      "kind": "production",
+      "dimensions_m": {
+        "width_m": 2,
+        "depth_m": 2,
+        "height_m": 2
+      },
+      "primary_action_id": "make",
+      "required_utility_ids": [
+        "sink"
+      ],
+      "service_requirements_status": "unresolved",
+      "power_connection": {
+        "required": false,
+        "service_id": null,
+        "demand_while_working": null,
+        "contract_status": "deferred"
+      },
+      "fixed_recipe_id": "make_pot",
+      "recipe_selection_in_game": false,
+      "worker_slots": 1,
+      "upgrade_tiers": [
+        {
+          "tier": 1,
+          "work_seconds": null,
+          "input_amount": null,
+          "output_amount": null,
+          "upgrade_cost": null
+        },
+        {
+          "tier": 2,
+          "work_seconds": null,
+          "input_amount": null,
+          "output_amount": null,
+          "upgrade_cost": null
+        },
+        {
+          "tier": 3,
+          "work_seconds": null,
+          "input_amount": null,
+          "output_amount": null,
+          "upgrade_cost": null
+        }
+      ]
+    },
+    "blacksmith": {
+      "label": "Blacksmith",
+      "status": "deferred",
+      "kind": "production",
+      "dimensions_m": {
+        "width_m": 2,
+        "depth_m": 2,
+        "height_m": 2
+      },
+      "primary_action_id": "forge",
+      "required_utility_ids": [],
+      "power_connection": {
+        "required": false,
+        "service_id": null,
+        "demand_while_working": null,
+        "contract_status": "deferred"
+      },
+      "fixed_recipe_id": "forge_tool",
+      "recipe_selection_in_game": false,
+      "worker_slots": 1,
+      "upgrade_tiers": [
+        {
+          "tier": 1,
+          "work_seconds": null,
+          "input_amount": null,
+          "output_amount": null,
+          "upgrade_cost": null
+        },
+        {
+          "tier": 2,
+          "work_seconds": null,
+          "input_amount": null,
+          "output_amount": null,
+          "upgrade_cost": null
+        },
+        {
+          "tier": 3,
+          "work_seconds": null,
+          "input_amount": null,
+          "output_amount": null,
+          "upgrade_cost": null
+        }
+      ]
+    },
+    "mill": {
+      "label": "Mill",
+      "status": "requested",
+      "kind": "production",
+      "dimensions_m": null,
+      "primary_action_id": "mill",
+      "required_utility_ids": [],
+      "power_connection": {
+        "required": false,
+        "service_id": null,
+        "demand_while_working": null,
+        "contract_status": "deferred"
+      },
+      "fixed_recipe_id": "mill_flour",
+      "recipe_selection_in_game": false,
+      "worker_slots": 1,
+      "upgrade_tiers": [
+        {
+          "tier": 1,
+          "work_seconds": null,
+          "input_amount": null,
+          "output_amount": null,
+          "upgrade_cost": null
+        },
+        {
+          "tier": 2,
+          "work_seconds": null,
+          "input_amount": null,
+          "output_amount": null,
+          "upgrade_cost": null
+        },
+        {
+          "tier": 3,
+          "work_seconds": null,
+          "input_amount": null,
+          "output_amount": null,
+          "upgrade_cost": null
+        }
+      ]
+    },
+    "mine": {
+      "label": "Mine",
+      "status": "proposed",
+      "kind": "production",
+      "dimensions_m": null,
+      "primary_action_id": "gather",
+      "required_utility_ids": [],
+      "fixed_recipe_id": "gather_stone",
+      "recipe_selection_in_game": false,
+      "worker_slots": 1,
+      "power_connection": {
+        "required": false,
+        "service_id": null,
+        "demand_while_working": null,
+        "contract_status": "deferred"
+      },
+      "upgrade_tiers": [
+        {
+          "tier": 1,
+          "work_seconds": null,
+          "input_amount": null,
+          "output_amount": null,
+          "upgrade_cost": null
+        },
+        {
+          "tier": 2,
+          "work_seconds": null,
+          "input_amount": null,
+          "output_amount": null,
+          "upgrade_cost": null
+        },
+        {
+          "tier": 3,
+          "work_seconds": null,
+          "input_amount": null,
+          "output_amount": null,
+          "upgrade_cost": null
+        }
+      ]
+    },
+    "crusher": {
+      "label": "Crusher",
+      "status": "deferred",
+      "kind": "production",
+      "dimensions_m": null,
+      "primary_action_id": "crush",
+      "required_utility_ids": [],
+      "power_connection": {
+        "required": false,
+        "service_id": null,
+        "demand_while_working": null,
+        "contract_status": "deferred"
+      },
+      "fixed_recipe_id": "crush_concrete",
+      "recipe_selection_in_game": false,
+      "worker_slots": 1,
+      "upgrade_tiers": [
+        {
+          "tier": 1,
+          "work_seconds": null,
+          "input_amount": null,
+          "output_amount": null,
+          "upgrade_cost": null
+        },
+        {
+          "tier": 2,
+          "work_seconds": null,
+          "input_amount": null,
+          "output_amount": null,
+          "upgrade_cost": null
+        },
+        {
+          "tier": 3,
+          "work_seconds": null,
+          "input_amount": null,
+          "output_amount": null,
+          "upgrade_cost": null
+        }
+      ]
+    },
+    "bakery": {
+      "label": "Bakery",
+      "status": "proposed",
+      "kind": "production",
+      "dimensions_m": null,
+      "primary_action_id": "bake",
+      "required_utility_ids": [],
+      "power_connection": {
+        "required": false,
+        "service_id": null,
+        "demand_while_working": null,
+        "contract_status": "deferred"
+      },
+      "fixed_recipe_id": "bake_bread",
+      "recipe_selection_in_game": false,
+      "worker_slots": 1,
+      "upgrade_tiers": [
+        {
+          "tier": 1,
+          "work_seconds": null,
+          "input_amount": null,
+          "output_amount": null,
+          "upgrade_cost": null
+        },
+        {
+          "tier": 2,
+          "work_seconds": null,
+          "input_amount": null,
+          "output_amount": null,
+          "upgrade_cost": null
+        },
+        {
+          "tier": 3,
+          "work_seconds": null,
+          "input_amount": null,
+          "output_amount": null,
+          "upgrade_cost": null
+        }
+      ]
+    },
+    "smelter": {
+      "label": "Smelter",
+      "status": "deferred",
+      "kind": "production",
+      "dimensions_m": null,
+      "primary_action_id": "smelt",
+      "required_utility_ids": [],
+      "power_connection": {
+        "required": false,
+        "service_id": null,
+        "demand_while_working": null,
+        "contract_status": "deferred"
+      },
+      "fixed_recipe_id": "smelt_iron",
+      "recipe_selection_in_game": false,
+      "worker_slots": 1,
+      "upgrade_tiers": [
+        {
+          "tier": 1,
+          "work_seconds": null,
+          "input_amount": null,
+          "output_amount": null,
+          "upgrade_cost": null
+        },
+        {
+          "tier": 2,
+          "work_seconds": null,
+          "input_amount": null,
+          "output_amount": null,
+          "upgrade_cost": null
+        },
+        {
+          "tier": 3,
+          "work_seconds": null,
+          "input_amount": null,
+          "output_amount": null,
+          "upgrade_cost": null
+        }
+      ]
+    },
+    "charcoal_burner": {
+      "label": "Burner",
+      "status": "deferred",
+      "kind": "production",
+      "dimensions_m": null,
+      "primary_action_id": "char",
+      "required_utility_ids": [],
+      "power_connection": {
+        "required": false,
+        "service_id": null,
+        "demand_while_working": null,
+        "contract_status": "deferred"
+      },
+      "fixed_recipe_id": "char_charcoal",
+      "recipe_selection_in_game": false,
+      "worker_slots": 1
+    },
+    "converter": {
+      "label": "Converter",
+      "status": "deferred",
+      "kind": "production",
+      "dimensions_m": null,
+      "primary_action_id": "convert",
+      "required_utility_ids": [],
+      "power_connection": {
+        "required": false,
+        "service_id": null,
+        "demand_while_working": null,
+        "contract_status": "deferred"
+      },
+      "fixed_recipe_id": "convert_gas",
+      "recipe_selection_in_game": false,
+      "worker_slots": 1
+    },
+    "windmill": {
+      "label": "Windmill",
+      "status": "requested",
+      "kind": "power_source",
+      "dimensions_m": null,
+      "primary_action_id": "drive",
+      "required_utility_ids": [],
+      "service_output": "mechanical_drive",
+      "fixed_recipe_id": null,
+      "recipe_selection_in_game": false,
+      "worker_slots": 1,
+      "power_connection": {
+        "required": false,
+        "service_id": null,
+        "demand_while_working": null,
+        "contract_status": "deferred"
+      }
+    },
+    "watermill": {
+      "label": "Watermill",
+      "status": "deferred",
+      "kind": "power_source",
+      "dimensions_m": null,
+      "primary_action_id": "drive",
+      "required_utility_ids": [],
+      "service_output": "mechanical_drive",
+      "placement_requirement": "suitable_water_site",
+      "fixed_recipe_id": null,
+      "recipe_selection_in_game": false,
+      "worker_slots": 1,
+      "power_connection": {
+        "required": false,
+        "service_id": null,
+        "demand_while_working": null,
+        "contract_status": "deferred"
+      }
+    },
+    "tile_kiln": {
+      "label": "Tiler",
+      "status": "proposed",
+      "kind": "production",
+      "dimensions_m": {
+        "width_m": 2,
+        "depth_m": 2,
+        "height_m": 2
+      },
+      "primary_action_id": "fire",
+      "required_utility_ids": [],
+      "power_connection": {
+        "required": false,
+        "service_id": null,
+        "demand_while_working": null,
+        "contract_status": "deferred"
+      },
+      "fixed_recipe_id": "fire_tile",
+      "recipe_selection_in_game": false,
+      "worker_slots": 1,
+      "upgrade_tiers": [
+        {
+          "tier": 1,
+          "work_seconds": null,
+          "input_amount": null,
+          "output_amount": null,
+          "upgrade_cost": null
+        },
+        {
+          "tier": 2,
+          "work_seconds": null,
+          "input_amount": null,
+          "output_amount": null,
+          "upgrade_cost": null
+        },
+        {
+          "tier": 3,
+          "work_seconds": null,
+          "input_amount": null,
+          "output_amount": null,
+          "upgrade_cost": null
+        }
+      ]
+    },
+    "sheet_forge": {
+      "label": "Forge",
+      "status": "deferred",
+      "kind": "production",
+      "dimensions_m": {
+        "width_m": 2,
+        "depth_m": 2,
+        "height_m": 2
+      },
+      "primary_action_id": "forge",
+      "required_utility_ids": [],
+      "power_connection": {
+        "required": false,
+        "service_id": null,
+        "demand_while_working": null,
+        "contract_status": "deferred"
+      },
+      "fixed_recipe_id": "forge_sheet",
+      "recipe_selection_in_game": false,
+      "worker_slots": 1,
+      "upgrade_tiers": [
+        {
+          "tier": 1,
+          "work_seconds": null,
+          "input_amount": null,
+          "output_amount": null,
+          "upgrade_cost": null
+        },
+        {
+          "tier": 2,
+          "work_seconds": null,
+          "input_amount": null,
+          "output_amount": null,
+          "upgrade_cost": null
+        },
+        {
+          "tier": 3,
+          "work_seconds": null,
+          "input_amount": null,
+          "output_amount": null,
+          "upgrade_cost": null
+        }
+      ]
+    },
+    "ore_mine": {
+      "label": "Quarry",
+      "status": "deferred",
+      "kind": "production",
+      "dimensions_m": null,
+      "primary_action_id": "gather",
+      "required_utility_ids": [],
+      "fixed_recipe_id": "gather_ore",
+      "recipe_selection_in_game": false,
+      "worker_slots": 1,
+      "power_connection": {
+        "required": false,
+        "service_id": null,
+        "demand_while_working": null,
+        "contract_status": "deferred"
+      },
+      "upgrade_tiers": [
+        {
+          "tier": 1,
+          "work_seconds": null,
+          "input_amount": null,
+          "output_amount": null,
+          "upgrade_cost": null
+        },
+        {
+          "tier": 2,
+          "work_seconds": null,
+          "input_amount": null,
+          "output_amount": null,
+          "upgrade_cost": null
+        },
+        {
+          "tier": 3,
+          "work_seconds": null,
+          "input_amount": null,
+          "output_amount": null,
+          "upgrade_cost": null
+        }
+      ]
+    },
+    "log_generator": {
+      "label": "Log generator",
+      "status": "deferred",
+      "kind": "production",
+      "dimensions_m": null,
+      "primary_action_id": "generate",
+      "required_utility_ids": [],
+      "fixed_recipe_id": "generate_from_log",
+      "recipe_selection_in_game": false,
+      "worker_slots": 1,
+      "power_connection": {
+        "required": false,
+        "service_id": null,
+        "demand_while_working": null,
+        "contract_status": "deferred"
+      }
+    },
+    "charcoal_generator": {
+      "label": "Charcoal generator",
+      "status": "deferred",
+      "kind": "production",
+      "dimensions_m": null,
+      "primary_action_id": "generate",
+      "required_utility_ids": [],
+      "fixed_recipe_id": "generate_from_charcoal",
+      "recipe_selection_in_game": false,
+      "worker_slots": 1,
+      "power_connection": {
+        "required": false,
+        "service_id": null,
+        "demand_while_working": null,
+        "contract_status": "deferred"
+      }
+    },
+    "natural_gas_generator": {
+      "label": "Gas generator",
+      "status": "deferred",
+      "kind": "production",
+      "dimensions_m": null,
+      "primary_action_id": "generate",
+      "required_utility_ids": [],
+      "fixed_recipe_id": "generate_from_natural_gas",
+      "recipe_selection_in_game": false,
+      "worker_slots": 1,
+      "power_connection": {
+        "required": false,
+        "service_id": null,
+        "demand_while_working": null,
+        "contract_status": "deferred"
+      }
+    },
+    "oil_generator": {
+      "label": "Oil generator",
+      "status": "deferred",
+      "kind": "production",
+      "dimensions_m": null,
+      "primary_action_id": "generate",
+      "required_utility_ids": [],
+      "fixed_recipe_id": "generate_from_oil",
+      "recipe_selection_in_game": false,
+      "worker_slots": 1,
+      "power_connection": {
+        "required": false,
+        "service_id": null,
+        "demand_while_working": null,
+        "contract_status": "deferred"
+      }
+    },
+    "stone_storage": {
+      "label": "Depot",
+      "status": "requested",
+      "kind": "storage",
+      "dimensions_m": {
+        "width_m": 3,
+        "depth_m": 3,
+        "height_m": 2
+      },
+      "form": "open",
+      "accepted_resource_ids": [
+        "stone",
+        "slab"
+      ],
+      "worker_slots": 1,
+      "power_connection": {
+        "required": false
+      },
+      "fixed_recipe_id": null,
+      "recipe_selection_in_game": false
+    },
+    "well": {
+      "label": "Well",
+      "status": "requested",
+      "kind": "water_storage",
+      "dimensions_m": {
+        "width_m": 1,
+        "depth_m": 1,
+        "height_m": 2
+      },
+      "dimensions_status": "proposed_above_ground_size",
+      "worker_slots": 1,
+      "power_connection": {
+        "required": false
+      },
+      "fixed_recipe_id": null,
+      "recipe_selection_in_game": false,
+      "water_storage": {
+        "base_capacity_by_puddle_distance_cubes": {
+          "0": 3,
+          "1": 2,
+          "2": 1
+        },
+        "distance_metric": null,
+        "distance_above_two_capacity": null,
+        "evaporation_per_second": 0,
+        "refill_rate": null,
+        "refill_connection_rule": null
+      },
+      "deepening": {
+        "trigger": "build_well_on_existing_well",
+        "max_depth_m": 3,
+        "upgrade_example": {
+          "before": {
+            "stored_water": 1,
+            "capacity": 1
+          },
+          "after": {
+            "stored_water": 1,
+            "capacity": 2
+          }
+        },
+        "capacity_at_max_depth": null,
+        "capacity_rule_for_other_distances": null,
+        "cost_per_depth": null,
+        "stored_water_increases_on_upgrade": false
+      }
+    }
+  },
+  "utilities": {
+    "bed": {
+      "label": "Bed",
+      "status": "requested",
+      "placement_modes": [
+        "inside"
+      ],
+      "placement_contract_status": "proposed",
+      "service_id": "sleep",
+      "service_rules_status": "reachable_bed_required_for_sleep",
+      "energy_resource_id": null
+    },
+    "sink": {
+      "label": "Sink",
+      "status": "requested",
+      "placement_modes": [
+        "inside"
+      ],
+      "placement_contract_status": "proposed",
+      "service_id": "water_service",
+      "service_rules_status": "unresolved",
+      "energy_resource_id": null
+    },
+    "ac": {
+      "label": "AC",
+      "status": "requested",
+      "placement_modes": [
+        "inside",
+        "outside_wall"
+      ],
+      "placement_contract_status": "proposed",
+      "service_id": "cooling",
+      "service_rules_status": "unresolved",
+      "energy_resource_id": "electricity",
+      "variants": [
+        "inside_unit",
+        "outside_unit"
+      ]
+    },
+    "coffee_machine": {
+      "label": "Coffee machine",
+      "status": "requested",
+      "placement_modes": [
+        "inside"
+      ],
+      "placement_contract_status": "proposed",
+      "service_id": "drink_preparation",
+      "service_rules_status": "unresolved",
+      "energy_resource_id": null
+    },
+    "antenna": {
+      "label": "Antenna",
+      "status": "requested",
+      "placement_modes": [
+        "outside_wall",
+        "roof"
+      ],
+      "placement_contract_status": "proposed",
+      "service_id": "signal",
+      "service_rules_status": "unresolved",
+      "energy_resource_id": null
+    },
+    "tv": {
+      "label": "TV",
+      "status": "requested",
+      "placement_modes": [
+        "inside"
+      ],
+      "placement_contract_status": "proposed",
+      "service_id": "entertainment",
+      "service_rules_status": "unresolved",
+      "energy_resource_id": null
+    },
+    "light": {
+      "label": "Light",
+      "status": "requested",
+      "placement_modes": [
+        "inside",
+        "wall"
+      ],
+      "placement_contract_status": "proposed",
+      "service_id": "illumination",
+      "service_rules_status": "unresolved",
+      "energy_resource_id": "electricity"
+    },
+    "freezer": {
+      "label": "Freezer",
+      "status": "requested",
+      "placement_modes": [
+        "inside"
+      ],
+      "placement_contract_status": "proposed",
+      "service_id": "preservation",
+      "service_rules_status": "unresolved",
+      "energy_resource_id": "electricity"
+    },
+    "stove": {
+      "label": "Stove",
+      "status": "requested",
+      "placement_modes": [
+        "inside"
+      ],
+      "placement_contract_status": "proposed",
+      "service_id": "cooking_or_heat",
+      "service_rules_status": "unresolved",
+      "energy_resource_id": null,
+      "variants": {
+        "log": {
+          "energy_resource_id": "log"
+        },
+        "gas": {
+          "energy_resource_id": "natural_gas"
+        },
+        "electric": {
+          "energy_resource_id": "electricity"
+        }
+      }
+    },
+    "transformer": {
+      "label": "Transformer",
+      "status": "requested",
+      "placement_modes": [
+        "outside",
+        "service_space"
+      ],
+      "placement_contract_status": "proposed",
+      "service_id": "electrical_distribution",
+      "service_rules_status": "unresolved",
+      "energy_resource_id": null
+    },
+    "pole": {
+      "label": "Pole",
+      "status": "requested",
+      "placement_modes": [
+        "outside"
+      ],
+      "placement_contract_status": "proposed",
+      "service_id": "electrical_distribution",
+      "service_rules_status": "unresolved",
+      "energy_resource_id": null
+    }
+  },
+  "recipes": {
+    "gather_berries": {
+      "status": "requested",
+      "primary_input": {
+        "kind": "source",
+        "id": "bush",
+        "amount": null
+      },
+      "action_id": "gather",
+      "display_verb": "gather",
+      "workplace": {
+        "kind": "source",
+        "id": "bush"
+      },
+      "output": {
+        "resource_id": "berries",
+        "amount": null
+      },
+      "work_units": null
+    },
+    "gather_hay": {
+      "status": "requested",
+      "primary_input": {
+        "kind": "source",
+        "id": "grass",
+        "amount": null
+      },
+      "action_id": "gather",
+      "display_verb": "cut",
+      "workplace": {
+        "kind": "source",
+        "id": "grass"
+      },
+      "output": {
+        "resource_id": "hay",
+        "amount": null
+      },
+      "work_units": null
+    },
+    "gather_log": {
+      "status": "requested",
+      "primary_input": {
+        "kind": "source",
+        "id": "tree",
+        "amount": null
+      },
+      "action_id": "gather",
+      "display_verb": "chop",
+      "workplace": {
+        "kind": "source",
+        "id": "tree"
+      },
+      "output": {
+        "resource_id": "log",
+        "amount": null
+      },
+      "work_units": null
+    },
+    "gather_clay": {
+      "status": "requested",
+      "primary_input": {
+        "kind": "source",
+        "id": "dirt",
+        "amount": null
+      },
+      "action_id": "gather",
+      "display_verb": "dig",
+      "workplace": {
+        "kind": "source",
+        "id": "dirt"
+      },
+      "output": {
+        "resource_id": "clay",
+        "amount": null
+      },
+      "work_units": null
+    },
+    "gather_stone": {
+      "status": "requested",
+      "primary_input": {
+        "kind": "source",
+        "id": "mountain",
+        "amount": null
+      },
+      "action_id": "gather",
+      "display_verb": "mine",
+      "workplace": {
+        "kind": "unresolved",
+        "candidate_building_id": "mine"
+      },
+      "output": {
+        "resource_id": "stone",
+        "amount": null
+      },
+      "work_units": null,
+      "source_variant": "stone"
+    },
+    "saw_plank": {
+      "status": "requested",
+      "primary_input": {
+        "kind": "resource",
+        "id": "log",
+        "amount": null
+      },
+      "action_id": "saw",
+      "display_verb": "saw",
+      "workplace": {
+        "kind": "building",
+        "id": "sawmill"
+      },
+      "output": {
+        "resource_id": "plank",
+        "amount": null
+      },
+      "work_units": null
+    },
+    "cut_slab": {
+      "status": "requested",
+      "primary_input": {
+        "kind": "resource",
+        "id": "stone",
+        "amount": null
+      },
+      "action_id": "cut",
+      "display_verb": "cut",
+      "workplace": {
+        "kind": "building",
+        "id": "masonry"
+      },
+      "output": {
+        "resource_id": "slab",
+        "amount": null
+      },
+      "work_units": null
+    },
+    "crush_concrete": {
+      "status": "deferred",
+      "primary_input": {
+        "kind": "resource",
+        "id": "stone",
+        "amount": null
+      },
+      "action_id": "crush",
+      "display_verb": "crush",
+      "workplace": {
+        "kind": "building",
+        "id": "crusher"
+      },
+      "output": {
+        "resource_id": "concrete",
+        "amount": null
+      },
+      "work_units": null,
+      "notes": "Requested simplified material chain; final Concrete semantics and Crusher packaging remain open."
+    },
+    "fire_brick": {
+      "status": "requested",
+      "primary_input": {
+        "kind": "resource",
+        "id": "clay",
+        "amount": null
+      },
+      "action_id": "fire",
+      "display_verb": "fire",
+      "workplace": {
+        "kind": "building",
+        "id": "kiln"
+      },
+      "output": {
+        "resource_id": "brick",
+        "amount": null
+      },
+      "work_units": null
+    },
+    "make_pot": {
+      "status": "requested",
+      "primary_input": {
+        "kind": "resource",
+        "id": "clay",
+        "amount": null
+      },
+      "action_id": "make",
+      "display_verb": "make",
+      "workplace": {
+        "kind": "building",
+        "id": "pottery"
+      },
+      "output": {
+        "resource_id": "pot",
+        "amount": null
+      },
+      "work_units": null
+    },
+    "mill_flour": {
+      "status": "proposed",
+      "primary_input": {
+        "kind": "resource",
+        "id": "hay",
+        "amount": null
+      },
+      "action_id": "mill",
+      "display_verb": "mill",
+      "workplace": {
+        "kind": "building",
+        "id": "mill"
+      },
+      "output": {
+        "resource_id": "flour",
+        "amount": null
+      },
+      "work_units": null
+    },
+    "bake_bread": {
+      "status": "requested",
+      "primary_input": {
+        "kind": "resource",
+        "id": "flour",
+        "amount": null
+      },
+      "action_id": "bake",
+      "display_verb": "bake",
+      "workplace": {
+        "kind": "building",
+        "id": "bakery"
+      },
+      "output": {
+        "resource_id": "food",
+        "amount": null
+      },
+      "work_units": null,
+      "notes": "Bread is the Food model, not a separate resource."
+    },
+    "fire_tile": {
+      "status": "proposed",
+      "primary_input": {
+        "kind": "resource",
+        "id": "clay",
+        "amount": null
+      },
+      "action_id": "fire",
+      "display_verb": "fire",
+      "workplace": {
+        "kind": "building",
+        "id": "tile_kiln"
+      },
+      "output": {
+        "resource_id": "tile",
+        "amount": null
+      },
+      "work_units": null
+    },
+    "char_charcoal": {
+      "status": "deferred",
+      "primary_input": {
+        "kind": "resource",
+        "id": "log",
+        "amount": null
+      },
+      "action_id": "char",
+      "display_verb": "char",
+      "workplace": {
+        "kind": "building",
+        "id": "charcoal_burner"
+      },
+      "output": {
+        "resource_id": "charcoal",
+        "amount": null
+      },
+      "work_units": null
+    },
+    "convert_gas": {
+      "status": "deferred",
+      "primary_input": {
+        "kind": "resource",
+        "id": "oil",
+        "amount": null
+      },
+      "action_id": "convert",
+      "display_verb": "convert",
+      "workplace": {
+        "kind": "building",
+        "id": "converter"
+      },
+      "output": {
+        "resource_id": "natural_gas",
+        "amount": null
+      },
+      "work_units": null,
+      "notes": "Optional game abstraction; gas identity, conversion process and losses undecided."
+    },
+    "smelt_iron": {
+      "status": "deferred",
+      "primary_input": {
+        "kind": "resource",
+        "id": "ore",
+        "amount": null
+      },
+      "action_id": "smelt",
+      "display_verb": "smelt",
+      "workplace": {
+        "kind": "building",
+        "id": "smelter"
+      },
+      "output": {
+        "resource_id": "iron",
+        "amount": null
+      },
+      "work_units": null
+    },
+    "forge_tool": {
+      "status": "deferred",
+      "primary_input": {
+        "kind": "resource",
+        "id": "iron",
+        "amount": null
+      },
+      "action_id": "forge",
+      "display_verb": "forge",
+      "workplace": {
+        "kind": "building",
+        "id": "blacksmith"
+      },
+      "output": {
+        "resource_id": "tool",
+        "amount": null
+      },
+      "work_units": null
+    },
+    "forge_sheet": {
+      "status": "deferred",
+      "primary_input": {
+        "kind": "resource",
+        "id": "iron",
+        "amount": null
+      },
+      "action_id": "forge",
+      "display_verb": "forge",
+      "workplace": {
+        "kind": "building",
+        "id": "sheet_forge"
+      },
+      "output": {
+        "resource_id": "sheet",
+        "amount": null
+      },
+      "work_units": null
+    },
+    "gather_ore": {
+      "status": "deferred",
+      "primary_input": {
+        "kind": "source",
+        "id": "mountain",
+        "amount": null
+      },
+      "action_id": "gather",
+      "display_verb": "mine",
+      "workplace": {
+        "kind": "building",
+        "id": "ore_mine"
+      },
+      "output": {
+        "resource_id": "ore",
+        "amount": null
+      },
+      "work_units": null,
+      "source_variant": "ore"
+    },
+    "generate_from_log": {
+      "status": "deferred",
+      "primary_input": {
+        "kind": "resource",
+        "id": "log",
+        "amount": null
+      },
+      "action_id": "generate",
+      "display_verb": "generate",
+      "workplace": {
+        "kind": "building",
+        "id": "log_generator"
+      },
+      "output": {
+        "resource_id": "electricity",
+        "amount": null
+      },
+      "work_units": null,
+      "efficiency": null,
+      "notes": "Candidate fuel-specific recipe; compatibility and delivery rates undecided."
+    },
+    "generate_from_charcoal": {
+      "status": "deferred",
+      "primary_input": {
+        "kind": "resource",
+        "id": "charcoal",
+        "amount": null
+      },
+      "action_id": "generate",
+      "display_verb": "generate",
+      "workplace": {
+        "kind": "building",
+        "id": "charcoal_generator"
+      },
+      "output": {
+        "resource_id": "electricity",
+        "amount": null
+      },
+      "work_units": null,
+      "efficiency": null,
+      "notes": "Candidate fuel-specific recipe; compatibility and delivery rates undecided."
+    },
+    "generate_from_natural_gas": {
+      "status": "deferred",
+      "primary_input": {
+        "kind": "resource",
+        "id": "natural_gas",
+        "amount": null
+      },
+      "action_id": "generate",
+      "display_verb": "generate",
+      "workplace": {
+        "kind": "building",
+        "id": "natural_gas_generator"
+      },
+      "output": {
+        "resource_id": "electricity",
+        "amount": null
+      },
+      "work_units": null,
+      "efficiency": null,
+      "notes": "Candidate fuel-specific recipe; compatibility and delivery rates undecided."
+    },
+    "generate_from_oil": {
+      "status": "deferred",
+      "primary_input": {
+        "kind": "resource",
+        "id": "oil",
+        "amount": null
+      },
+      "action_id": "generate",
+      "display_verb": "generate",
+      "workplace": {
+        "kind": "building",
+        "id": "oil_generator"
+      },
+      "output": {
+        "resource_id": "electricity",
+        "amount": null
+      },
+      "work_units": null,
+      "efficiency": null,
+      "notes": "Candidate fuel-specific recipe; compatibility and delivery rates undecided."
+    },
+    "harvest_hay": {
+      "status": "proposed",
+      "primary_input": {
+        "kind": "source",
+        "id": "crop",
+        "amount": null
+      },
+      "action_id": "gather",
+      "display_verb": "harvest",
+      "workplace": {
+        "kind": "building",
+        "id": "hay_field"
+      },
+      "output": {
+        "resource_id": "hay",
+        "amount": null
+      },
+      "work_units": null,
+      "source_variant": "hay"
+    }
+  },
+  "deposit_rules": {
+    "berries_to_food": {
+      "status": "requested",
+      "input_resource_id": "berries",
+      "output_resource_id": "food",
+      "output_per_input": null,
+      "trigger": "accepted_storage_delivery",
+      "consume_input": true,
+      "destination": "receiving_store_food_compartment"
+    }
+  },
+  "storage_policy": {
+    "status": "proposed",
+    "food_delivery_accepted_at": "every_storage",
+    "food_compartment_capacity": null,
+    "specialist_material_compartments": {
+      "hay": [
+        "hay"
+      ],
+      "log": [
+        "log",
+        "plank"
+      ],
+      "warehouse": null,
+      "stone": [
+        "stone",
+        "slab"
+      ]
+    },
+    "display_totals": "derived_from_actual_stored_amounts",
+    "money_owner": "settlement_ledger",
+    "food_conversion_destroys_original_item": true,
+    "stone_store": {
+      "label": "Depot",
+      "dimensions_m": {
+        "width_m": 3,
+        "depth_m": 3,
+        "height_m": 2
+      },
+      "form": "open",
+      "accepted_resource_ids": [
+        "stone",
+        "slab"
+      ]
+    },
+    "house_water_storage": {
+      "container_resource_id": "pot",
+      "max_vases": 3,
+      "full_supply_days": 3,
+      "status": "requested"
+    }
+  },
+  "roof_tiers": {
+    "hay": {
+      "order": 1,
+      "label": "Hay",
+      "status": "requested",
+      "resource_id": "hay"
+    },
+    "plank": {
+      "order": 2,
+      "label": "Plank",
+      "status": "requested",
+      "resource_id": "plank"
+    },
+    "tile": {
+      "order": 3,
+      "label": "Tile",
+      "status": "requested",
+      "resource_id": "tile",
+      "material_chain_status": "proposed"
+    },
+    "metal": {
+      "order": 4,
+      "label": "Metal",
+      "status": "requested",
+      "resource_id": "sheet",
+      "material_chain_status": "proposed"
+    }
+  },
+  "roof_policy": {
+    "generation": "automatic_on_exposed_room_tops",
+    "visual_customization": "proposed",
+    "durability_values": null,
+    "drainage_rules": null,
+    "construction_costs": null
+  },
+  "worker_cycle": {
+    "status": "confirmed",
+    "phases": [
+      "deliver_input",
+      "work_at_machine",
+      "collect_output",
+      "deliver_output"
+    ],
+    "same_worker_completes_cycle": true,
+    "work_requires": [
+      "worker_performing_task"
+    ],
+    "physical_output_destinations": [
+      "storage",
+      "construction_site"
+    ],
+    "storage_includes_piles": false,
+    "intermediate_storage_required": false,
+    "destination_priority": null,
+    "citizen_assignment_supported": true,
+    "assignment_target": "specific_workplace_or_source",
+    "assignment_persistence": "until_player_reassigns_or_target_is_removed",
+    "storage_scope_note": "Stockpile buildings removed from planned roster. Loose resource drops remain a separate decision."
+  },
+  "excluded_building_types": {
+    "stockpile": "Removed by user during building review",
+    "school": "Omitted for now; no defined gameplay purpose",
+    "room_2x3": "House size omitted for now; retain 2 X 2 X 2 only",
+    "room_3x3": "House size omitted for now; retain 2 X 2 X 2 only"
+  },
+  "upgrade_policy": {
+    "tiers": [
+      1,
+      2,
+      3
+    ],
+    "fixed_output": true,
+    "merge_mechanic": "unconfirmed",
+    "balance_status": "unresolved"
+  },
+  "review_notation": {
+    "class_marker": "[Name]",
+    "verb_case": "lowercase",
+    "headers_row": 1
+  },
+  "tier_1_review": {
+    "status": "proposed",
+    "crafting_building_ids": [
+      "hay_field",
+      "sawmill",
+      "masonry",
+      "mill",
+      "bakery",
+      "kiln",
+      "pottery"
+    ],
+    "deferred_building_ids": [
+      "crusher",
+      "blacksmith",
+      "smelter",
+      "sheet_forge",
+      "ore_mine",
+      "warehouse"
+    ],
+    "concrete_workplace_name": null,
+    "storage_building_ids": [
+      "shed",
+      "stone_storage",
+      "well"
+    ]
+  },
+  "water_vessels": {
+    "resource_id": "pot",
+    "water_capacity": null,
+    "reusable": true,
+    "filling_work_seconds": null,
+    "empty_vessel_required": null,
+    "status": "proposed",
+    "label": "Vase",
+    "holds_resource_id": "water",
+    "crafted_at": "pottery",
+    "house_capacity_vases": 3,
+    "house_full_supply_days": 3,
+    "consumption_allocation": "unresolved"
+  },
+  "day_night_balance": {
+    "runtime_enabled": false,
+    "status": "proposed",
+    "daylight_seconds": null,
+    "night_seconds": null,
+    "duration_unit": "simulation_seconds_at_1x",
+    "current_runtime_cycle_seconds": 360,
+    "current_runtime_setting": "game_settings.cfg [general] day_seconds",
+    "night_player_activity": null
+  },
+  "citizen_routine": {
+    "status": "proposed",
+    "night_activities": [
+      "sleep",
+      "recover",
+      "wash",
+      "eat",
+      "drink"
+    ],
+    "routine_midday_interruptions": false,
+    "food_per_cycle": null,
+    "water_per_cycle": null,
+    "rest_seconds": null,
+    "wash_seconds": null,
+    "eat_seconds": null,
+    "drink_seconds": null,
+    "shortage_policy": null
+  }
+}

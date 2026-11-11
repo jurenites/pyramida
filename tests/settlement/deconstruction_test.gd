@@ -26,6 +26,11 @@ func fresh():
 	return world
 
 func complete(world, kind: String, cell := SOURCE) -> void:
+	if kind == "stockpile":
+		# Imported legacy piles remain removable, but are no longer buildable.
+		world.add_store(cell, {})
+		world.construction_materials[cell] = {"stone": 2}
+		return
 	check(world.request_build(kind, cell), "Fixture can build " + kind)
 	if world.plans.is_empty(): return
 	world._complete_plan(world.plans.values().back())
@@ -77,7 +82,7 @@ func test_lifecycle() -> void:
 	check(world.plans[id].relocation.parts.total() == 15, "No parts lost when storage is full")
 	store.capacity = 100
 	complete(world, "log_shed", Vector3i(-4, 0, 0))
-	complete(world, "house", Vector3i(4, 0, 0))
+	complete(world, "sawmill", Vector3i(4, 0, 0))
 	world.revision += 1
 	check(world.Jobs._assign_build(world, world.workers[1]), "Builder reserves salvage after storage opens")
 	world = reload_world(world)
@@ -114,19 +119,20 @@ func test_support_and_legacy() -> void:
 func test_reuse_without_storage() -> void:
 	var world = fresh()
 	world.stores.clear()
-	complete(world, "stockpile")
+	world.buildings.clear() # No starter household remains to recreate its buffer.
+	complete(world, "log_shed")
 	check(world.Deconstruction.request(world, SOURCE), "Last storage plot can be dismantled")
 	var old_id: int = world.next_plan_id - 1
 	world.order_build(0, old_id)
 	advance_until(world, func(): return world.plans[old_id].relocation.stage == "salvage")
-	check(world.stores.is_empty(), "Last store is gone and its stone remains on site")
-	check(world.request_build("stockpile", Vector3i(4, 0, 0)), "Replacement plot accepts normal construction")
+	check(world.stores.is_empty(), "Last store is gone and its timber remains on site")
+	check(world.request_build("log_shed", Vector3i(4, 0, 0)), "Replacement plot accepts normal construction")
 	world.order_build(0, world.next_plan_id - 1)
 	advance_until(world, func(): return not world.workers[0].cargo.is_empty())
-	check(world.workers[0].cargo == "stone", "Builder physically picks up recovered stone without a store")
+	check(world.workers[0].cargo == "log", "Builder physically picks up recovered timber without a store")
 	world = reload_world(world)
 	advance_until(world, func(): return world.plans.is_empty())
-	check(world.stores.has(Vector3i(4, 0, 0)) and world.plans.is_empty(), "Recovered stone rebuilds storage and clears both sites")
+	check(world.stores.has(Vector3i(4, 0, 0)) and world.plans.is_empty(), "Recovered timber rebuilds storage and clears both sites")
 
 func test_controls() -> void:
 	var game = preload("res://scenes/settlement/Terraces.tscn").instantiate()

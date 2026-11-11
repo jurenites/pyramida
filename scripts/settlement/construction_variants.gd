@@ -17,12 +17,16 @@ static func apply(node: Node3D, kind: String) -> void:
 			target.mesh = part.mesh
 			target.material_override = part.material_override
 			target.transform = part.transform
+			target.visible = part.visible
+			for key in ["timber_stock", "timber_count", "timber_cut_profile"]:
+				if part.has_meta(key): target.set_meta(key, part.get_meta(key))
+				elif target.has_meta(key): target.remove_meta(key)
 		elif part is Marker3D: target.transform = part.transform
 	node.scale = Vector3.ONE
 	node.set_meta("construction_variant", kind)
 	source.free()
 	preload("res://scripts/settlement/timber_palette.gd").prepare(node, kind)
-	preload("res://scripts/settlement/illustration_style.gd").apply(node)
+	preload("res://scripts/settlement/illustration_style.gd").apply(node,false,true)
 
 static func stairs(node: Node3D, rise: int) -> void:
 	apply(node, "stairs_1m" if rise == 1 else "stairs")

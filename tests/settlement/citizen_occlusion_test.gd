@@ -41,7 +41,7 @@ func run() -> void:
 	game.world.actors[1].hide()
 	# Keep clothing distinct from the yellow contour in image assertions.
 	game.world.actors[2].set_appearance(2, 0)
-	game.world.actors[2].body.scale = Vector3.ONE * 0.64
+	game.world.actors[2].body.scale = Vector3.ONE * 0.70
 	game.world.actors[2].body.rotation = Vector3.ZERO
 	facade = Node3D.new()
 	game.viewport.add_child(facade)
@@ -73,16 +73,15 @@ func run() -> void:
 		camera.size = zoom
 		for id in [0, 2]:
 			var actor = game.world.actors[id]
-			for path in ["Head/HeadShape", "Body", "LeftArm/Elbow/Forearm", "RightLeg/Knee/Shin"]:
-				var part: MeshInstance3D = actor.body.get_node(path)
-				var mouse := camera.unproject_position(part.global_position)
-				check(game.object_at(mouse).get("worker_id", -1) == id, "Head/body/animated limbs beat the facade at zoom %s, person %s, %s" % [zoom, id, path])
+			for local_point in [Vector3(0, 0.845, 0), Vector3(0, 0.48, 0), actor.body.to_local(actor.hand_position(-1)), Vector3(0.11, 0.1, 0)]:
+				var mouse := camera.unproject_position(actor.body.to_global(local_point))
+				check(game.object_at(mouse).get("worker_id", -1) == id, "Head/body/animated limbs beat the facade at zoom %s, person %s, %s" % [zoom, id, local_point])
 			var outside := camera.unproject_position(actor.global_position + Vector3(0.5, 0.5, 0))
 			check(not game.object_at(outside).has("worker_id"), "Empty space outside the silhouette still picks the building")
-		var kid_mouse := camera.unproject_position(game.world.actors[2].body.get_node("Head/HeadShape").global_position)
+		var kid_mouse := camera.unproject_position(game.world.actors[2].body.get_node("Head").global_position)
 		game._select_worker(false, kid_mouse)
 		check(game.selected == -1 and game.selected_object.get("worker_id") == 2 and game.selected_workers.is_empty(), "Concealed kid is inspected, never commanded")
-		game._select_worker(false, camera.unproject_position(game.world.actors[0].body.get_node("Head/HeadShape").global_position))
+		game._select_worker(false, camera.unproject_position(game.world.actors[0].body.get_node("Head").global_position))
 		check(game.selected == 0 and game.selected_workers == [0], "Concealed adult is selected")
 	# Overlapping bodies resolve to the nearest person, regardless of array order.
 	var front = game.world.actors[1]
@@ -90,7 +89,7 @@ func run() -> void:
 	front.set_appearance(0, 0)
 	front.position = game.world.actors[0].position + Vector3(0, 0, 1)
 	front.body.rotation = Vector3.ZERO
-	var overlap := camera.unproject_position(front.body.get_node("Head/HeadShape").global_position)
+	var overlap := camera.unproject_position(front.body.get_node("Head").global_position)
 	check(game.object_at(overlap).get("worker_id") == 1, "Nearest overlapping person wins")
 	front.hide()
 	check(game.object_at(overlap).get("worker_id") == 0, "Hidden actors cannot steal selection")
@@ -102,8 +101,8 @@ func run() -> void:
 		adult.body.get_node("LeftArm").rotation.z = 0.8
 		camera.position = Vector3(4, 4, 12)
 		camera.look_at(Vector3(0, 0.5, 0))
-		var hand: Node3D = adult.body.get_node("LeftArm/Elbow/Forearm")
-		check(game.object_at(camera.unproject_position(hand.global_position)).get("worker_id") == 0, "Picking follows rotated and animated outfit %s" % variant)
+		adult.CitizenRig.sync(adult.body, adult.skeleton)
+		check(game.object_at(camera.unproject_position(adult.hand_position(-1))).get("worker_id") == 0, "Picking follows rotated and animated outfit %s" % variant)
 	adult.set_appearance(0, 0)
 	adult.body.rotation = Vector3.ZERO
 	camera.position = Vector3(0, 1, 12)

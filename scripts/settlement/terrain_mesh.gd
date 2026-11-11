@@ -2,9 +2,10 @@ extends RefCounted
 ## Half-room terrain cells with shared sloped talus and matching collision.
 const Greece = preload("res://scripts/settlement/greece_landscape.gd")
 const Nav = preload("res://scripts/settlement/navigation.gd")
-const STONE_TOP := Color("d9b48d")
-const STONE_SIDE := Color("c59870")
-const STONE_STRATUM := Color("b88965")
+const Palette = preload("res://scripts/game_palette.gd")
+const STONE_TOP := Palette.SAND_SURFACE
+const STONE_SIDE := Palette.LIMESTONE_SIDE
+const STONE_STRATUM := Palette.PEACH_SHADOW
 const CORNERS := [Vector3(-0.5, 0, -0.5), Vector3(0.5, 0, -0.5), Vector3(0.5, 0, 0.5), Vector3(-0.5, 0, 0.5)]
 const EDGES := [[1, 2, 0, 3], [2, 3, 1, 0], [3, 0, 2, 1], [0, 1, 3, 2]]
 
@@ -27,13 +28,17 @@ static func build(parent: Node3D, model, cells: Dictionary = {}, border: Diction
 		var points: Array[Vector3] = []
 		for index in 4:
 			points.append(Vector3(cell.x * Nav.CELL_SIZE, heights[index], cell.z * Nav.CELL_SIZE) + CORNERS[index] * Nav.CELL_SIZE)
+		if model.difficulty=="easy" and model.generator_version>=6 and not model.surface_edits.has(Vector2i(cell.x,cell.z)) and preload("res://scripts/settlement/archipelago_landscape.gd").shore_distance(Vector2(cell.x,cell.z),model.world_seed)>-1.5:
+			for index in 4:
+				var shore: Vector2 = preload("res://scripts/settlement/archipelago_landscape.gd").shoreline_vertex(Vector2(points[index].x,points[index].z),model.world_seed)
+				points[index].x=shore.x; points[index].z=shore.y
 		var talus: bool = model.terrain_shapes.has(cell)
-		var color := Color("c6ad88") if talus else (STONE_TOP if cell.y > 0 else Color("fef1cf"))
+		var color := Palette.LIMESTONE_SIDE if talus else (STONE_TOP if cell.y > 0 else Color("fef1cf"))
 		if model.difficulty == "easy":
-			color = Greece.ground_color(Vector2(cell.x, cell.z), model.world_seed)
+			color = preload("res://scripts/settlement/archipelago_landscape.gd").ground_color(Vector2(cell.x,cell.z),model.world_seed) if model.generator_version >= 6 else Greece.ground_color(Vector2(cell.x, cell.z), model.world_seed)
 		var edited_sand: bool = model.surface_edits.has(Vector2i(cell.x, cell.z))
 		if edited_sand: color = Color("fef1cf")
-		if talus:
+		if talus and model.generator_version < 5:
 			var normal := (points[2] - points[0]).cross(points[1] - points[0]).normalized()
 			color = color.lightened(normal.dot(Vector3(-0.6, 0, -0.8)) * 0.18)
 		if heights.size() == 5:
@@ -42,10 +47,17 @@ static func build(parent: Node3D, model, cells: Dictionary = {}, border: Diction
 				var next := (index + 1) % 4
 				# Relief changes geometry, not the sunlit fill. Per-triangle tint
 				# exposes the soil fan as false shadows across otherwise open sand.
-				triangle(st, points[index], centre, points[next], color)
+				if talus and model.generator_version >= 5 and model.difficulty != "easy" and not edited_sand:
+					terrace_triangle(st, points[index], centre, points[next])
+				else:
+					triangle(st, points[index], centre, points[next], color)
 		else:
-			triangle(st, points[0], points[2], points[1], color)
-			triangle(st, points[0], points[3], points[2], color)
+			if model.generator_version >= 5 and model.difficulty != "easy" and not edited_sand:
+				terrace_triangle(st, points[0], points[2], points[1])
+				terrace_triangle(st, points[0], points[3], points[2])
+			else:
+				triangle(st, points[0], points[2], points[1], color)
+				triangle(st, points[0], points[3], points[2], color)
 		for side in 4:
 			var direction: Vector3i = Nav.DIRECTIONS[side]
 			var neighbour: Vector3i = model.surface_at(cell.x + direction.x, cell.z + direction.z)
@@ -88,13 +100,13 @@ static func build(parent: Node3D, model, cells: Dictionary = {}, border: Diction
 				triangle(st, a_low, b_high, b_low, rock)
 				triangle(st, a_low, a_high, b_high, rock)
 				band += 1.2
-		if model.difficulty != "easy" and talus and posmod(cell.x * 17 + cell.z * 31, 4) == 0:
+		if model.generator_version < 5 and model.difficulty != "easy" and talus and posmod(cell.x * 17 + cell.z * 31, 4) == 0:
 			# Low polygon chips are subcell decoration, never placement coordinates.
 			var centre := (points[0] + points[1] + points[2] + points[3]) * 0.25 + Vector3.UP * 0.025
 			var tip := centre + Vector3(0.02, 0.14, 0.01)
 			var chip := [centre + Vector3(-0.12, 0, -0.1), centre + Vector3(0.13, 0, -0.06), centre + Vector3(0.03, 0, 0.14)]
 			for side in 3:
-				triangle(st, chip[side], tip, chip[(side + 1) % 3], Color("a38c71"))
+				triangle(st, chip[side], tip, chip[(side + 1) % 3], Palette.PEACH_SHADOW)
 	var material := StandardMaterial3D.new()
 	material.vertex_color_use_as_albedo = true
 	material.vertex_color_is_srgb = true
@@ -169,3 +181,10 @@ static func triangle(st: SurfaceTool, a: Vector3, b: Vector3, c: Vector3, color:
 	st.add_vertex(a)
 	st.add_vertex(c)
 	st.add_vertex(b)
+
+static func terrace_triangle(st: SurfaceTool, a: Vector3, b: Vector3, c: Vector3) -> void:
+	var normal := (b - a).cross(c - a).normalized()
+	var shade := STONE_SIDE.darkened(0.08 + 0.16 * maxf(0.0, normal.dot(Vector3(0.6, 0, 0.8))))
+	# Colour follows the actual face, never the square cell's slope flag.
+	var colour := shade.lerp(STONE_TOP, smoothstep(0.75, 1.0, normal.y))
+	triangle(st, a, b, c, colour)

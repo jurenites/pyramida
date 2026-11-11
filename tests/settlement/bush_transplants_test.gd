@@ -78,8 +78,8 @@ func run() -> void:
 	advance_until_done(world, id)
 	world.set_role(0, "idle")
 	check(world.soil_beds.has(target) and not world.deposits.has(target) and population(world) == 1, "Repeated collection never creates a bush or removes soil")
-	# Other crops occupy their soil; adjoining beds can support a small plot between them.
-	world.gardens[target] = {"species": "grass", "water": 0, "growth": 0.0, "food": 0, "reserved": -1}
+	# Living crops occupy their soil; harvested grass does not. Adjoining beds can support a small plot between them.
+	world.gardens[target] = {"species": "grass", "water": 0, "growth": 0.0, "food": 1, "reserved": -1}
 	check(not world.build_error("seed_bush", target).is_empty(), "Occupied farmland rejects a bush")
 	world.gardens.erase(target)
 	check(not world.Farming.bush_soil_ready(world, target + Vector3i.RIGHT), "A half-supported bush plot is rejected")
@@ -103,16 +103,15 @@ func run() -> void:
 	root.add_child(game)
 	game.set_process(false)
 	game.model = world
-	game.hud.show_category("nature")
+	check(not game.hud.category_lists.has("nature"), "No Nature menu")
 	game.hud.update(world, -1, 1)
-	var row: Button = game.hud.buttons.seed_bush
-	check(row.visible and not row.disabled and row.get_meta("plant_title").text == "Berry bush (1)", "Collected bush appears with its available count")
+	check(not game.hud.buttons.has("seed_bush"), "Collected bushes do not restore a Nature menu")
 	game._set_tool("seed_bush")
 	check(game.preview.has_node("Leaves0") and game.preview.scale == Vector3.ONE, "Planting preview shows the collected mature bush")
 	check(world.request_build("seed_bush", target), "UI fixture reserves collected bush")
 	id = world.next_plan_id - 1
 	game.hud.update(world, -1, 1)
-	check(row.visible and row.disabled and row.get_meta("plant_title").text == "Berry bush (0)", "Exhausted bush entry stays disabled at zero")
+	check(not game.hud.buttons.has("seed_bush"), "Reserved bushes do not add a Nature menu entry")
 	game.moving_plan_id = id
 	game._refresh_preview()
 	check(game.preview.has_node("Leaves0") and game.preview.scale == Vector3.ONE, "Moving a reserved order previews its bush even with zero stock")
@@ -125,7 +124,7 @@ func run() -> void:
 	game.world.sync(world, 0, -1)
 	game.selected_object = {"cell": source, "kind": "berry", "entity_key": "deposit:%s" % source}
 	game.hud.update(world, -1, 1, game.selected_object)
-	check(not row.visible and game.hud.move_label == "Move", "Undiscovered bush menu stays hidden and selected bush offers Move")
+	check(not game.hud.buttons.has("seed_bush") and game.hud.move_label == "Move", "Bush menu stays absent and selected bush offers Move")
 	game.hud.move_button.pressed.emit()
 	check(world.plans.values().any(func(plan): return plan.get("collect_bush", false)) and game.relocation_source == null, "Move queues collection before choosing a planting spot")
 	game.free()

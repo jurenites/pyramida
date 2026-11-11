@@ -21,11 +21,11 @@ func run() -> void:
 	root.add_child(game)
 	await process_frame
 	await process_frame
-	game._choose_slot(0, true)
+	await game._choose_slot(0, true)
 	game.speed = 0.0
 	check(game.model.workers.size() == 3 and game.world.actors.size() == 3, "Playable scene creates simulation and visible citizens")
-	game.hud.buttons.platform.pressed.emit()
-	check(game.tool == "platform" and is_instance_valid(game.preview), "Platform toolbar opens a real placement preview")
+	game.hud.buttons.support.pressed.emit()
+	check(game.tool == "support" and is_instance_valid(game.preview), "Support toolbar opens a real placement preview")
 	game.hud.set_level(2)
 	check(game.level == 2, "Floor selector changes cutaway elevation")
 	var rotation := InputEventKey.new()
@@ -40,10 +40,11 @@ func run() -> void:
 	game.world.sync(game.model, 0.05, 0)
 	check(game.world.actors[0].body.get_node_or_null("CargoSocket") != null, "Citizen carries resources using an authored socket")
 	game.autosave()
+	await game._wait_for_autosave()
 	check(FileAccess.file_exists(game.saves.path_for(0)), "Autosave writes an actual slot file")
 	var saved_log_count: int = game.model.resource_total("log")
-	game._choose_slot(1, true)
-	game._choose_slot(0, false)
+	await game._choose_slot(1, true)
+	await game._choose_slot(0, false)
 	check(game.model.resource_total("log") == saved_log_count and game.model.plans.size() == 2, "Slot selection restores saved construction after visiting another settlement")
 	game.world.sync(game.model, 0, -1)
 	var plan: Dictionary = game.model.plans.values()[0]
@@ -106,13 +107,13 @@ func run() -> void:
 	var arrays: Array = rock.get_child(0).mesh.surface_get_arrays(0)
 	check(arrays[Mesh.ARRAY_VERTEX][0].dot(arrays[Mesh.ARRAY_NORMAL][0]) > 0, "Bevelled mesh faces point outward rather than rendering inside-out")
 	rock.free()
-	game.hud.show_category("industry")
-	check(game.hud.category_lists.industry.visible and not game.hud.category_lists.housing.visible, "Category tabs show one compact building list")
+	game.hud.show_category("timber")
+	check(game.hud.category_lists.timber.visible and not game.hud.category_lists.housing.visible, "Category tabs show one compact building list")
 	var visible_buildings := 0
 	for category: Array in Catalog.CATEGORIES.values(): visible_buildings += category.size()
 	check(game.hud.buttons.size() == visible_buildings + 1, "Every available building and the exit control have a working menu button")
-	check(game.hud.buttons.has("soil_bed") and not game.hud.buttons.has("garden"), "One-tile soil bed replaces the legacy crop garden in the menu")
-	check(game.hud.category_buttons.keys() == ["housing", "industry", "structure", "nature"], "Housing, industry, structure and the requested Nature tab are available")
+	check(game.hud.buttons.has("support") and game.hud.buttons.has("stair") and not game.hud.buttons.has("school"), "Reviewed structural buildings replace deferred buildings in the menu")
+	check(game.hud.category_buttons.keys() == Catalog.CATEGORIES.keys(), "All resource and purpose groups have category buttons")
 	check(not game.hud.buttons.has("seed_grass"), "Nature has no grass planting option")
 	for seed_kind: String in ["seed_vegetables", "seed_tree", "seed_bush", "seed_palm"]:
 		game.hud.buttons[seed_kind].pressed.emit()

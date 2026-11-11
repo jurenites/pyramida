@@ -16,6 +16,7 @@ static func piece(parent: Node3D, label: String, size: Vector3, at: Vector3, col
 	parent.add_child(node)
 
 static func sync(node: Node3D, tier: int) -> void:
+	if node.has_meta("reviewed_model"): return
 	if not node.has_node("Sawhorses"):
 		var horses := Node3D.new()
 		horses.name = "Sawhorses"

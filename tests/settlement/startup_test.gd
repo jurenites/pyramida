@@ -48,7 +48,7 @@ func run() -> void:
 	node_added.disconnect(probe_startup_input)
 	var game := current_scene
 	if game != null and game.get("menu") != null:
-		check(game.menu.visible and not game.hud.visible and game.menu.current_page == "home" and game.menu.title.is_visible_in_tree() and game.menu.title.text == "Pyramida", "Ready game displays the Pyramida main menu before gameplay")
+		check(game.menu.visible and not game.hud.visible and game.menu.current_page == "home" and game.menu.title.is_visible_in_tree() and game.menu.title.text == "... Town", "Ready game displays the town main menu before gameplay")
 		check(game.menu.root.get_child(0).color.a < 1.0 and game.menu_preview != null, "Menu reveals the generated world after the loading cover exits")
 		check(game.get_node_or_null("EditorPreview") == null, "Editor asset preview never remains in the running game")
 		if capture:

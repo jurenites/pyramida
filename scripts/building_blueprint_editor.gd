@@ -291,7 +291,7 @@ func _create_interface() -> void:
 
 	_file_dialog = FileDialog.new()
 	_file_dialog.access = FileDialog.ACCESS_FILESYSTEM
-	_file_dialog.filters = PackedStringArray(["*.pyrbuilding ; Pyramida Building Blueprint"])
+	_file_dialog.filters = PackedStringArray(["*.pyrbuilding ; Town Building Blueprint"])
 	_file_dialog.file_selected.connect(_on_file_selected)
 	interface_layer.add_child(_file_dialog)
 

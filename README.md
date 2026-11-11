@@ -1,20 +1,92 @@
+# ... Town
+
+Working title for a cozy town-building management game. The current generated cottage icon is a temporary placeholder. The final icon will use an actual in-game 3D model once the visual style is defined; the current direction is moving toward ShantyTown's assembled, lived-in architecture.
+
+# Rope bridges
+
+## Generated building plans
+
+In the main game, choose **Housing → Building plan** to generate and rotate a
+connected room layout. Workers build its rooms, terrace, stairs and beds through
+the existing construction system. House remains available. See the
+[object/material ledger and save/detail design](docs/GENERATED_BUILDINGS.md).
+
+
+Run `tools/settlement/play_modular_house.sh` to inspect joined rooms, automatic
+supports, a usable roof terrace and an obstructable chimney without opening a
+settlement save. See [controls and scope](docs/MODULAR_HOUSE_PROTOTYPE.md).
+
+## Main-game Supports and Greece islands
+
+The main menu now previews the latest island landscape, and **Fields**, the first new-game choice, starts that exact world. New **Fields** games start on a Greece-inspired island map with surrounding small islands, mountain shelves, sandy shores and turquoise saltwater. Existing saves keep their original generator and coastline. New small islands are generated from the world seed as varied headlands, coves, twin-summit saddles and bluffs. Coast contours, aspect ratios, elevations, shelf widths and exposed sides vary; the sheltered side has terraces/beaches while continuous rock faces meet the sea on the other side. These are generated solids rather than scaled copies of a mountain. The main island now varies its proportions, rotation, bays, cliff orientation, plateau heights and peak count with the seed. Unequal adjoining coastal blocks surround the protected village; exposed cliffs meet the sea without a continuous beach rim. Touching shelves at the same elevation form one continuous surface rather than separate radial arms. Unequal 2 m shelves and a 4 m overlook now break up the middle, while deeper bays reach closer to the first house. The connected lowland retains space for early buildings and a full-size field; stairs unlock nearby upper plots, making terrace and rooftop expansion useful. The lowest land stands 0.65 m above the rendered sea, with small animated foam patches at the shore and rocks. Small blue wavelets travel downwind, softening in sheltered bays; short surf packets roll toward land and leave foam that fades after impact. Translucent shallows reveal submerged rock and a sandy bed, fading into opaque deep water. New maps have fewer seabed-rooted rocks beside coastal cliffs and two finite inland stone patches below exposed rock faces, with citizen access and room for a nearby Quarry. Full, visible puddles provide reachable freshwater near the starting family. New Normal (Sand) games roll their own island seed and use dry sand and warm rock. New games generate fresh layouts; saved seeds reproduce the same terrain. In both landscapes, the third terrace at 6 m and higher levels have bare rock surfaces and no generated grass. Start a new Fields or Sand game to see the new terrain; existing settlements keep their saved landscape.
+
+New version-23 islands use dipping strata, gently folded grassy uplands and taller broad mountain crowns connected to inclined cliffs. Thin exposed shelf bands merge into the cliff, while soil fades into rock below higher faces and across the mountain foothills. Irregular rock faces and embedded ledges remain instead of separate pointed peaks. Gentle relief supports walking; construction still needs a level footing. Wide terraces and the protected village remain buildable. Sparse decorative stones emerge beside cliffs or remain submerged; they have no collectible Stone inventory and do not create walking steps. Usable quarry deposits stay on land.
+
+A continuous shallow shelf follows the main coastline, broad beside beaches and narrow below cliffs, before fading into deep water. Its width varies along the coast, with seeded deeper channels crossing selected beach shelves. Turquoise water reveals irregular sandy patches, while submerged rock fades into the same deeper-water tone as the seabed. Smaller islands keep only a narrow submerged edge, without detached reef ovals. Beaches, the physical seabed, collision and foundation pricing share the same depth profile, and submerged sand blends across the mesh join. Shallows support ordinary pier construction. Shore contact has been checked at 15 cm below and above mean water level; automatic tides remain future work. The menu and both new-game landscapes use this generator. Earlier worlds keep their saved terrain and channels, while receiving the improved water and underwater material colours.
+
+**Support** placement supports small structural rotations: **[ / ]** adjust by 2° up to ±15°, **Shift** allows continuous positioning within the current metre address, and **R** changes plank direction. Neighboring groups share compatible logs within a 15 cm corner tolerance, with the older building retaining its position and posts. New beams fit to those logs. Rotated overlaps and unsupported feet are rejected. Shared-log owners cannot be removed while another group depends on them. Deck gaps do not automatically become walking routes. These fields persist through construction and saving.
+
+New Fields and Sand maps use closed irregular terrain solids with wide asymmetric terraces, inclined cliffs and broad rocky shoulders. Aim Support at an exposed cliff to excavate through construction. Completed modules cut their actual positioned/rotated volume; two stacked modules provide citizen headroom. Previewing or cancelling an unstarted plan removes no rock. Excavation survives demolition, saving and streaming. The sea has continuous coastal shallows that broaden beside beaches and narrow beneath cliffs. Existing worlds retain their terrain. Resource recovery from excavated rock remains future work. Previews: [Greece islands](artifacts/settlement/greece-islands.png), [main-game fitted Supports](artifacts/settlement/main-support-fitting.png), [generated main island](artifacts/settlement/main-generated-island.png), [Support excavation](artifacts/settlement/main-support-excavation.png).
+
+## Terrain construction sandbox
+
+Run `./tools/terrain_sandbox/play.sh`, or open `scenes/terrain_sandbox/TerrainSandbox.tscn` in Godot and press F6. This separate prototype has an irregular plateau, high ridge, fractured fin and natural overhangs. Excavation belongs to Support construction; there is no freeform tunnel tool.
+
+With **Support** active, click a terrace or exposed cliff to place a **1×1×1 m** module. Construction clears only that footprint. Adjacent modules share frame parts within a group no larger than **2×2×2 m**. A horizontal pair loses the intermediate legs and crossbeam; a vertical pair loses the lower deck and waist-high beams so a citizen can pass through. Larger arrangements retain separate group identities. Where groups touch, the older building owns one shared corner post; the newer frame fits its bearings to that log instead of adding a duplicate leg. Coincident boundary beams also keep their older owner.
+
+Default positioning uses one-metre sockets. New placements within 0.16 m of a free neighbor socket snap to the existing structure, without moving it. Hold **Shift** for 0.1 m horizontal positioning without automatic attachment, including deliberate gaps. Within-group joining still requires exact faces. Between separate groups, corner offsets up to 0.15 m can share an existing post when the facing modules have the same floor height. Only the newer bearing endpoints adapt: neither building moves, and deck gaps remain visible. Larger offsets, different floor heights and diagonal corner-only contacts retain independent posts. This fitting rule also applies during Shift placement; Shift disables placement snapping, not structural fitting. Each module needs rock below its posts or another module directly below. No remote construction inside unexposed rock.
+
+Decks use visibly separated, staggered stock boards over exposed Log bearings, with posts projecting above the deck. Plank direction varies deterministically by 90°; press **R** during placement to choose the other direction. This rotates the boards, not the structural footprint. Use **[ / ]** for small structural rotations up to ±15°; fitted beams and excavation rotate with the module. General wall fitting, interior part manipulation and stairs between separate floors remain separate work.
+
+**Undo** or Cmd/Ctrl+Z reverses the last prototype placement and its excavation, restoring exposed frame parts; it is editor history, not a production dismantling rule. **Reset** restores the original scene; Esc leaves placement. Right/middle drag orbits, the wheel zooms and WASD pans. No permanent instruction panel is shown.
+
+Construction persists separately in `user://support-groups-terrain-sandbox.json` (version 5; version 4 grouped Supports load without rotation). Earlier Support, two-metre-bay and freeform-cut files remain untouched and are not imported or resized. Main-game terrain and saves are unchanged. This bounded CSG prototype supports 128 modules and completes construction immediately. Worker excavation, recovered resources, hauling, settlement navigation and large-world streaming remain integration work.
+
+Previews: [Supports above the mountain](artifacts/settlement/support-mountain.png), [constructed passage](artifacts/settlement/support-excavation.png). Focused checks: `tests/terrain_sandbox/volume_test.gd` and `tests/terrain_sandbox/interaction_test.gd`.
+
+## Rope bridge prototype
+
+Run `./tools/settlement/play_rope_bridge.sh`, or open `scenes/settlement/RopeBridgePrototype.tscn` and press F6. This separate scenario uses the real settlement production, construction, navigation and carrying simulation without loading or saving player settlements.
+
+Two terraces stand at 2 m and 5 m. Workers turn supplied Hay into Rope, deliver Rope and Planks to the queued bridge, then carry Logs uphill to the empty Shed and return across the bridge. Buildings remain grid-aligned. The supplied stocks and completed workplaces are prototype fixtures.
+
+**Bridge** lets you click two supported surfaces to place freely positioned ends; the preview shows the span's material cost. **Remove bridge** cancels a plan or removes the latest completed, unoccupied span. **Reset** restarts the supplied scenario. Escape cancels placement; the existing camera pan, rotate and zoom controls work. No instruction panel or goal counter is added.
+
+Rope maker is also available in the normal construction menu: a fixed 1 Hay → 1 Rope recipe, four seconds per batch, with a four-Log construction cost. Hay retains its existing internal `grain` resource ID. These are provisional values; production tuning lives in `[production.rope_maker]` in `game_settings.cfg`. A bridge costs one Plank per metre of curved deck and one Rope per two metres, each rounded up. The default crossing costs 8 Planks and 4 Rope. Both producer unlocks are required to queue it, but current stock may be zero.
+
+The prototype and main game share bridge geometry, construction, routing, rendering and save support. Spans are limited to 2–24 m horizontal distance and a maximum local grade of 0.75, with supported landings, room for both anchors and terrain/building/span clearance checks. The graph counts the curved deck and landing approaches; a planned bridge grants no navigation. Crossings use one-at-a-time traffic. Citizens finish crossing before accepting a new movement/work assignment, and occupied bridges cannot be removed. Moving, completed-span removal and construction cancellation preserve physical salvage. Same-height intersections and overlapping rails are rejected; overpasses require vertical clearance. Bridge anchors must fit on their supporting surface. Rope sway and load simulation remain later work.
+
+See [the live prototype capture](artifacts/settlement/rope-bridge-prototype.png). Main-game captures: [first post pair](artifacts/settlement/rope-bridge-main-first-pair.png), [automatic log hauling](artifacts/settlement/rope-bridge-main-hauling.png), [rooftop landings](artifacts/settlement/rope-bridge-main-roofs.png). Focused checks: `rope_bridge_test.gd`, `rope_bridge_runtime_test.gd`, `rope_bridge_main_test.gd` and `rope_bridge_edit_test.gd` under `tests/settlement`.
+
+---
+
+# Main-game construction
+
+Run the main project with F5 and enter a settlement. Use the regular construction categories to place buildings with defined roles, such as a house or log shed. The experimental **Rooms** toolbar entry and shape menu have been removed from normal gameplay.
+
+The room editor, shared shapes and worker-construction integration are retained for future reuse. Existing room layouts remain compatible with saved settlements. For development only, `./tools/settlement/play_rooms.sh` opens the isolated room-construction prototype without overwriting player saves.
+
+See [the retained prototype scope](docs/VERTICAL_PROTOTYPE.md#room-construction-milestone) and [metric measurements](docs/BUILDING_MEASUREMENTS.md).
+
+---
+
 # New experiment: Block City
 
-Select **Block City Demo → Run** in Godot Project Manager (import `demos/block_city/project.godot` once on other machines), or run `./tools/block_city/play.sh`, for the separate coloured-box city-building demo: small flat pieces with editable draw weights, a 3×3 lot with supported overhangs, direct pole-to-floor hanging wires and an Escape menu. Building types and the economy are deferred. The existing Pyramida startup and saves are unchanged.
+Select **Block City Demo → Run** in Godot Project Manager (import `demos/block_city/project.godot` once on other machines), or run `./tools/block_city/play.sh`, for the separate coloured-box city-building demo: small flat pieces with editable draw weights, a 3×3 lot with supported overhangs, direct pole-to-floor hanging wires and an Escape menu. Building types and the economy are deferred. The existing main-game startup and saves are unchanged.
 
 See the [play guide, design, shape table and market evaluation](docs/block_city/README.md). Run `python3 tools/block_city/run_checks.py` for its focused checks. In Godot, open `scenes/block_city/BlockCity.tscn` and press F6.
 
 ---
 
-# Peaceful Pyramida foundation
+# Town economy
 
 The playable settlement now has a working food and materials economy: berries, irrigated grain, bread milling, plank sawing, limestone mining and masonry. Houses support population growth; schools, workshops, pantries and roads have simulation effects. Select or box-select adults, assign jobs in the inspector, or right-click resources and workplaces. No alien storyline, enemies or weapons are active.
 
 Trees, dead trees and palms disappear when the final log is harvested, freeing the ground immediately. Partial trunks remain harvestable; no decorative stumps remain. Older stumps are cleared when saves and map chunks load.
 
-The current visual direction uses featureless citizens, flat colour shapes, and a full-resolution antialiased world with fine irregular outlines. The world stays 3D; an illustrated material and edge pass replaces the reduced-resolution pixel look. Day/night tint affects the world while the interface remains sharp.
+The current visual direction uses featureless citizens, flat colour shapes, and a full-resolution antialiased world with fine, straight outlines. The world stays 3D; an illustrated material and edge pass replaces the reduced-resolution pixel look. Day/night tint affects the world while the interface remains sharp.
 
-Read [the reference research, source links, exact scope and play guide](docs/PYRAMIDA_RESEARCH.md). New recipes are prototype tuning, not claims about the original game's exact numbers. Existing saves migrate, including old timber-only plans. **V** inspects and **Esc** clears selection and cancels placement without saving or leaving play. Play continues at **1×**, **2×**, or **4×**; Space does not pause.
+Recipes are prototype tuning for this town-building game. Existing saves migrate, including old timber-only plans. **V** inspects and **Esc** clears selection and cancels placement without saving or leaving play. Play continues at **1×**, **2×**, or **4×**; Space does not pause.
 
 Run `python3 tools/settlement/run_checks.py` for the regression suite. `tools/settlement/verify_progression.gd` tests the full economy from the normal starting inventory through village construction and dressed-stone production.
 
@@ -22,7 +94,7 @@ Run `python3 tools/settlement/run_checks.py` for the regression suite. `tools/se
 
 # Vertical settlement prototype — v0.1.0
 
-**F5 opens the settlement selector.** Choose an empty slot and Normal difficulty, or continue an existing settlement. **Esc** clears selection and cancels placement; progress saves automatically and Settings contains only fullscreen and route visibility. New settlements start with one Stockpile (18 timber and 5 food), two adults and one child. There are no prebuilt terraces, stairs, wells, gardens or queued buildings. Adults carry resources and construct what you place; the child wanders and eats independently, cannot be selected for work, and becomes an adult after three simulation days. Growth and clothing survive saving. Citizens have slimmer rounded bodies, short pill-shaped limbs without fingers, heads without facial features, and solid-color shorts, dresses, top-and-skirt outfits or one-shoulder robes. The scene uses a 33-model 3D kit with articulated citizens and editable GLB exports. The compact peach build menu follows the supplied Figma reference and includes 13 housing and industry building types, plus platforms, stairs, stockpiles and gardens. Placement snaps to ground, decks and completed roofs across a 41 × 41 cell world.
+**F5 opens the settlement selector.** Choose an empty slot and Normal difficulty, or continue an existing settlement. **Esc** clears selection and cancels placement; progress saves automatically and Settings contains only fullscreen and route visibility. New settlements start with one completed house, two adults and one child. The house holds five meals and accepts gathered berries; there is no starting pile or loose timber. Builders can harvest raw materials for the first storage buildings. There are no prebuilt terraces, stairs, wells, gardens or queued buildings. Adults carry resources and construct what you place; the child wanders and eats independently, cannot be selected for work, and becomes an adult after three simulation days. Growth and clothing survive saving. Citizens have slimmer rounded bodies, short pill-shaped limbs without fingers, heads without facial features, and solid-color shorts, dresses, top-and-skirt outfits or one-shoulder robes. The scene uses a 33-model 3D kit with articulated citizens and editable GLB exports. The compact peach build menu follows the supplied Figma reference and includes 13 housing and industry building types, plus platforms, stairs, stockpiles and gardens. Placement snaps to ground, decks and completed roofs across a 41 × 41 cell world.
 
 Press **F2 / Blueprints** for the [unified asset editor](docs/STRUCTURE_WORKSHOP.md): edit primitives, component parts and prefabs, set occupied grid volumes and overlap margins, and exchange GLBs with Blender.
 

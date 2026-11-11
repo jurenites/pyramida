@@ -19,14 +19,14 @@ static func export_to_file(blueprint: BuildingBlueprint, destination_path: Strin
 	var material_error := _write_material_library(blueprint, material_path)
 	if material_error != OK:
 		return material_error
-	destination.store_line("# Pyramida Building Blueprint OBJ")
+	destination.store_line("# Town Building Blueprint OBJ")
 	destination.store_line("# id: %s" % blueprint.blueprint_id)
 	destination.store_line("# display_name: %s" % blueprint.display_name)
 	destination.store_line("# source_format: %s v%d" % [
 		BuildingBlueprintScript.FORMAT_ID,
 		blueprint.source_format_version,
 	])
-	destination.store_line("# units: 1 OBJ unit = 1 Pyramida World Unit = 1 Blender metre")
+	destination.store_line("# units: 1 OBJ unit = 1 Town World Unit = 1 Blender metre")
 	destination.store_line("mtllib %s" % material_path.get_file())
 	var vertex_offset := 0
 	for blueprint_part in blueprint.parts:
@@ -62,7 +62,7 @@ static func _write_material_library(
 	var material_file := FileAccess.open(destination_path, FileAccess.WRITE)
 	if material_file == null:
 		return FileAccess.get_open_error()
-	material_file.store_line("# Pyramida Building materials")
+	material_file.store_line("# Town Building materials")
 	var written_materials := {}
 	for blueprint_part in blueprint.parts:
 		var material_id := str(blueprint_part.get("material", "wood"))

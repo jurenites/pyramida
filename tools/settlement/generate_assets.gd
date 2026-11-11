@@ -1,8 +1,9 @@
 extends SceneTree
 ## Reproducible original mesh kit. Exports editable Godot scenes and Blender GLBs.
 const OUT := "res://data/settlement/"
-const WOOD := Color("74513e")
-const END_GRAIN := Color("bb9166")
+const TimberPalette = preload("res://scripts/settlement/timber_palette.gd")
+const WOOD: Color = TimberPalette.BARK[0]
+const END_GRAIN: Color = TimberPalette.WOOD[0]
 const PLANK := Color("b28b60")
 const STONE := Color("d8c5a2")
 const CHALK := Color("eee2c8")
@@ -78,7 +79,7 @@ func _initialize() -> void:
 				child.scale.y *= Catalog.LEVEL_HEIGHT / 2.4
 		if kind == "well": preload("res://scripts/settlement/timber_kit.gd").well_shape(asset, false)
 		if kind in Catalog.COSTS: preload("res://scripts/settlement/timber_kit.gd").rebuild(asset)
-		if kind == "stairs": preload("res://scripts/settlement/timber_kit.gd").fit_ladder(asset, Catalog.LEVEL_HEIGHT)
+		if kind == "stairs": preload("res://scripts/settlement/stair_timber.gd").populate(asset, Catalog.LEVEL_HEIGHT)
 		add_anchors(asset, kind)
 		own(asset, asset)
 		var scene := PackedScene.new()
@@ -270,7 +271,8 @@ func stairs(parent: Node3D) -> void:
 		beam(parent, "LadderRail", Vector3(-0.94, 0.06, z), Vector3(0.94, 2.34, z), 0.1)
 
 func log_mesh(parent: Node3D) -> void:
-	var trunk := cylinder(parent, "Bark", Vector3(0, 0.12, 0), 0.115, 0.9, WOOD)
+	var timber = preload("res://scripts/settlement/timber_kit.gd")
+	var trunk := cylinder(parent, "Bark", Vector3(0, 0.12, 0), timber.LOG_DIAMETER * 0.5, timber.LOG_BARK_LENGTH, WOOD)
 	trunk.rotation.z = PI / 2
 	for x in [-0.453, 0.453]:
 		var end := cylinder(parent, "CutEnd", Vector3(x, 0.12, 0), 0.084, 0.012, END_GRAIN)
@@ -342,9 +344,6 @@ func hay_field(parent: Node3D) -> void:
 	var soil := BoxMesh.new()
 	soil.size = Vector3(3.94, 0.012, 3.94)
 	mesh(parent, "Soil", soil, Vector3(0, 0.006, 0), Color("e8d5a4"))
-	for side in [-1.97, 1.97]:
-		box(parent, "EdgePlank", Vector3(side, 0.055, 0), Vector3(0.06, 0.09, 4.0), PLANK, 0.01)
-		box(parent, "EdgePlank", Vector3(0, 0.055, side), Vector3(3.88, 0.09, 0.06), PLANK, 0.01)
 	for side in 4:
 		for slot in 4:
 			var peg := box(parent, "EdgePeg", Vector3.ZERO, Vector3(0.06, 0.26, 0.06), WOOD, 0.01)
@@ -358,49 +357,10 @@ func hay_field(parent: Node3D) -> void:
 	preload("res://scripts/settlement/hay_field_view.gd").arrange_pegs(parent, Vector3i.ZERO, 0)
 	var plants := Node3D.new()
 	plants.name = "Plants"
-	plants.position.y = 0.012
 	parent.add_child(plants)
-	# Adult knees are at 0.185 m. Four flush quarters read as one crop surface,
-	# but each can disappear independently when its bundle is gathered.
-	var canopy := BoxMesh.new()
-	canopy.size = Vector3(1.97, 0.173, 1.97)
-	var arrays := canopy.surface_get_arrays(0)
-	var colours := PackedColorArray()
-	for normal: Vector3 in arrays[Mesh.ARRAY_NORMAL]:
-		colours.append(Color("ffca76") if normal.y > 0.5 else Color("efb45e"))
-	arrays[Mesh.ARRAY_COLOR] = colours
-	var crop_mesh := ArrayMesh.new()
-	crop_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
-	var crop_material := material(Color.WHITE).duplicate() as StandardMaterial3D
-	crop_material.vertex_color_use_as_albedo = true
-	crop_material.vertex_color_is_srgb = true
-	for index in 4:
-		var quarter := Node3D.new()
-		quarter.name = "Quarter%d" % index
-		quarter.position = Vector3(-0.985 if index % 2 == 0 else 0.985, 0, -0.985 if index < 2 else 0.985)
-		plants.add_child(quarter)
-		var fill := mesh(quarter, "Canopy", crop_mesh, Vector3(0, 0.0865, 0), Color.WHITE)
-		fill.material_override = crop_material
-		var ears := SurfaceTool.new()
-		ears.begin(Mesh.PRIMITIVE_TRIANGLES)
-		for detail in 4:
-			var seed_ := index * 4 + detail
-			var centre := Vector3(-0.54 + (detail % 2) * 1.02 + sin(seed_ * 4.1) * 0.15, 0.173, -0.54 + (detail / 2) * 1.02 + cos(seed_ * 2.7) * 0.15)
-			# Small crossed line silhouettes stay legible from every camera angle.
-			for angle in [0.35 + seed_ * 0.7, 0.35 + seed_ * 0.7 + PI * 0.5]:
-				var side_ := Vector3(cos(angle), 0, sin(angle))
-				var tip := centre + Vector3.UP * 0.065 + side_ * 0.012
-				triangle(ears, centre - side_ * 0.006, centre + side_ * 0.006, tip + side_ * 0.005)
-				triangle(ears, centre - side_ * 0.006, tip + side_ * 0.005, tip - side_ * 0.005)
-				for grain in 3:
-					var middle := centre.lerp(tip, 0.48 + grain * 0.18)
-					var edge := middle + side_ * (0.025 if grain % 2 == 0 else -0.025) + Vector3.UP * 0.012
-					triangle(ears, middle - Vector3.UP * 0.009, edge, middle + Vector3.UP * 0.014)
-		ears.generate_normals()
-		var accents := mesh(quarter, "Spikelets", ears.commit(), Vector3.ZERO, Color("eab463"))
-		var accent_material := accents.material_override.duplicate() as StandardMaterial3D
-		accent_material.cull_mode = BaseMaterial3D.CULL_DISABLED
-		accents.material_override = accent_material
+	preload("res://scripts/settlement/hay_surface.gd").build_stalks(null, Vector3i.ZERO, plants)
+	for visual: GeometryInstance3D in parent.find_children("*", "GeometryInstance3D", true, false):
+		visual.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 
 func pot(parent: Node3D, centre: Vector3, radius: float) -> void:
 	cylinder(parent, "PotFoot", centre + Vector3.UP * radius * 0.12, radius * 0.5, radius * 0.24, CLAY)
@@ -428,32 +388,15 @@ func tree(parent: Node3D, dead := false) -> void:
 	preload("res://tools/settlement/tree_geometry.gd").build(self, parent, dead)
 
 func palm(parent: Node3D) -> void:
-	for index in 9:
-		var y := index * 0.27
-		var x := 0.035 * index + 0.006 * index * index
-		cylinder(parent, "TrunkRing", Vector3(x, y + 0.14, 0), 0.15 - index * 0.006, 0.29, WOOD.lightened((index % 2) * 0.08), 0.13 - index * 0.006)
-	var crown := Vector3(0.67, 2.55, 0)
-	for index in 9:
-		var angle := index * TAU / 9
-		var tool := SurfaceTool.new()
-		tool.begin(Mesh.PRIMITIVE_TRIANGLES)
-		tool.set_smooth_group(-1)
-		var direction := Vector3(cos(angle), 0, sin(angle))
-		var side := Vector3(-sin(angle), 0, cos(angle))
-		for segment in 4:
-			var t := segment / 4.0
-			var u := (segment + 1) / 4.0
-			var a := crown + direction * t * 1.65 + Vector3.UP * (sin(t * PI) * 0.38 - t * t * 0.55)
-			var b := crown + direction * u * 1.65 + Vector3.UP * (sin(u * PI) * 0.38 - u * u * 0.55)
-			var width_a := sin(t * PI) * 0.23 + 0.015
-			var width_b := sin(u * PI) * 0.23
-			triangle(tool, a - side * width_a, b - side * width_b, b + side * width_b)
-			triangle(tool, a - side * width_a, b + side * width_b, a + side * width_a)
-		tool.generate_normals()
-		var node := mesh(parent, "Frond", tool.commit(), Vector3.ZERO, LEAF.darkened((index % 2) * 0.12))
-		var mat := material(LEAF.darkened((index % 2) * 0.12)).duplicate() as StandardMaterial3D
-		mat.cull_mode = BaseMaterial3D.CULL_DISABLED
-		node.material_override = mat
+	var generator = preload("res://scripts/settlement/nature_generator.gd")
+	var illustrated: bool = generator.Illustration.enabled
+	generator.Illustration.enabled = false
+	generator.populate(parent, "palm", 517)
+	generator.Illustration.enabled = illustrated
+	var access := Marker3D.new()
+	access.name = "AccessFront"
+	access.position = Vector3(0, 0, 0.7)
+	parent.add_child(access)
 
 func rock(parent: Node3D) -> void:
 	for index in 4:
@@ -541,111 +484,10 @@ func sawmill(parent: Node3D) -> void:
 	log_node.position.y = 0.7
 	log_mesh(log_node)
 
-# Featureless silhouettes and simple colour blocks remain legible at game zoom.
-const CLOTH_PALETTE := [Color("518e9a"), Color("cc765c"), Color("d3ad53"), Color("869c70"), Color("9583ad")]
-
-func bean(parent: Node3D, name_: String, centre: Vector3, size: Vector3, colour: Color) -> MeshInstance3D:
-	var shape := SphereMesh.new()
-	shape.radius = 0.5
-	shape.height = 1.0
-	shape.radial_segments = 16
-	shape.rings = 10
-	var result := mesh(parent, name_, shape, centre, colour)
-	result.scale = size
-	return result
-
-func pill(parent: Node3D, name_: String, centre: Vector3, radius: float, height: float, colour: Color) -> MeshInstance3D:
-	# A cylinder with hemispherical caps, not a stretched sphere with tapered ends.
-	var shape := CapsuleMesh.new()
-	shape.radius = radius
-	shape.height = height
-	shape.radial_segments = 16
-	shape.rings = 8
-	return mesh(parent, name_, shape, centre, colour)
-
-func attached_arm(parent: Node3D, colour: Color) -> void:
-	# Overlapping round ends hide the hinge; the upper cap stays inside the shoulder.
-	pill(parent, "PillArm", Vector3(0, -0.0675, 0), 0.063, 0.261, colour)
-	var elbow := Node3D.new()
-	elbow.name = "Elbow"
-	elbow.position.y = -0.135
-	parent.add_child(elbow)
-	pill(elbow, "Forearm", Vector3(0, -0.0575, 0), 0.06, 0.235, colour)
-
-func jointed_leg(parent: Node3D, colour: Color) -> void:
-	pill(parent, "PillLeg", Vector3(0, -0.0525, 0), 0.073, 0.251, colour)
-	var knee := Node3D.new()
-	knee.name = "Knee"
-	knee.position.y = -0.105
-	parent.add_child(knee)
-	pill(knee, "Shin", Vector3(0, -0.0475, 0), 0.072, 0.239, colour)
-
-func garment(node: MeshInstance3D) -> void:
-	node.set_meta("citizen_cloth", true)
-
+# Joined body/clothing meshes are sculpted and imported by the citizen authoring tools.
 func citizen(parent: Node3D, variant: int) -> void:
-	var skin: Color = [Color("66513a"), Color("78583f"), Color("543b2c"), Color("674938")][variant]
-	var cloth: Color = CLOTH_PALETTE[variant]
-	bean(parent, "Body", Vector3(0, 0.53, 0), Vector3(0.42, 0.57, 0.30), skin)
-	var head := Node3D.new()
-	head.name = "Head"
-	head.position.y = 0.96
-	parent.add_child(head)
-	bean(head, "HeadShape", Vector3.ZERO, Vector3(0.30, 0.35, 0.27), skin)
-	# No eyes, nose, mouth or ears: hair and clothing carry the identity.
-	var hair := Color("211c18")
-	var cap := bean(head, "HairCap", Vector3(-0.015, 0.12, 0.025), Vector3(0.32, 0.14, 0.29), hair)
-	cap.rotation.z = -0.18
-	if variant % 2 == 1:
-		bean(head, "SideBun", Vector3(0.15, 0.12, 0.06), Vector3(0.19, 0.21, 0.20), hair)
-	else:
-		var tuft := bean(head, "HairTuft", Vector3(-0.07, 0.17, 0.01), Vector3(0.15, 0.13, 0.22), hair)
-		tuft.rotation.z = -0.4
-	# A single solid clothing colour identifies each citizen at game zoom.
-	if variant in [1, 3]:
-		garment(bean(parent, "DressTop" if variant == 1 else "Top", Vector3(0, 0.63, 0), Vector3(0.44, 0.35, 0.32), cloth))
-		var skirt := cylinder(parent, "DressSkirt" if variant == 1 else "Skirt", Vector3(0, 0.36, 0), 0.27, 0.40, cloth, 0.19, 16)
-		skirt.scale.z = 0.72
-		garment(skirt)
-		if variant == 1:
-			parent.get_node("DressTop").position.y = 0.56
-			parent.get_node("DressTop").scale = Vector3(0.46, 0.50, 0.34)
-		if variant == 3:
-			# Exposed waist separates the top and skirt without tiny decorative detail.
-			parent.get_node("Top").position.y = 0.67
-			parent.get_node("Top").scale.y = 0.28
-			parent.get_node("Skirt").position.y = 0.31
-			parent.get_node("Skirt").scale.y = 0.80
-	elif variant == 2:
-		var wrap := cylinder(parent, "RobeSkirt", Vector3(0, 0.35, 0), 0.23, 0.32, cloth, 0.20, 16)
-		wrap.scale.z = 0.76
-		garment(wrap)
-		# Diagonal wrap joins the waist to only the left shoulder, front and back.
-		for z in [-0.12, 0.12]:
-			var sash := bean(parent, "DiagonalRobe", Vector3(-0.015, 0.61, z), Vector3(0.20, 0.52, 0.08), cloth)
-			sash.rotation.z = -0.48
-			garment(sash)
-		garment(bean(parent, "CoveredShoulder", Vector3(-0.185, 0.73, 0), Vector3(0.19, 0.18, 0.27), cloth))
-	for side in [-1, 1]:
-		var leg := Node3D.new()
-		leg.name = "LeftLeg" if side == -1 else "RightLeg"
-		leg.position = Vector3(side * 0.11, 0.29, 0)
-		parent.add_child(leg)
-		jointed_leg(leg, skin)
-		if variant == 0:
-			garment(pill(leg, "Shorts", Vector3(0, 0.015, 0), 0.105, 0.22, cloth))
-		var arm := Node3D.new()
-		arm.name = "LeftArm" if side == -1 else "RightArm"
-		bean(parent, "LeftShoulder" if side == -1 else "RightShoulder", Vector3(side * 0.15, 0.70, 0), Vector3(0.22, 0.15, 0.24), skin)
-		arm.position = Vector3(side * 0.18, 0.70, 0)
-		parent.add_child(arm)
-		attached_arm(arm, skin)
-	if variant == 0:
-		garment(bean(parent, "ShortsWaist", Vector3(0, 0.35, 0), Vector3(0.43, 0.21, 0.31), cloth))
-	var cargo := Node3D.new()
-	cargo.name = "CargoSocket"
-	cargo.position = Vector3(0, 0.53, -0.36)
-	parent.add_child(cargo)
+	preload("res://scripts/settlement/citizen_rig.gd").populate(parent, variant)
+	meshes += 1
 
 func add_anchors(asset: Node3D, kind: String) -> void:
 	if kind in ["ceramic_roof_tile", "metal_roof_sheet"]: return

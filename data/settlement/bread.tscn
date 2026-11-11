@@ -1,0 +1,42 @@
+[gd_scene load_steps=5 format=3]
+
+[sub_resource type="StandardMaterial3D" id="Crust"]
+albedo_color = Color(0.67, 0.35, 0.12, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Score"]
+albedo_color = Color(0.92, 0.69, 0.36, 1)
+roughness = 1.0
+
+[sub_resource type="SphereMesh" id="Loaf"]
+radius = 0.105
+height = 0.16
+radial_segments = 12
+rings = 6
+
+[sub_resource type="BoxMesh" id="Slash"]
+size = Vector3(0.018, 0.007, 0.10)
+
+[node name="Bread" type="Node3D"]
+
+[node name="Loaf" type="MeshInstance3D" parent="."]
+scale = Vector3(1.65, 1, 1)
+mesh = SubResource("Loaf")
+material_override = SubResource("Crust")
+
+[node name="ScoreLeft" type="MeshInstance3D" parent="."]
+position = Vector3(-0.075, 0.069, 0)
+rotation = Vector3(0, -0.35, 0.18)
+mesh = SubResource("Slash")
+material_override = SubResource("Score")
+
+[node name="ScoreMiddle" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.076, 0)
+rotation = Vector3(0, -0.35, 0)
+mesh = SubResource("Slash")
+material_override = SubResource("Score")
+
+[node name="ScoreRight" type="MeshInstance3D" parent="."]
+position = Vector3(0.075, 0.069, 0)
+rotation = Vector3(0, -0.35, -0.18)
+mesh = SubResource("Slash")

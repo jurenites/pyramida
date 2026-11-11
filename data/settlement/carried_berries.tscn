@@ -1,0 +1,28 @@
+[gd_scene load_steps=3 format=3]
+
+[sub_resource type="StandardMaterial3D" id="Material_berry"]
+albedo_color = Color(0.73333335, 0.34509805, 0.27058825, 1)
+roughness = 1.0
+
+[sub_resource type="SphereMesh" id="Mesh_berry"]
+radius = 0.065
+height = 0.1105
+radial_segments = 8
+rings = 4
+
+[node name="CarriedBerries" type="Node3D"]
+
+[node name="BerryLeft" type="MeshInstance3D" parent="."]
+position = Vector3(-0.058, 0, 0)
+mesh = SubResource("Mesh_berry")
+material_override = SubResource("Material_berry")
+
+[node name="BerryRight" type="MeshInstance3D" parent="."]
+position = Vector3(0.058, 0, 0)
+mesh = SubResource("Mesh_berry")
+material_override = SubResource("Material_berry")
+
+[node name="BerryFront" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.025, -0.075)
+mesh = SubResource("Mesh_berry")
+material_override = SubResource("Material_berry")

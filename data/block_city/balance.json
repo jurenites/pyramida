@@ -35,6 +35,7 @@
     {"id": "flat_l", "palette_hidden": true, "weight": 0, "cells": [[0, 0, 0], [0, 0, 1], [0, 0, 2], [1, 0, 2]], "door": [0, 0, 0]},
     {"id": "flat_l_mirror", "palette_hidden": true, "weight": 0, "cells": [[1, 0, 0], [1, 0, 1], [1, 0, 2], [0, 0, 2]], "door": [1, 0, 0]},
     {"id": "elevator", "role": "elevator", "weight": 4, "cells": [[0, 0, 0]], "door": [0, 0, 0]},
-    {"id": "stairs", "role": "stairs", "weight": 10, "cells": [[0, 0, 0]], "door": [0, 0, 0]}
+    {"id": "stairs", "role": "stairs", "weight": 10, "cells": [[0, 0, 0]], "door": [0, 0, 0]},
+    {"id": "stairs_quarter", "role": "stairs", "turn_degrees": 90, "weight": 0, "cells": [[0, 0, 0]], "door": [0, 0, 0]}
   ]
 }

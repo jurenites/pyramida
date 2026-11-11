@@ -59,6 +59,9 @@ func run() -> void:
 	game.launch_to_menu = false
 	root.add_child(game)
 	game.speed = 0
+	# Exercise local exploration independently of the island-wide discovery rule.
+	game.model.exploration = Model.Exploration.new()
+	game.model.exploration.update(game.model.workers)
 	await process_frame
 	await physics_frame
 	check(game.fog.visible and game.world.fog_enabled, "Playable settlement uses fog rendering")
@@ -79,11 +82,34 @@ func run() -> void:
 	check(game.placement_at(mouse).is_empty(), "Construction previews cannot expose unexplored land")
 	var worker: Dictionary = game.model.workers[1]
 	check(not Model.Jobs._assign_collection(game.model, worker, far_cell, "log", "fell"), "Autonomous harvesting cannot target undiscovered resources")
+	var saved_cells: Dictionary = game.model.exploration.cells.duplicate()
+	game.model.exploration.cells = {Mask.cell_at(Nav.point(far_cell)): true}
+	game.model.exploration.revision += 1
+	game.world.sync(game.model, 0, -1)
+	check(not tree.visible and tree.get_meta("collider").collision_layer == 0, "An explored trunk with a fog-covered crown stays completely hidden and unpickable")
+	game.world.fog_enabled = false
+	game.world.sync(game.model, 0, -1)
+	check(tree.visible, "Fog-disabled previews show the complete tree at an unexplored edge")
+	game.world.fog_enabled = true
+	game.model.exploration.cells = saved_cells
+	game.model.exploration.revision += 1
 	game.model.exploration.reveal(Nav.point(far_cell))
 	game.fog.sync(game.model, true)
 	game.world.sync(game.model, 0, -1)
 	await physics_frame
 	check(tree.visible and tree.get_meta("collider").collision_layer == 1, "Arriving reveals the resource and enables inspection")
+	var shape: CollisionShape3D = tree.get_meta("collider").get_child(0)
+	var size: Vector3 = shape.shape.size
+	var box: AABB = shape.global_transform * AABB(-size * 0.5, size)
+	var crown_cell := Mask.cell_at(box.end + Vector3(Mask.CELL_SIZE * 0.49, 0, Mask.CELL_SIZE * 0.49))
+	game.model.exploration.cells.erase(crown_cell)
+	game.model.exploration.revision += 1
+	game.world.sync(game.model, 0, -1)
+	check(not tree.visible, "One unrevealed texel at the filtered crown edge hides the whole tree")
+	game.model.exploration.cells[crown_cell] = true
+	game.model.exploration.revision += 1
+	game.world.sync(game.model, 0, -1)
+	check(tree.visible, "Clearing the last crown-edge texel reveals the whole tree again")
 	game.world.cutaway = true
 	game.world.display_level = -1
 	game.world.sync(game.model, 0, -1)

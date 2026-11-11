@@ -1,4 +1,4 @@
-"""Blender import/export extension for Pyramida Building blueprints."""
+"""Blender import/export extension for Town Building blueprints."""
 
 from __future__ import annotations
 
@@ -15,12 +15,12 @@ from mathutils import Euler, Matrix, Vector
 from . import pyrbuilding_codec as codec
 
 bl_info = {
-    "name": "Pyramida Building Blueprint",
-    "author": "Pyramida 2 contributors",
+    "name": "Town Building Blueprint",
+    "author": "Town contributors",
     "version": (0, 1, 0),
     "blender": (4, 2, 0),
     "location": "File > Import-Export",
-    "description": "Round-trip Pyramida .pyrbuilding construction assets",
+    "description": "Round-trip Town .pyrbuilding construction assets",
     "category": "Import-Export",
 }
 
@@ -116,7 +116,7 @@ def _octahedron_mesh(name: str, radius: float, height: float):
 
 
 def _material(material_id: str):
-    name = f"Pyramida | {material_id}"
+    name = f"Town | {material_id}"
     material = bpy.data.materials.get(name) or bpy.data.materials.new(name)
     material.diffuse_color = codec.MATERIAL_COLOURS.get(material_id, (0.5, 0.5, 0.5, 1.0))
     material.roughness = 0.92
@@ -193,7 +193,7 @@ def _part_object(part: dict):
 
 def import_blueprint(filepath: str, context):
     blueprint = codec.load_blueprint(filepath)
-    collection = bpy.data.collections.new(f"Pyramida | {blueprint.get('display_name', blueprint['id'])}")
+    collection = bpy.data.collections.new(f"Town | {blueprint.get('display_name', blueprint['id'])}")
     context.scene.collection.children.link(collection)
     collection[COLLECTION_FORMAT_KEY] = codec.FORMAT_ID
     collection["pyr_source_path"] = str(Path(filepath).resolve())
@@ -222,7 +222,7 @@ def _blueprint_collection(context):
     ]
     if len(candidates) == 1:
         return candidates[0]
-    raise ValueError("Select one object belonging to the Pyramida Building you want to export")
+    raise ValueError("Select one object belonging to the Town Building you want to export")
 
 
 def _local_dimensions(obj) -> Vector:
@@ -317,7 +317,7 @@ def export_blueprint(filepath: str, context):
 
 class PYRAMIDA_OT_import_building(Operator, ImportHelper):
     bl_idname = "import_scene.pyrbuilding"
-    bl_label = "Import Pyramida Building"
+    bl_label = "Import Town Building"
     bl_options = {"REGISTER", "UNDO"}
     filename_ext = ".pyrbuilding"
     filter_glob: StringProperty(default="*.pyrbuilding", options={"HIDDEN"})
@@ -325,7 +325,7 @@ class PYRAMIDA_OT_import_building(Operator, ImportHelper):
     def execute(self, context):
         try:
             collection = import_blueprint(self.filepath, context)
-            self.report({"INFO"}, f"Imported {len(collection.objects)} Pyramida Building parts")
+            self.report({"INFO"}, f"Imported {len(collection.objects)} Town Building parts")
             return {"FINISHED"}
         except Exception as error:
             self.report({"ERROR"}, str(error))
@@ -334,14 +334,14 @@ class PYRAMIDA_OT_import_building(Operator, ImportHelper):
 
 class PYRAMIDA_OT_export_building(Operator, ExportHelper):
     bl_idname = "export_scene.pyrbuilding"
-    bl_label = "Export Pyramida Building"
+    bl_label = "Export Town Building"
     filename_ext = ".pyrbuilding"
     filter_glob: StringProperty(default="*.pyrbuilding", options={"HIDDEN"})
 
     def execute(self, context):
         try:
             blueprint = export_blueprint(self.filepath, context)
-            self.report({"INFO"}, f"Exported {len(blueprint['parts'])} Pyramida Building parts")
+            self.report({"INFO"}, f"Exported {len(blueprint['parts'])} Town Building parts")
             return {"FINISHED"}
         except Exception as error:
             self.report({"ERROR"}, str(error))
@@ -350,7 +350,7 @@ class PYRAMIDA_OT_export_building(Operator, ExportHelper):
 
 class PYRAMIDA_OT_snap_parts(Operator):
     bl_idname = "object.pyrbuilding_snap_parts"
-    bl_label = "Snap Pyramida Parts to Sub-Units"
+    bl_label = "Snap Town Parts to Sub-Units"
     bl_options = {"REGISTER", "UNDO"}
 
     def execute(self, context):
@@ -372,16 +372,16 @@ class PYRAMIDA_OT_snap_parts(Operator):
             obj.location += snapped_anchor - anchor
             obj["pyr_sub_unit"] = sub_unit
             moved += 1
-        self.report({"INFO"}, f"Snapped {moved} Pyramida Building parts")
+        self.report({"INFO"}, f"Snapped {moved} Town Building parts")
         return {"FINISHED"}
 
 
 class PYRAMIDA_PT_building(Panel):
-    bl_label = "Pyramida Building"
+    bl_label = "Town Building"
     bl_idname = "PYRAMIDA_PT_building"
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
-    bl_category = "Pyramida"
+    bl_category = "Town"
 
     def draw(self, context):
         layout = self.layout
@@ -396,11 +396,11 @@ class PYRAMIDA_PT_building(Panel):
 
 
 def _menu_import(self, _context):
-    self.layout.operator(PYRAMIDA_OT_import_building.bl_idname, text="Pyramida Building (.pyrbuilding)")
+    self.layout.operator(PYRAMIDA_OT_import_building.bl_idname, text="Town Building (.pyrbuilding)")
 
 
 def _menu_export(self, _context):
-    self.layout.operator(PYRAMIDA_OT_export_building.bl_idname, text="Pyramida Building (.pyrbuilding)")
+    self.layout.operator(PYRAMIDA_OT_export_building.bl_idname, text="Town Building (.pyrbuilding)")
 
 
 CLASSES = (

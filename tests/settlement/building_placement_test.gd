@@ -53,7 +53,7 @@ func _initialize() -> void:
 	model.trees.clear()
 	model.water_sources.clear()
 	var index := 0
-	for category: String in ["housing", "industry"]:
+	for category: String in ["housing", "timber", "storage", "clay", "hay", "stone"]:
 		for kind: String in Catalog.CATEGORIES[category]:
 			var cell := Vector3i(-9 + index % 6 * 4, 0, 5 + index / 6 * 4)
 			complete(model, kind, cell)

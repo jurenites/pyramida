@@ -30,6 +30,7 @@ static func tick(world, delta: float) -> void:
 		for cell: Vector3i in world.water_sources:
 			if world.wells.has(cell): continue
 			var source: Dictionary = world.water_sources[cell]
+			if source.kind in ["cistern","vase","barrel","basin"]: continue
 			var inventory = source.inventory
 			if world.weather.raining and second % 4 == 0 and inventory.total() < inventory.capacity:
 				inventory.store("water")
@@ -39,13 +40,21 @@ static func tick(world, delta: float) -> void:
 				inventory.amounts.water -= 1
 				changed = true
 		if world.weather.raining and second % 4 == 0:
+			world.Farming.rain_crops(world)
+			changed = true
 			for cell: Vector3i in world.wells:
+				if world.roof_rain.primary: continue
 				if not world.Volume.well_connected(world, cell): continue
 				var inventory = world.wells[cell]
+				inventory.capacity = maxi(inventory.total(), capacity(world, cell, units(world.buildings.get(cell, {}))))
 				var amount := mini(inventory.capacity - inventory.total(), rain_yield(world, cell) * units(world.buildings.get(cell, {})))
 				if amount > 0:
 					inventory.store("water", amount)
 					changed = true
+		preload("res://scripts/settlement/room_utilities.gd").rain_second(world)
+		preload("res://scripts/settlement/home_assembly.gd").rain_second(world)
+		preload("res://scripts/settlement/rain_exposure.gd").tick(world)
+		preload("res://scripts/settlement/roof_rain.gd").rain_second(world)
 		preload("res://scripts/settlement/vines.gd").tick_second(world)
 		if changed:
 			world.revision += 1
@@ -53,15 +62,23 @@ static func tick(world, delta: float) -> void:
 static func seconds_to_rain(world) -> int:
 	return posmod(RAIN_START - int(world.weather.seconds), CYCLE_SECONDS)
 
-# A tile means the minimum terrain cell; diagonals use the same distance ring.
+# Metre grid, with diagonal cells in the same distance ring.
 static func rain_yield(world, cell: Vector3i) -> int:
-	var result := 1
-	for x in range(-1, 2):
-		for z in range(-1, 2):
-			var nearby := cell + Vector3i(x, 0, z)
-			if world.water_sources.get(nearby, {}).get("kind") == "puddle":
-				result = maxi(result, 3 - maxi(absi(x), absi(z)))
-	return result
+	if on_puddle(world, cell): return 3
+	for x in range(-2, 3):
+		for z in range(-2, 3):
+			if on_puddle(world, cell + Vector3i(x, 0, z)): return 2
+	return 1
+
+static func on_puddle(world, cell: Vector3i) -> bool:
+	return world.water_sources.get(cell, {}).get("kind") == "puddle"
+
+static func capacity(world, cell: Vector3i, count: int) -> int:
+	if world.roof_rain.primary: return 3*clampi(count,1,3)
+	var rules: Dictionary = preload("res://scripts/settlement/reviewed_balance.gd").data.well
+	var level := clampi(count, 1, 3) - 1
+	if on_puddle(world, cell): return int(rules.on_puddle_capacity[level])
+	return rain_yield(world, cell) if level == 0 else int(rules.away_capacity[level])
 
 static func units(building: Dictionary) -> int:
 	# Legacy authored wells had the roofed silhouette, but only one storage unit.
@@ -90,9 +107,9 @@ static func complete(world, plan: Dictionary) -> void:
 	var incoming: Dictionary = payload.get("buildings", {})
 	var count := units(existing) if world.wells.has(cell) else 0
 	if plan.kind == "well" or not payload.is_empty(): count += units(incoming)
-	count = maxi(1, count)
+	count = clampi(count, 1, 3)
 	var inventory = world.wells.get(cell, Inventory.new())
-	inventory.capacity = inventory.capacity + (count - units(existing)) * WELL_STORAGE if world.wells.has(cell) else rain_yield(world, cell) + count * WELL_STORAGE
+	inventory.capacity = maxi(inventory.total(), capacity(world, cell, count)) # Preserve legacy water; no free refill.
 	var materials: Dictionary = world.construction_materials.get(cell, {}).duplicate()
 	for resource: String in plan.materials:
 		materials[resource] = int(materials.get(resource, 0)) + int(plan.materials[resource])

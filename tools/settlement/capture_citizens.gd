@@ -33,6 +33,7 @@ func capture() -> void:
 	scene.add_child(light)
 	var camera := Camera3D.new()
 	camera.projection = Camera3D.PROJECTION_ORTHOGONAL
+	camera.keep_aspect = Camera3D.KEEP_WIDTH
 	camera.size = 6.6
 	scene.add_child(camera)
 	camera.position = Vector3(0, 2.4, 8)
@@ -41,7 +42,7 @@ func capture() -> void:
 	var ui := CanvasLayer.new()
 	root.add_child(ui)
 	caption(ui, "PYRAMIDA / CITIZENS", Vector2(48, 35), 32)
-	caption(ui, "Featureless faces / flat colour shapes / fine irregular edges", Vector2(48, 85), 20)
+	caption(ui, "Small heads / broad bellies / short limbs", Vector2(48, 85), 20)
 	for index in 5:
 		var worker := Worker.new()
 		scene.add_child(worker)

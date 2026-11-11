@@ -1,222 +1,157 @@
 [gd_scene format=3]
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_l1mvs"]
-albedo_color = Color(0.32941177, 0.23137255, 0.17254902, 1)
-roughness = 0.92
+[ext_resource type="ArrayMesh" path="res://data/settlement/citizens/body_2.res" id="1_i83da"]
 
-[sub_resource type="SphereMesh" id="SphereMesh_i83da"]
-radial_segments = 16
-rings = 10
+[sub_resource type="Skin" id="Skin_pxqht"]
+bind_count = 11
+bind/0/name = &""
+bind/0/bone = 0
+bind/0/pose = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+bind/1/name = &""
+bind/1/bone = 1
+bind/1/pose = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.48, 0)
+bind/2/name = &""
+bind/2/bone = 2
+bind/2/pose = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.845, 0)
+bind/3/name = &""
+bind/3/bone = 3
+bind/3/pose = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.22, -0.64, 0)
+bind/4/name = &""
+bind/4/bone = 4
+bind/4/pose = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.295, -0.515, 0)
+bind/5/name = &""
+bind/5/bone = 5
+bind/5/pose = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.22, -0.64, 0)
+bind/6/name = &""
+bind/6/bone = 6
+bind/6/pose = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.295, -0.515, 0)
+bind/7/name = &""
+bind/7/bone = 7
+bind/7/pose = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.11, -0.29, 0)
+bind/8/name = &""
+bind/8/bone = 8
+bind/8/pose = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.11, -0.185, 0)
+bind/9/name = &""
+bind/9/bone = 9
+bind/9/pose = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.11, -0.29, 0)
+bind/10/name = &""
+bind/10/bone = 10
+bind/10/pose = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.11, -0.185, 0)
 
-[sub_resource type="SphereMesh" id="SphereMesh_pxqht"]
-radial_segments = 16
-rings = 10
+[node name="Citizen2" type="Node3D" unique_id=600566441]
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_76l0b"]
-albedo_color = Color(0.12941177, 0.10980392, 0.09411765, 1)
-roughness = 0.92
+[node name="Skeleton3D" type="Skeleton3D" parent="." unique_id=126026299]
+bones/0/name = "Root"
+bones/0/parent = -1
+bones/0/rest = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+bones/0/enabled = true
+bones/0/position = Vector3(0, 0, 0)
+bones/0/rotation = Quaternion(0, 0, 0, 1)
+bones/0/scale = Vector3(1, 1, 1)
+bones/1/name = "Torso"
+bones/1/parent = 0
+bones/1/rest = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.48, 0)
+bones/1/enabled = true
+bones/1/position = Vector3(0, 0.48, 0)
+bones/1/rotation = Quaternion(0, 0, 0, 1)
+bones/1/scale = Vector3(1, 1, 1)
+bones/2/name = "Head"
+bones/2/parent = 1
+bones/2/rest = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.36500004, 0)
+bones/2/enabled = true
+bones/2/position = Vector3(0, 0.36500004, 0)
+bones/2/rotation = Quaternion(0, 0, 0, 1)
+bones/2/scale = Vector3(1, 1, 1)
+bones/3/name = "LeftArm"
+bones/3/parent = 1
+bones/3/rest = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.22, 0.16, 0)
+bones/3/enabled = true
+bones/3/position = Vector3(-0.22, 0.16, 0)
+bones/3/rotation = Quaternion(0, 0, 0, 1)
+bones/3/scale = Vector3(1, 1, 1)
+bones/4/name = "LeftElbow"
+bones/4/parent = 3
+bones/4/rest = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.07499999, -0.125, 0)
+bones/4/enabled = true
+bones/4/position = Vector3(-0.07499999, -0.125, 0)
+bones/4/rotation = Quaternion(0, 0, 0, 1)
+bones/4/scale = Vector3(1, 1, 1)
+bones/5/name = "RightArm"
+bones/5/parent = 1
+bones/5/rest = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.22, 0.16, 0)
+bones/5/enabled = true
+bones/5/position = Vector3(0.22, 0.16, 0)
+bones/5/rotation = Quaternion(0, 0, 0, 1)
+bones/5/scale = Vector3(1, 1, 1)
+bones/6/name = "RightElbow"
+bones/6/parent = 5
+bones/6/rest = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.07499999, -0.125, 0)
+bones/6/enabled = true
+bones/6/position = Vector3(0.07499999, -0.125, 0)
+bones/6/rotation = Quaternion(0, 0, 0, 1)
+bones/6/scale = Vector3(1, 1, 1)
+bones/7/name = "LeftLeg"
+bones/7/parent = 0
+bones/7/rest = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.11, 0.29, 0)
+bones/7/enabled = true
+bones/7/position = Vector3(-0.11, 0.29, 0)
+bones/7/rotation = Quaternion(0, 0, 0, 1)
+bones/7/scale = Vector3(1, 1, 1)
+bones/8/name = "LeftKnee"
+bones/8/parent = 7
+bones/8/rest = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.10499999, 0)
+bones/8/enabled = true
+bones/8/position = Vector3(0, -0.10499999, 0)
+bones/8/rotation = Quaternion(0, 0, 0, 1)
+bones/8/scale = Vector3(1, 1, 1)
+bones/9/name = "RightLeg"
+bones/9/parent = 0
+bones/9/rest = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.11, 0.29, 0)
+bones/9/enabled = true
+bones/9/position = Vector3(0.11, 0.29, 0)
+bones/9/rotation = Quaternion(0, 0, 0, 1)
+bones/9/scale = Vector3(1, 1, 1)
+bones/10/name = "RightKnee"
+bones/10/parent = 9
+bones/10/rest = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.10499999, 0)
+bones/10/enabled = true
+bones/10/position = Vector3(0, -0.10499999, 0)
+bones/10/rotation = Quaternion(0, 0, 0, 1)
+bones/10/scale = Vector3(1, 1, 1)
 
-[sub_resource type="SphereMesh" id="SphereMesh_035rv"]
-radial_segments = 16
-rings = 10
+[node name="Head" type="Node3D" parent="." unique_id=1653347884]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.845, 0)
 
-[sub_resource type="SphereMesh" id="SphereMesh_ji4fp"]
-radial_segments = 16
-rings = 10
+[node name="LeftArm" type="Node3D" parent="." unique_id=1557009712]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.22, 0.64, 0)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_5ikvc"]
-albedo_color = Color(0.827451, 0.6784314, 0.3254902, 1)
-roughness = 0.92
+[node name="Elbow" type="Node3D" parent="LeftArm" unique_id=338693096]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.07499999, -0.125, 0)
 
-[sub_resource type="CylinderMesh" id="CylinderMesh_jtpnc"]
-top_radius = 0.2
-bottom_radius = 0.23
-height = 0.32
-radial_segments = 16
-rings = 1
+[node name="RightArm" type="Node3D" parent="." unique_id=367791806]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.22, 0.64, 0)
 
-[sub_resource type="SphereMesh" id="SphereMesh_ho50c"]
-radial_segments = 16
-rings = 10
+[node name="Elbow" type="Node3D" parent="RightArm" unique_id=1786082166]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.07499999, -0.125, 0)
 
-[sub_resource type="SphereMesh" id="SphereMesh_dunqi"]
-radial_segments = 16
-rings = 10
-
-[sub_resource type="SphereMesh" id="SphereMesh_ulv8g"]
-radial_segments = 16
-rings = 10
-
-[sub_resource type="CapsuleMesh" id="CapsuleMesh_pwthd"]
-radius = 0.073
-height = 0.251
-radial_segments = 16
-
-[sub_resource type="CapsuleMesh" id="CapsuleMesh_m3vq0"]
-radius = 0.072
-height = 0.239
-radial_segments = 16
-
-[sub_resource type="SphereMesh" id="SphereMesh_g1ope"]
-radial_segments = 16
-rings = 10
-
-[sub_resource type="CapsuleMesh" id="CapsuleMesh_0utgb"]
-radius = 0.063
-height = 0.261
-radial_segments = 16
-
-[sub_resource type="CapsuleMesh" id="CapsuleMesh_1kg3k"]
-radius = 0.06
-height = 0.235
-radial_segments = 16
-
-[sub_resource type="CapsuleMesh" id="CapsuleMesh_73eql"]
-radius = 0.073
-height = 0.251
-radial_segments = 16
-
-[sub_resource type="CapsuleMesh" id="CapsuleMesh_1f8rq"]
-radius = 0.072
-height = 0.239
-radial_segments = 16
-
-[sub_resource type="SphereMesh" id="SphereMesh_brxjg"]
-radial_segments = 16
-rings = 10
-
-[sub_resource type="CapsuleMesh" id="CapsuleMesh_6dr20"]
-radius = 0.063
-height = 0.261
-radial_segments = 16
-
-[sub_resource type="CapsuleMesh" id="CapsuleMesh_l4a2c"]
-radius = 0.06
-height = 0.235
-radial_segments = 16
-
-[node name="Citizen2" type="Node3D" unique_id=1149010644]
-
-[node name="Body" type="MeshInstance3D" parent="." unique_id=1365732256]
-transform = Transform3D(0.42, 0, 0, 0, 0.57, 0, 0, 0, 0.3, 0, 0.53, 0)
-material_override = SubResource("StandardMaterial3D_l1mvs")
-mesh = SubResource("SphereMesh_i83da")
-
-[node name="Head" type="Node3D" parent="." unique_id=1471160657]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.96, 0)
-
-[node name="HeadShape" type="MeshInstance3D" parent="Head" unique_id=1678851640]
-transform = Transform3D(0.3, 0, 0, 0, 0.35, 0, 0, 0, 0.27, 0, 0, 0)
-material_override = SubResource("StandardMaterial3D_l1mvs")
-mesh = SubResource("SphereMesh_pxqht")
-
-[node name="HairCap" type="MeshInstance3D" parent="Head" unique_id=1137668550]
-transform = Transform3D(0.31482998, 0.025064142, 0, -0.057289466, 0.13773812, 0, 0, 0, 0.29, -0.015, 0.12, 0.025)
-material_override = SubResource("StandardMaterial3D_76l0b")
-mesh = SubResource("SphereMesh_035rv")
-
-[node name="HairTuft" type="MeshInstance3D" parent="Head" unique_id=67163056]
-transform = Transform3D(0.13815916, 0.05062438, 0, -0.058412753, 0.11973792, 0, 0, 0, 0.22, -0.07, 0.17, 0.01)
-material_override = SubResource("StandardMaterial3D_76l0b")
-mesh = SubResource("SphereMesh_ji4fp")
-
-[node name="RobeSkirt" type="MeshInstance3D" parent="." unique_id=665539161]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 0.76, 0, 0.35, 0)
-material_override = SubResource("StandardMaterial3D_5ikvc")
-mesh = SubResource("CylinderMesh_jtpnc")
-metadata/citizen_cloth = true
-
-[node name="DiagonalRobe" type="MeshInstance3D" parent="." unique_id=1698014787]
-transform = Transform3D(0.17739898, 0.24012516, 0, -0.09235584, 0.46123734, 0, 0, 0, 0.08, -0.015, 0.61, -0.12)
-material_override = SubResource("StandardMaterial3D_5ikvc")
-mesh = SubResource("SphereMesh_ho50c")
-metadata/citizen_cloth = true
-
-[node name="@MeshInstance3D@2" type="MeshInstance3D" parent="." unique_id=2067787622]
-transform = Transform3D(0.17739898, 0.24012516, 0, -0.09235584, 0.46123734, 0, 0, 0, 0.08, -0.015, 0.61, 0.12)
-material_override = SubResource("StandardMaterial3D_5ikvc")
-mesh = SubResource("SphereMesh_dunqi")
-metadata/citizen_cloth = true
-
-[node name="CoveredShoulder" type="MeshInstance3D" parent="." unique_id=463194426]
-transform = Transform3D(0.19, 0, 0, 0, 0.18, 0, 0, 0, 0.27, -0.185, 0.73, 0)
-material_override = SubResource("StandardMaterial3D_5ikvc")
-mesh = SubResource("SphereMesh_ulv8g")
-metadata/citizen_cloth = true
-
-[node name="LeftLeg" type="Node3D" parent="." unique_id=731837261]
+[node name="LeftLeg" type="Node3D" parent="." unique_id=1612126712]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.11, 0.29, 0)
 
-[node name="PillLeg" type="MeshInstance3D" parent="LeftLeg" unique_id=1596896617]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.0525, 0)
-material_override = SubResource("StandardMaterial3D_l1mvs")
-mesh = SubResource("CapsuleMesh_pwthd")
+[node name="Knee" type="Node3D" parent="LeftLeg" unique_id=1255071389]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.10499999, 0)
 
-[node name="Knee" type="Node3D" parent="LeftLeg" unique_id=1159387585]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.105, 0)
-
-[node name="Shin" type="MeshInstance3D" parent="LeftLeg/Knee" unique_id=938535016]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.0475, 0)
-material_override = SubResource("StandardMaterial3D_l1mvs")
-mesh = SubResource("CapsuleMesh_m3vq0")
-
-[node name="LeftShoulder" type="MeshInstance3D" parent="." unique_id=1621864716]
-transform = Transform3D(0.22, 0, 0, 0, 0.15, 0, 0, 0, 0.24, -0.15, 0.7, 0)
-material_override = SubResource("StandardMaterial3D_l1mvs")
-mesh = SubResource("SphereMesh_g1ope")
-
-[node name="LeftArm" type="Node3D" parent="." unique_id=204298414]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.18, 0.7, 0)
-
-[node name="PillArm" type="MeshInstance3D" parent="LeftArm" unique_id=1565896204]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.0675, 0)
-material_override = SubResource("StandardMaterial3D_l1mvs")
-mesh = SubResource("CapsuleMesh_0utgb")
-
-[node name="Elbow" type="Node3D" parent="LeftArm" unique_id=1418451525]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.135, 0)
-
-[node name="Forearm" type="MeshInstance3D" parent="LeftArm/Elbow" unique_id=930976740]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.0575, 0)
-material_override = SubResource("StandardMaterial3D_l1mvs")
-mesh = SubResource("CapsuleMesh_1kg3k")
-
-[node name="RightLeg" type="Node3D" parent="." unique_id=1870845365]
+[node name="RightLeg" type="Node3D" parent="." unique_id=1845660095]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.11, 0.29, 0)
 
-[node name="PillLeg" type="MeshInstance3D" parent="RightLeg" unique_id=1080075767]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.0525, 0)
-material_override = SubResource("StandardMaterial3D_l1mvs")
-mesh = SubResource("CapsuleMesh_73eql")
+[node name="Knee" type="Node3D" parent="RightLeg" unique_id=1143341207]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.10499999, 0)
 
-[node name="Knee" type="Node3D" parent="RightLeg" unique_id=2022564296]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.105, 0)
+[node name="Surface" type="MeshInstance3D" parent="." unique_id=2054637666]
+custom_aabb = AABB(-0.65, -0.2, -0.65, 1.3, 1.4, 1.3)
+mesh = ExtResource("1_i83da")
+skin = SubResource("Skin_pxqht")
+skeleton = NodePath("../Skeleton3D")
+metadata/citizen_cloth_surface = 1
 
-[node name="Shin" type="MeshInstance3D" parent="RightLeg/Knee" unique_id=398556560]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.0475, 0)
-material_override = SubResource("StandardMaterial3D_l1mvs")
-mesh = SubResource("CapsuleMesh_1f8rq")
-
-[node name="RightShoulder" type="MeshInstance3D" parent="." unique_id=587404793]
-transform = Transform3D(0.22, 0, 0, 0, 0.15, 0, 0, 0, 0.24, 0.15, 0.7, 0)
-material_override = SubResource("StandardMaterial3D_l1mvs")
-mesh = SubResource("SphereMesh_brxjg")
-
-[node name="RightArm" type="Node3D" parent="." unique_id=1553025265]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.18, 0.7, 0)
-
-[node name="PillArm" type="MeshInstance3D" parent="RightArm" unique_id=977719341]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.0675, 0)
-material_override = SubResource("StandardMaterial3D_l1mvs")
-mesh = SubResource("CapsuleMesh_6dr20")
-
-[node name="Elbow" type="Node3D" parent="RightArm" unique_id=562027401]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.135, 0)
-
-[node name="Forearm" type="MeshInstance3D" parent="RightArm/Elbow" unique_id=700195390]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.0575, 0)
-material_override = SubResource("StandardMaterial3D_l1mvs")
-mesh = SubResource("CapsuleMesh_l4a2c")
-
-[node name="CargoSocket" type="Node3D" parent="." unique_id=1208386747]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.53, -0.36)
+[node name="CargoSocket" type="Node3D" parent="." unique_id=1704691703]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, -0.37)

@@ -29,11 +29,11 @@ Build the local Blender extension:
 python3 -B tools/package_blender_extension.py
 ```
 
-This creates `dist/pyramida_building_tools-0.1.0.zip`. In Blender 4.2 or newer, use **Edit → Preferences → Get Extensions → Install from Disk**, choose that ZIP, and enable **Pyramida Building Tools** if Blender does not enable it automatically.
+This creates `dist/pyramida_building_tools-0.1.0.zip`. In Blender 4.2 or newer, use **Edit → Preferences → Get Extensions → Install from Disk**, choose that ZIP, and enable **Town Building Tools** if Blender does not enable it automatically.
 
-Use **File → Import → Pyramida Building (.pyrbuilding)** when changing logical parts, resource metadata, Sub-Unit placement, or recipes. Every Log, Plank, or Block remains a separate Blender object with Pyramida metadata. The **Pyramida** panel can snap selected parts to the half-World-Unit Sub-Unit grid. Export with **File → Export → Pyramida Building (.pyrbuilding)**, then regenerate the neighboring OBJ.
+Use **File → Import → Town Building (.pyrbuilding)** when changing logical parts, resource metadata, Sub-Unit placement, or recipes. Every Log, Plank, or Block remains a separate Blender object with Town metadata. The **Town** panel can snap selected parts to the half-World-Unit Sub-Unit grid. Export with **File → Export → Town Building (.pyrbuilding)**, then regenerate the neighboring OBJ.
 
-Pyramida/Godot uses Y-up coordinates while Blender uses Z-up. The extension converts coordinates in both directions. One Pyramida World Unit equals one Blender metre; one Sub-Unit is `0.5 m` on each axis.
+Town/Godot uses Y-up coordinates while Blender uses Z-up. The extension converts coordinates in both directions. One Town World Unit equals one Blender metre; one Sub-Unit is `0.5 m` on each axis.
 
 ## Runtime OBJ geometry
 

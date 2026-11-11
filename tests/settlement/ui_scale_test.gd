@@ -20,8 +20,7 @@ func run() -> void:
 	var menu := Menu.new()
 	root.add_child(menu)
 	menu.root.theme = hud.root.theme
-	menu.show_page("home")
-	menu.visible = true
+	menu.open_menu([], false, -1, {})
 	var world_container := SubViewportContainer.new()
 	world_container.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	world_container.stretch = true
@@ -70,6 +69,13 @@ func run() -> void:
 				"Menu remains horizontally centered after resizing: " + context)
 			check(is_equal_approx(menu.buttons.settlements.get_global_rect().position.y, 160 * VisualTokens.POINT),
 				"First menu action retains its confirmed 160-point top position: " + context)
+			var quit_rect := menu.buttons.quit.get_global_rect() as Rect2
+			menu.buttons.settlements.pressed.emit()
+			for frame in 2: await process_frame
+			check(menu.buttons.slots_back.get_global_rect().is_equal_approx(quit_rect),
+				"Back and Quit share a click area across window sizes and monitor densities: " + context)
+			menu.buttons.slots_back.pressed.emit()
+			for frame in 2: await process_frame
 			var resource_panel: Control = hud.resource_counts.food.get_parent().get_parent().get_parent()
 			check(resource_panel.get_global_rect().encloses(hud.day_icon.get_global_rect()),
 				"Day/night icon sits inside the resource bar: " + context)

@@ -1,9 +1,25 @@
 extends Control
 const VisualTokens = preload("res://scripts/ui_visual_tokens.gd")
-## Small original line icons drawn in the reference's warm, square-button style.
+## Coloured material and building miniatures; actions retain their line symbols.
+const ResourceIcon = preload("res://scripts/settlement/resource_icon.gd")
 var kind := "house"
 var framed := false
 const BUILDING_ICONS := {
+	"housing": preload("res://assets/ui/buildings/house.svg"),
+	"structure": preload("res://assets/ui/buildings/platform.svg"),
+	"rope_maker": preload("res://assets/ui/buildings/rope_maker.svg"),
+	"rope_bridge": preload("res://assets/ui/buildings/rope_bridge.svg"),
+	"tilery": preload("res://assets/ui/buildings/tilery.svg"),
+	"mill": preload("res://assets/ui/buildings/windmill.svg"),
+	"bakery": preload("res://assets/ui/buildings/bakery.svg"),
+	"pottery_workshop": preload("res://assets/ui/buildings/pottery_workshop.svg"),
+	"kiln": preload("res://assets/ui/buildings/kiln.svg"),
+	"claypit": preload("res://assets/ui/buildings/claypit.svg"),
+	"quarry": preload("res://assets/ui/buildings/quarry.svg"),
+	"mine": preload("res://assets/ui/buildings/mine.svg"),
+	"brickyard": preload("res://assets/ui/buildings/brickyard.svg"),
+	"support": preload("res://assets/ui/buildings/platform.svg"),
+	"stair": preload("res://assets/ui/buildings/stairs.svg"),
 	"goods_rack": preload("res://assets/ui/buildings/small_warehouse.svg"),
 	"small_warehouse": preload("res://assets/ui/buildings/small_warehouse.svg"),
 	"stone_storage": preload("res://assets/ui/buildings/stockpile.svg"),
@@ -47,13 +63,24 @@ func icon_rect(rect: Rect2) -> Rect2:
 	return Rect2(rect.position * VisualTokens.GAME_ICON_SCALE, rect.size * VisualTokens.GAME_ICON_SCALE)
 
 func _draw() -> void:
+	if ResourceIcon.draw_icon(self, kind): return
 	if framed:
 		draw_rect(icon_rect(Rect2(1, 1, 32, 32)), Color("f3c78f"), false, VisualTokens.LINE_WIDTH)
 		draw_rect(icon_rect(Rect2(4, 4, 26, 26)), Color("fff0c8"), false, VisualTokens.LINE_WIDTH)
 	if BUILDING_ICONS.has(kind):
-		draw_texture_rect(BUILDING_ICONS[kind], icon_rect(Rect2(5, 5, 24, 24)), false)
+		draw_texture_rect(BUILDING_ICONS[kind], icon_rect(Rect2(0, 0, 34, 34)), false)
 		return
 	match kind:
+		"rope_bridge":
+			line([Vector2(4, 5), Vector2(4, 29)])
+			line([Vector2(30, 5), Vector2(30, 29)])
+			line([Vector2(4, 9), Vector2(10, 15), Vector2(17, 17), Vector2(24, 15), Vector2(30, 9)])
+			line([Vector2(4, 22), Vector2(17, 28), Vector2(30, 22)])
+			for x in [10, 17, 24]: line([Vector2(x, 16), Vector2(x, 25)])
+		"rope", "rope_maker":
+			circle(Vector2(15, 17), 10)
+			circle(Vector2(15, 17), 5)
+			line([Vector2(24, 21), Vector2(28, 27), Vector2(32, 27)])
 		"terrain_dig", "terrain_fill":
 			line([Vector2(5, 15), Vector2(15, 10), Vector2(25, 15), Vector2(15, 20), Vector2(5, 15), Vector2(5, 26), Vector2(15, 31), Vector2(25, 26), Vector2(25, 15)])
 			line([Vector2(15, 20), Vector2(15, 31)])
@@ -111,6 +138,9 @@ func _draw() -> void:
 			line([Vector2(7, 24), Vector2(7, 17), Vector2(11, 11), Vector2(24, 10), Vector2(28, 15), Vector2(28, 23), Vector2(7, 24)])
 			line([Vector2(12, 12), Vector2(16, 17)])
 			line([Vector2(18, 11), Vector2(22, 16)])
+		"flour":
+			line([Vector2(12, 8), Vector2(22, 8), Vector2(20, 13), Vector2(26, 22), Vector2(23, 27), Vector2(11, 27), Vector2(8, 22), Vector2(14, 13), Vector2(12, 8)])
+			line([Vector2(13, 13), Vector2(21, 13)])
 		"grain":
 			line([Vector2(17, 27), Vector2(17, 8)])
 			for y in [13, 18, 23]:
@@ -119,13 +149,17 @@ func _draw() -> void:
 		"plank":
 			line([Vector2(7, 20), Vector2(22, 7), Vector2(27, 13), Vector2(12, 27), Vector2(7, 20)])
 			line([Vector2(11, 20), Vector2(23, 10)])
-		"stone":
+		"stone", "clay", "ore":
 			line([Vector2(7, 23), Vector2(10, 12), Vector2(15, 8), Vector2(24, 10), Vector2(28, 23), Vector2(19, 27), Vector2(7, 23)])
 			line([Vector2(10, 12), Vector2(17, 15), Vector2(19, 27)])
 		"pottery":
 			line([Vector2(12, 8), Vector2(22, 8)])
 			line([Vector2(13, 9), Vector2(13, 13), Vector2(8, 18), Vector2(10, 26), Vector2(24, 26), Vector2(26, 18), Vector2(21, 13), Vector2(21, 9)])
-		"block":
+		"imbrex", "tilery":
+			line([Vector2(7, 24), Vector2(8, 18), Vector2(12, 15), Vector2(17, 18), Vector2(19, 24)])
+			line([Vector2(8, 18), Vector2(17, 7), Vector2(22, 6), Vector2(26, 10), Vector2(28, 15), Vector2(19, 24)])
+			line([Vector2(17, 18), Vector2(26, 10)])
+		"block", "brick":
 			line([Vector2(8, 24), Vector2(9, 13), Vector2(19, 8), Vector2(26, 14), Vector2(25, 25), Vector2(8, 24)])
 			line([Vector2(9, 13), Vector2(17, 18), Vector2(26, 14)])
 			line([Vector2(17, 18), Vector2(17, 25)])

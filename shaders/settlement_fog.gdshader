@@ -1,28 +1,21 @@
 shader_type spatial;
-render_mode unshaded, fog_disabled, cull_disabled, depth_draw_never, depth_test_disabled;
+render_mode unshaded, fog_disabled;
+#include "res://shaders/settlement_cloud_motion.gdshaderinc"
 
-uniform sampler2D depth_texture : hint_depth_texture, filter_nearest;
-uniform sampler2D fog_mask : filter_linear, repeat_disable;
-uniform vec4 fog_color : source_color;
-uniform vec2 mask_origin = vec2(-192.0);
-uniform vec2 mask_size = vec2(384.0);
+uniform vec4 cloud_color : source_color = vec4(1.0);
+uniform vec4 shade_color : source_color = vec4(0.72, 0.79, 0.84, 1.0);
+uniform float cloud_time = 0.0;
+varying vec3 face_normal;
+varying float active;
 
 void vertex() {
-	POSITION = vec4(VERTEX.xy, 1.0, 1.0);
+	active = step(0.999, INSTANCE_CUSTOM.r) * step(0.999, INSTANCE_CUSTOM.b);
+	VERTEX = (VERTEX + local_drift(MODEL_MATRIX,cloud_drift(cloud_time,INSTANCE_CUSTOM.g,INSTANCE_CUSTOM.a))) * active;
+	face_normal = normalize(MODEL_NORMAL_MATRIX * NORMAL);
 }
+
 void fragment() {
-	float depth = texture(depth_texture, SCREEN_UV).r;
-	vec4 view = INV_PROJECTION_MATRIX * vec4(SCREEN_UV * 2.0 - 1.0, depth, 1.0);
-	view /= view.w;
-	vec3 world = (INV_VIEW_MATRIX * view).xyz;
-	vec2 mask_uv = (world.xz - mask_origin) / mask_size;
-	float revealed = texture(fog_mask, mask_uv).r;
-	bool inside = all(greaterThanEqual(mask_uv, vec2(0.0))) && all(lessThan(mask_uv, vec2(1.0)));
-	// Keep the old opaque contour; cover actual terrain depth, including cliffs.
-	if (depth > 0.00001 && inside && revealed >= 0.5) {
-		discard;
-	}
-	ALBEDO = fog_color.rgb;
-	// Draw last, without overwriting transparent construction in explored regions.
-	ALPHA = 1.0;
+	if (active < 0.5) { discard; }
+	float light = clamp(dot(normalize(face_normal), normalize(vec3(-0.4, 0.85, 0.3))) * 0.55 + 0.55, 0.0, 1.0);
+	ALBEDO = mix(shade_color.rgb, cloud_color.rgb, light);
 }

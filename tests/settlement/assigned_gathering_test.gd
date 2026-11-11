@@ -119,7 +119,32 @@ func test_guards() -> void:
 	world.trees[SOURCE].inventory.amounts.clear()
 	check(not world.Jobs._assign_collection(world, world.workers[0], SOURCE, "log", "fell"), "Assigned workers cannot gather depleted resources")
 
+func test_first_storage(resource: String, kind: String) -> void:
+	var world = fixture(resource)
+	world.stores.clear()
+	world.rebuild_navigation()
+	check(world.request_build(kind, STORE), "First %s can be planned without supplies" % kind)
+	check(world.order_build(0, world.next_plan_id - 1), "Builder accepts the first %s order" % kind)
+	check(world.workers[0].job.get("phase") == "collect", "Builder gathers missing raw " + resource)
+	var restored = Model.new()
+	check(restored.restore(JSON.parse_string(JSON.stringify(world.snapshot()))), "Construction gathering survives a save")
+	world = restored
+	for index in 1000:
+		step(world)
+		if world.stores.has(STORE): break
+	check(world.stores.has(STORE) and world.plans.is_empty(), "First %s completes from physical harvested materials" % kind)
+	check(remaining(world, resource) == 3 - int(Model.Catalog.recipe(kind)[resource]), "First %s consumes its exact raw material recipe" % kind)
+	world = fixture(resource)
+	world.stores.clear()
+	world.request_build(kind, STORE)
+	world.order_build(0, world.next_plan_id - 1)
+	world.set_role(0, "idle")
+	var sources: Dictionary = world.trees if resource == "log" else world.deposits
+	check(sources[SOURCE].inventory.reservations.is_empty() and remaining(world, resource) == 3, "Cancelling construction gathering releases the source")
+
 func _initialize() -> void:
+	test_first_storage("log", "log_shed")
+	test_first_storage("stone", "stockpile")
 	test_assignment("log", "woodcutter", "log_shed")
 	test_assignment("food", "forager", "house")
 	test_assignment("grain", "farmer", "hay_barn")

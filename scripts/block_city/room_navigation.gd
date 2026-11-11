@@ -14,6 +14,8 @@ static func build(model, rooms: Array) -> Dictionary:
 	var ports := {}
 	var entry := {}
 	var entries: Array=[]
+	var roofs: Dictionary=model.roof_cells(rooms)
+	for roof in roofs: graph[roof]={}
 	for room in rooms:
 		ports[int(room.id)]=model.room_ports(room,rooms)
 		for raw in room.cells:
@@ -27,13 +29,15 @@ static func build(model, rooms: Array) -> Dictionary:
 				if occupied.get(cell+direction,-1)==int(room.id): link(graph,cell,cell+direction,1,"walk")
 		for port in ports[int(room.id)]:
 			var outside: Vector3i=port.cell+port.normal
-			if model.street(outside) and not occupied.has(outside):
+			if (model.street(outside) or room.get("access_path",[]).has(model.arr(outside))) and not occupied.has(outside):
 				var entrance: Dictionary={"room":int(room.id),"cell":port.cell,"normal":port.normal}
 				entries.append(entrance)
 				if entry.is_empty(): entry=entrance
 			if occupied.has(outside):
 				var other: int=occupied[outside]
 				if other!=int(room.id) and model.port_matches(rooms[other],outside,-port.normal,rooms): link(graph,port.cell,outside,1,"walk")
+			elif roofs.has(outside):
+				link(graph,port.cell,outside,1,"roof")
 		if model.room_role(room)=="stairs":
 			var base: Vector3i=model.vec(room.door)
 			var top:=base+Vector3i.UP
@@ -44,6 +48,10 @@ static func build(model, rooms: Array) -> Dictionary:
 			while occupied.has(top) and model.room_role(rooms[int(occupied[top])])=="elevator":
 				link(graph,base,top,2,"elevator")
 				top+=Vector3i.UP
+	# Exposed decks connect horizontally, never through the ceiling below them.
+	for roof in roofs:
+		for direction in model.DIRECTIONS:
+			if roofs.has(roof+direction): link(graph,roof,roof+direction,1,"roof")
 	# Existing saved exterior walkways stay traversable, including their stairs.
 	for room in rooms:
 		var path: Array=room.get("access_path",[])

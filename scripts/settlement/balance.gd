@@ -40,8 +40,14 @@ static func load_file(path: String) -> Dictionary:
 	for kind in COLLECTIONS:
 		collection[kind] = {"seconds_per_action": 3.0}
 	var factories := {
+		"rope_maker": {"seconds_per_batch": 4.0, "output_items": 1, "automatic_stock_target": 12},
 		"sawmill": {"seconds_per_batch": 5.0, "output_items": 1, "automatic_stock_target": 12},
 		"windmill": {"seconds_per_batch": 4.0, "output_items": 3, "automatic_stock_target": 24},
+		"mill": {"seconds_per_batch": 5.0, "output_items": 1, "automatic_stock_target": 12},
+		"bakery": {"seconds_per_batch": 4.0, "output_items": 1, "automatic_stock_target": 24},
+		"pottery_workshop": {"seconds_per_batch": 6.0, "output_items": 1, "automatic_stock_target": 6},
+		"tilery": {"seconds_per_batch": 6.0, "output_items": 1, "automatic_stock_target": 12},
+		"kiln": {"seconds_per_batch": 6.0, "output_items": 1, "automatic_stock_target": 12},
 		"masonry": {"seconds_per_batch": 6.0, "output_items": 1, "automatic_stock_target": 12},
 	}
 	var result := {"general": GENERAL.duplicate(), "construction": construction,

@@ -60,6 +60,7 @@ static func arrival_route(world, worker: Dictionary, route: Array) -> Array:
 	return best if not best.is_empty() else route.duplicate()
 
 static func tick(world, worker: Dictionary, delta: float) -> bool:
+	if preload("res://scripts/settlement/citizen_ledge_escape.gd").tick(world, worker, delta): return true
 	if not worker.has("clearance_route"):
 		var route: Array[Vector3i] = []
 		if world.navigation.blocked.has(worker.cell):
@@ -75,9 +76,10 @@ static func tick(world, worker: Dictionary, delta: float) -> bool:
 		worker.erase("clearance_index")
 		return true
 	var old: Vector3 = worker.position
+	if not world.RopeBridges.can_step(world, worker, next): return true
 	var speed := 2.25 if world.Citizens.is_adult(worker) else 1.2
-	worker.position = old.move_toward(world.navigation.movement_target(worker.cell, next, old), delta * speed)
-	if worker.cell.y == next.y:
+	worker.position = old.move_toward(world.navigation.movement_target(worker.cell, next, old), delta * speed * preload("res://scripts/settlement/rain_exposure.gd").movement(world,worker,next,delta))
+	if worker.cell.y == next.y and not world.navigation.room_paths.get(worker.cell, {}).has(next):
 		worker.position = world.navigation.ground_position(worker.position, worker.cell.y)
 	worker.distance += old.distance_to(worker.position)
 	if worker.position.distance_to(world.navigation.surface_point(next)) < 0.001:

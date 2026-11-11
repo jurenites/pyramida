@@ -107,7 +107,8 @@ func _initialize() -> void:
 	world = fresh()
 	check(world.request_build("seed_tree", Vector3i.ZERO), "Queue a cancellable seed order")
 	world.order_build(0, world.next_plan_id - 1)
-	check(world.delete_plan(world.next_plan_id - 1) and world.workers[0].job.is_empty() and world.gardens.is_empty(), "Deleting an assigned seed order leaves no crop or dangling job")
+	var crops_before: Dictionary = world.gardens.duplicate(true)
+	check(world.delete_plan(world.next_plan_id - 1) and world.workers[0].job.is_empty() and world.gardens == crops_before, "Deleting an assigned seed order leaves existing crops unchanged with no dangling job")
 	world.terrain_shapes[Vector3i.ZERO] = [0.0, 0.1, 0.1, 0.0]
 	check(not world.build_error("seed_bush", Vector3i.ZERO).is_empty(), "Seeds reject slopes")
 	world.terrain_shapes.clear()
@@ -115,7 +116,7 @@ func _initialize() -> void:
 	world.rebuild_navigation()
 	check(not world.build_error("seed_vegetables", Vector3i.UP).is_empty(), "Bare decks cannot receive vegetable seeds")
 	world.soil_beds[Vector3i.UP] = {"materials": {"log": 1}}
-	check(world.build_error("seed_vegetables", Vector3i.UP).is_empty(), "Soil beds support rooftop vegetables")
+	check(not world.build_error("seed_vegetables", Vector3i.UP).is_empty(), "Seeds cannot be placed on buildings, even with a soil bed")
 	check(not world.build_error("seed_palm", Vector3i.UP).is_empty(), "Trees need natural ground")
 	world.soil_beds.clear()
 	Planting.complete(world, {"kind": "seed_bush", "cell": Vector3i.ZERO})

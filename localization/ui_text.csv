@@ -1,4 +1,6 @@
 keys,en,_character_limit,_interface_location,_translator_note
+house_floor_name_text,Floor,16,world_object_name,Selected house floor without a floor number
+house_room_name_text,Room,16,world_object_name,Selected individual house room
 prototype_title_text,FOUNDATION PROTOTYPE,32,top_left_title,Prototype title
 prototype_instructions_text,Click/drag: select people   •   Click ground: deselect   •   Right-click: move or work\nWASD: move camera   •   Right-click tree/site: assign person   •   B: building menu,180,top_left_instructions,Keep the two-line structure by preserving the escaped newline
 build_button_tooltip_text,Build,12,top_right_toolbar,Action label shown while hovering over the building button
@@ -100,7 +102,7 @@ world_item_debug_hover_text,debug · seed %d · logs %d · water %d,80,debug_hov
 world_unit_debug_hover_text,"debug · World Unit (%d, %d)",48,debug_hover,World Unit coordinates replace the placeholders
 pile_debug_hover_text,debug · logs %d · calories %d,48,debug_hover,Pile inventory counters replace the placeholders
 settlement_eyebrow_text,A VERTICAL SETTLEMENT · PLAYABLE STUDY,68,settlement_prototype,Vertical settlement prototype
-settlement_title_text,Pyramida,60,settlement_prototype,Vertical settlement prototype
+settlement_title_text,... Town,60,settlement_prototype,Vertical settlement prototype
 settlement_pause_text,Pause / play,60,settlement_prototype,Vertical settlement prototype
 settlement_speed_text,Speed ×1,60,settlement_prototype,Vertical settlement prototype
 settlement_goal_heading_text,FIRST OBJECTIVE,60,settlement_prototype,Vertical settlement prototype
@@ -178,7 +180,7 @@ settlement_object_platform_text,platform,120,settlement_prototype,Inspection inf
 settlement_object_stairs_text,ladder,120,settlement_prototype,Inspection information
 settlement_object_stockpile_text,pile,120,settlement_prototype,Inspection information
 settlement_object_garden_text,garden,120,settlement_prototype,Inspection information
-settlement_object_well_text,well,120,settlement_prototype,Inspection information
+settlement_object_well_text,Well,120,settlement_prototype,Inspection information
 settlement_object_tree_text,Tree,120,settlement_prototype,Inspection information
 settlement_status_restock_text,Restocking timber,60,settlement_prototype,Logistics state
 settlement_status_unload_text,Unloading timber,60,settlement_prototype,Logistics state
@@ -204,6 +206,11 @@ settlement_pause_short_text,II,180,settlement_build_menu,Reference menu and cons
 settlement_timber_cost_text,%d timber,180,settlement_build_menu,Reference menu and construction feedback
 settlement_category_housing_text,housing,180,settlement_build_menu,Reference menu and construction feedback
 settlement_category_industry_text,industry,180,settlement_build_menu,Reference menu and construction feedback
+settlement_category_timber_text,Log,48,settlement_build_menu,Log and plank production
+settlement_category_storage_text,Storage,48,settlement_build_menu,Dedicated resource stores
+settlement_category_clay_text,Clay,48,settlement_build_menu,Clay extraction and processing
+settlement_category_hay_text,Hay,48,settlement_build_menu,Field milling baking and rope making
+settlement_category_stone_text,Stone,48,settlement_build_menu,Quarry masonry and mining
 settlement_category_structure_text,structure,180,settlement_build_menu,Reference menu and construction feedback
 settlement_snap_text,"Snaps to ground, decks and roofs. Add stairs to reach upper floors.",180,settlement_build_menu,Reference menu and construction feedback
 settlement_more_text,...,180,settlement_build_menu,Reference menu and construction feedback
@@ -211,37 +218,37 @@ settlement_minus_text,−,180,settlement_build_menu,Reference menu and construct
 settlement_plus_text,+,180,settlement_build_menu,Reference menu and construction feedback
 settlement_cutaway_floor_text,view floor %d,180,settlement_build_menu,Reference menu and construction feedback
 settlement_cutaway_help_text,C toggle cutaway · Q/E floor,180,settlement_build_menu,Reference menu and construction feedback
-settlement_object_house_text,house,180,settlement_build_menu,Reference menu and construction feedback
-settlement_object_hay_field_text,hay field,180,settlement_build_menu,Reference menu and construction feedback
+settlement_object_house_text,House,180,settlement_build_menu,Reference menu and construction feedback
+settlement_object_hay_field_text,Field,180,settlement_build_menu,Reference menu and construction feedback
 settlement_object_windmill_text,windmill,180,settlement_build_menu,Reference menu and construction feedback
-settlement_object_road_text,road,180,settlement_build_menu,Reference menu and construction feedback
+settlement_object_road_text,Road,180,settlement_build_menu,Reference menu and construction feedback
 settlement_object_school_text,school,180,settlement_build_menu,Reference menu and construction feedback
 settlement_object_pantry_text,pantry,180,settlement_build_menu,Reference menu and construction feedback
-settlement_object_log_shed_text,log shed,180,settlement_build_menu,Reference menu and construction feedback
-settlement_object_hay_barn_text,hay barn,180,settlement_build_menu,Reference menu and construction feedback
-settlement_object_sawmill_text,sawmill,180,settlement_build_menu,Reference menu and construction feedback
+settlement_object_log_shed_text,Shed,180,settlement_build_menu,Reference menu and construction feedback
+settlement_object_hay_barn_text,Barn,180,settlement_build_menu,Reference menu and construction feedback
+settlement_object_sawmill_text,Sawmill,180,settlement_build_menu,Reference menu and construction feedback
 settlement_object_mine_camp_text,mine camp,180,settlement_build_menu,Reference menu and construction feedback
-settlement_object_masonry_text,masonry,180,settlement_build_menu,Reference menu and construction feedback
+settlement_object_masonry_text,Masonry,180,settlement_build_menu,Reference menu and construction feedback
 settlement_object_workshop_text,workshop,180,settlement_build_menu,Reference menu and construction feedback
-settlement_description_house_text,3 resident places · 12 food. Connected rooms share a household.,180,settlement_build_menu,Reference menu and construction feedback
-settlement_description_hay_field_text,Grows hay on sand or four soil beds. Roof cover slows growth.,180,settlement_build_menu,Reference menu and construction feedback
+settlement_description_house_text,,180,settlement_build_menu,Reference menu and construction feedback
+settlement_description_hay_field_text,harvest,180,settlement_build_menu,Reference menu and construction feedback
 settlement_description_windmill_text,"Bakers carry 1 hay here and turn it into 3 food, then deliver the bread to storage. Several bakers can share a mill.",180,settlement_build_menu,Reference menu and construction feedback
-settlement_description_road_text,"People walk 35% faster along completed roads. Place them between fields, workshops and stores.",180,settlement_build_menu,Reference menu and construction feedback
-settlement_description_well_text,Irrigates fields within 2 cells on the same floor. Also supplies water for gardens and distant fields.,180,settlement_build_menu,Reference menu and construction feedback
+settlement_description_road_text,,180,settlement_build_menu,Reference menu and construction feedback
+settlement_description_well_text,store,180,settlement_build_menu,Reference menu and construction feedback
 settlement_description_school_text,Children grow up twice as fast while a completed school exists. Extra schools do not multiply the bonus.,180,settlement_build_menu,Reference menu and construction feedback
 settlement_description_pantry_text,Legacy food supplies. New food storage belongs in houses.,180,settlement_build_menu,Reference menu and construction feedback
-settlement_description_log_shed_text,Stores 48 logs.,180,settlement_build_menu,Reference menu and construction feedback
-settlement_description_hay_barn_text,Stores 48 hay. Place it between your fields and windmill for a short bread-production route.,180,settlement_build_menu,Reference menu and construction feedback
-settlement_description_sawmill_text,"Sawyers carry timber here and cut it into planks for windmills, pantries and advanced buildings.",180,settlement_build_menu,Reference menu and construction feedback
+settlement_description_log_shed_text,store,180,settlement_build_menu,Reference menu and construction feedback
+settlement_description_hay_barn_text,store,180,settlement_build_menu,Reference menu and construction feedback
+settlement_description_sawmill_text,saw,180,settlement_build_menu,Reference menu and construction feedback
 settlement_description_mine_camp_text,Unlocks limestone mining and stores 48 raw stone or dressed blocks. Build near a stone deposit.,180,settlement_build_menu,Reference menu and construction feedback
-settlement_description_masonry_text,"Masons carry raw stone here and dress it into blocks for the school and workshop.",180,settlement_build_menu,Reference menu and construction feedback
+settlement_description_masonry_text,cut,180,settlement_build_menu,Reference menu and construction feedback
 settlement_description_workshop_text,All applied work is 50% faster while a completed workshop exists. Additional workshops do not stack.,180,settlement_build_menu,Reference menu and construction feedback
 settlement_description_platform_text,Raised deck with posts. Must stand on a clear surface; never floats.,180,settlement_build_menu,Reference menu and construction feedback
 settlement_description_stairs_text,Freestanding 1×1×1 ladder with its own supports. Connects diagonally to an adjacent floor one level up. R rotates.,180,settlement_build_menu,Reference menu and construction feedback
 settlement_description_stockpile_text,32 shared spaces for stone / blocks / planks / water. Adjacent piles join.,180,settlement_build_menu,Reference menu and construction feedback
 settlement_description_garden_text,Watered crop plot. Food grows and is carried to storage by people.,180,settlement_build_menu,Reference menu and construction feedback
 settlement_dead_tree_text,Logs remaining: %d / 3\nDead stump does not regrow,120,settlement_prototype,Dead tree inspection
-settlement_menu_title_text,Pyramida,180,settlement_main_menu,Main menu and automatic save feedback
+settlement_menu_title_text,... Town,180,settlement_main_menu,Main menu and automatic save feedback
 settlement_menu_tagline_text,A place to begin,180,settlement_main_menu,Main menu and automatic save feedback
 settlement_menu_resume_text,Continue,180,settlement_main_menu,Main menu and automatic save feedback
 settlement_menu_slots_text,Play,180,settlement_main_menu,Main menu and automatic save feedback
@@ -292,35 +299,35 @@ settlement_citizens_tooltip_text,Population,20,settlement_prototype,Population c
 settlement_save_exit_text,Save and leave settlement,40,settlement_menu,Toolbar exit tooltip
 settlement_population_ages_text,%d adults · %d children (grow up in 3 days),100,population_tooltip,Childhood lasts three simulation days
 settlement_status_growing_text,Growing up,32,citizen_status,Child NPC
-economy_day_text,Daylight,200,settlement_economy,Peaceful Pyramida foundation
-economy_night_text,Night,200,settlement_economy,Peaceful Pyramida foundation
-economy_fetch_material_text,Fetching materials,200,settlement_economy,Peaceful Pyramida foundation
-economy_to_deposit_text,Walking to gather,200,settlement_economy,Peaceful Pyramida foundation
-economy_processing_text,Crafting,200,settlement_economy,Peaceful Pyramida foundation
-economy_walking_text,Walking,200,settlement_economy,Peaceful Pyramida foundation
-economy_order_text,Order given. Change the person’s job to Automatic to resume general work.,200,settlement_economy,Peaceful Pyramida foundation
-economy_storage_text,Storage: %d / %d,200,settlement_economy,Peaceful Pyramida foundation
-economy_deposit_text,Remaining: %d,200,settlement_economy,Peaceful Pyramida foundation
-economy_housing_text,Village housing: %d / %d,200,settlement_economy,Peaceful Pyramida foundation
-economy_irrigated_text,Irrigated · hay harvest,200,settlement_economy,Peaceful Pyramida foundation
-economy_hand_water_text,Hand-watered · hay harvest,200,settlement_economy,Peaceful Pyramida foundation
-settlement_object_berry_text,Berry bush,200,settlement_economy,Peaceful Pyramida foundation
-settlement_object_limestone_text,Limestone,200,settlement_economy,Peaceful Pyramida foundation
-settlement_resource_grain_text,Hay,200,settlement_economy,Peaceful Pyramida foundation
-settlement_resource_plank_text,Planks,200,settlement_economy,Peaceful Pyramida foundation
-settlement_resource_stone_text,Stone,200,settlement_economy,Peaceful Pyramida foundation
-settlement_resource_block_text,Blocks,200,settlement_economy,Peaceful Pyramida foundation
-economy_role_auto_text,Job: Automatic,200,settlement_economy,Peaceful Pyramida foundation
-economy_role_builder_text,Job: Builder,200,settlement_economy,Peaceful Pyramida foundation
-economy_role_forager_text,Job: Gatherer,200,settlement_economy,Peaceful Pyramida foundation
-economy_role_farmer_text,Job: Grass gatherer,200,settlement_economy,Peaceful Pyramida foundation
-economy_role_baker_text,Job: Baker,200,settlement_economy,Peaceful Pyramida foundation
-economy_role_woodcutter_text,Job: Lumber,200,settlement_economy,Peaceful Pyramida foundation
-economy_role_sawyer_text,Job: Sawyer,200,settlement_economy,Peaceful Pyramida foundation
-economy_role_miner_text,Job: Miner,200,settlement_economy,Peaceful Pyramida foundation
-economy_role_mason_text,Job: Mason,200,settlement_economy,Peaceful Pyramida foundation
-economy_role_hauler_text,Job: Hauler,200,settlement_economy,Peaceful Pyramida foundation
-economy_role_idle_text,Job: Idle / explorer,200,settlement_economy,Peaceful Pyramida foundation
+economy_day_text,Daylight,200,settlement_economy,Town economy
+economy_night_text,Night,200,settlement_economy,Town economy
+economy_fetch_material_text,Fetching materials,200,settlement_economy,Town economy
+economy_to_deposit_text,Walking to gather,200,settlement_economy,Town economy
+economy_processing_text,Crafting,200,settlement_economy,Town economy
+economy_walking_text,Walking,200,settlement_economy,Town economy
+economy_order_text,Order given. Change the person’s job to Automatic to resume general work.,200,settlement_economy,Town economy
+economy_storage_text,Storage: %d / %d,200,settlement_economy,Town economy
+economy_deposit_text,Remaining: %d,200,settlement_economy,Town economy
+economy_housing_text,Village housing: %d / %d,200,settlement_economy,Town economy
+economy_irrigated_text,Irrigated · hay harvest,200,settlement_economy,Town economy
+economy_hand_water_text,Hand-watered · hay harvest,200,settlement_economy,Town economy
+settlement_object_berry_text,Berry bush,200,settlement_economy,Town economy
+settlement_object_limestone_text,Limestone,200,settlement_economy,Town economy
+settlement_resource_grain_text,Hay,200,settlement_economy,Town economy
+settlement_resource_plank_text,Planks,200,settlement_economy,Town economy
+settlement_resource_stone_text,Stone,200,settlement_economy,Town economy
+settlement_resource_block_text,Slab,200,settlement_economy,Town economy
+economy_role_auto_text,Job: Automatic,200,settlement_economy,Town economy
+economy_role_builder_text,Job: Builder,200,settlement_economy,Town economy
+economy_role_forager_text,Job: Gatherer,200,settlement_economy,Town economy
+economy_role_farmer_text,Job: Grass gatherer,200,settlement_economy,Town economy
+economy_role_baker_text,Job: Baker,200,settlement_economy,Town economy
+economy_role_woodcutter_text,Job: Lumber,200,settlement_economy,Town economy
+economy_role_sawyer_text,Job: Sawyer,200,settlement_economy,Town economy
+economy_role_miner_text,Job: Miner,200,settlement_economy,Town economy
+economy_role_mason_text,Job: Mason,200,settlement_economy,Town economy
+economy_role_hauler_text,Job: Hauler,200,settlement_economy,Town economy
+economy_role_idle_text,Job: Idle / explorer,200,settlement_economy,Town economy
 settlement_menu_seed_text,Seed %d,180,settlement_main_menu,Seed of the preview used for a new game
 kid_name_text,Kid,16,world_hover,Child inspection label
 stone_name_text,Stone,16,world_hover,Stone deposit label
@@ -369,14 +376,61 @@ settlement_object_vine_tree_text,Vine tree,48,planting,Climbing flora
 vine_wall_required_text,Plant beside a wall,80,planting,Placement feedback
 settlement_object_waterworks_text,Waterworks,32,object_name,Well enclosed by a utility building
 settlement_description_waterworks_text,Rainwater storage,64,building_description,Water utility
-settlement_object_stone_storage_text,Stone storage,40,settlement_build_menu,Stone storage name
-settlement_description_stone_storage_text,Stores stone,80,settlement_build_menu,Stone storage description
+settlement_object_stone_storage_text,Depot,40,settlement_build_menu,Stone storage name
+settlement_description_stone_storage_text,store,80,settlement_build_menu,Stone storage description
 settlement_object_goods_rack_text,Pottery rack,40,settlement_build_menu,Pile tier two
 settlement_description_goods_rack_text,Stores pottery · 48,80,settlement_build_menu,Fixed goods storage
 settlement_object_small_warehouse_text,Small warehouse,40,settlement_build_menu,Pile tier three
 settlement_description_small_warehouse_text,Stores pottery · 64,80,settlement_build_menu,Fixed goods storage
-settlement_resource_pottery_text,Pottery,40,settlement_resources,Food-preserving clay pots
+settlement_resource_pottery_text,Vase,40,settlement_resources,Food-preserving clay pots
 terrain_dig_text,Dig · 1×1×1 m,24,settlement_toolbar,Remove one metre of exposed sand
 terrain_fill_text,Fill · 1×1×1 m,24,settlement_toolbar,Add one metre of sand
 terrain_exposed_text,Choose exposed sand,48,settlement_terrain,Terrain tool validation
 terrain_limit_text,Terrain height limit,48,settlement_terrain,Terrain tool vertical bounds
+settlement_resource_flour_text,Flour,32,settlement,
+settlement_resource_clay_text,Clay,32,settlement,
+settlement_resource_brick_text,Brick,32,settlement,
+settlement_resource_ore_text,Ore,32,settlement,
+economy_role_miller_text,Miller,32,settlement,
+economy_role_potter_text,Potter,32,settlement,
+economy_role_kilner_text,Kilner,32,settlement,
+economy_role_claydigger_text,Digger,32,settlement,
+economy_role_prospector_text,Miner,32,settlement,
+settlement_object_support_text,Support,32,settlement,
+settlement_description_support_text,,32,settlement,
+settlement_object_stair_text,Stair,32,settlement,
+settlement_description_stair_text,,32,settlement,
+settlement_object_brickyard_text,Brickyard,32,settlement,
+settlement_description_brickyard_text,store,32,settlement,
+settlement_object_mill_text,Mill,32,settlement,
+settlement_description_mill_text,mill,32,settlement,
+settlement_object_bakery_text,Bakery,32,settlement,
+settlement_description_bakery_text,bake,32,settlement,
+settlement_object_quarry_text,Quarry,32,settlement,
+settlement_description_quarry_text,"mine, store",32,settlement,
+settlement_object_claypit_text,Claypit,32,settlement,
+settlement_description_claypit_text,,32,settlement,
+settlement_object_pottery_workshop_text,Pottery,32,settlement,
+settlement_description_pottery_workshop_text,make,32,settlement,
+settlement_object_kiln_text,Kiln,32,settlement,
+settlement_description_kiln_text,fire,32,settlement,
+settlement_object_mine_text,Mine,32,settlement,
+settlement_description_mine_text,mine,32,settlement,
+person_job_miller_text,Miller,32,settlement,
+person_job_potter_text,Potter,32,settlement,
+person_job_kilner_text,Kilner,32,settlement,
+person_job_claydigger_text,Digger,32,settlement,
+person_job_prospector_text,Miner,32,settlement,
+settlement_resource_rope_text,Rope,20,resource_label,Rope made from Hay
+settlement_object_rope_maker_text,Rope maker,24,building_label,Fixed Hay to Rope recipe
+settlement_description_rope_maker_text,Hay → Rope,32,building_tooltip,Fixed recipe
+settlement_object_rope_bridge_text,Rope bridge,24,building_label,Suspended crossing
+settlement_resource_imbrex_text,Imbrex,32,settlement,
+economy_role_tiler_text,Tiler,32,settlement,
+person_job_tiler_text,Tiler,32,settlement,
+settlement_object_tilery_text,Tilery,32,settlement,
+settlement_description_tilery_text,fire,32,settlement,
+economy_role_ropemaker_text,Rope maker,24,citizen_role,Hay to Rope workplace
+terrain_sandbox_undo_text,Undo,24,terrain_sandbox,Undo the last terrain cut
+terrain_sandbox_support_text,Support,24,terrain_sandbox,Building placement tool
+terrain_sandbox_support_hover_text,1 m · [ ]: angle · R: boards · Shift: fine,64,terrain_sandbox,Support bay with fine placement

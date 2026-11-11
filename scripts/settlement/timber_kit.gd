@@ -3,12 +3,15 @@ extends RefCounted
 ## Arrange rigid copies; never inflate a tree trunk or stretch a board to fit.
 const LOG_LENGTH := 0.918 # Includes the two cut-end discs on the 0.9 m trunk.
 const LOG_DIAMETER := 0.23
+const LOG_BARK_LENGTH := 0.9
 const BOARD := Vector3(0.7, 0.055, 0.22)
 static var stock: Dictionary = {}
+static var stock_scenes: Dictionary = {}
 
 static func sources(kind: String) -> Array:
 	if not stock.has(kind):
-		var root := (load("res://data/settlement/%s.tscn" % kind) as PackedScene).instantiate()
+		stock_scenes[kind] = load("res://data/settlement/%s.tscn" % kind)
+		var root := (stock_scenes[kind] as PackedScene).instantiate()
 		var pieces: Array = []
 		for child in root.get_children():
 			if not child is MeshInstance3D or (kind == "plank" and child.name != "Plank0"): continue
@@ -18,6 +21,35 @@ static func sources(kind: String) -> Array:
 		stock[kind] = pieces
 		root.free()
 	return stock[kind]
+
+static func tree_segment(parent: Node3D, index: int, start: Vector3, direction: Vector3) -> Node3D:
+	# The standing tree contains the same rigid mesh resources used by cargo and
+	# construction. Branches are decoration, not additional inventory stock.
+	var segment := Node3D.new()
+	segment.name = "Segment%d" % (index + 1)
+	parent.add_child(segment)
+	var pose := Transform3D(Basis(Quaternion(Vector3.RIGHT, direction.normalized())), start + direction.normalized() * LOG_LENGTH * 0.5)
+	for source: Dictionary in sources("log"):
+		var part := MeshInstance3D.new()
+		var cut := not is_zero_approx(source.pose.origin.x)
+		part.name = ("CutFace" if source.pose.origin.x > 0 else "BaseCut") if cut else "Trunk"
+		part.mesh = source.mesh
+		part.transform = pose * source.pose
+		part.set_meta("timber_stock", "log")
+		part.set_meta("timber_cut", cut)
+		part.visible = not cut or (index == 2 and source.pose.origin.x > 0)
+		segment.add_child(part)
+	preload("res://scripts/settlement/timber_palette.gd").apply(segment, "tree")
+	return segment
+
+static func bind_tree_stock(root: Node3D) -> void:
+	# Packed editable tree scenes embed meshes. Rebind them to the live stock
+	# resources so authored trees, generated trees and loose logs share geometry.
+	for part: MeshInstance3D in root.find_children("*", "MeshInstance3D", true, false):
+		if part.get_meta("timber_stock", "") != "log": continue
+		for source: Dictionary in sources("log"):
+			var name_: String = ("CutFace" if source.pose.origin.x > 0 else "BaseCut") if not is_zero_approx(source.pose.origin.x) else "Trunk"
+			if part.name == name_: part.mesh = source.mesh
 
 static func centres(span: float, length: float) -> Array[float]:
 	var count := maxi(1, ceili(span / length))

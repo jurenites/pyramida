@@ -5,12 +5,16 @@ const Catalog = preload("res://data/settlement/catalog.gd")
 const Appearance = Assets.Appearance
 const SNAP := 0.05
 const LIMIT := 2048
+const UNUSED_ASSETS := {"food_crate": "Retained for future use; berries are carried in bare hands."}
 static var bounds_cache: Dictionary = {}
 
 static func kinds() -> Array:
 	return Appearance.PRIMITIVES + Appearance.buildings()
 
 static func title(kind: String) -> String:
+	if kind in preload("res://scripts/settlement/roof_kit.gd").TITLES:
+		return preload("res://scripts/settlement/roof_kit.gd").TITLES[kind]
+	if kind in UNUSED_ASSETS: return "Food crate (Unused)"
 	if kind == "ceramic_roof_tile": return "Ceramic roof tile"
 	if kind == "metal_roof_sheet": return "Metal roof sheet"
 	return {"roof_face": "Roof face", "bed": "Bed", "bench": "Bench", "table": "Table", "urn": "Urn", "food_crate": "Food crate", "water_bucket": "Water bucket", "pottery": "Pottery", "stick": "Stick", "log": "Log", "plank": "Plank", "grain": "Hay", "berry": "Berry bush", "tree": "Tree", "palm": "Palm", "raw_stone": "Raw stone", "block": "Stone block", "rock": "Rock", "utility_ac": "Wall cooler", "utility_dish": "Wall dish", "utility_pipe": "Pipe"}.get(kind, Catalog.title(kind))

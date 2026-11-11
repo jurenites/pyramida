@@ -1,7 +1,7 @@
 class_name ObjAsset
 extends RefCounted
 
-## Minimal runtime reader for Blender/Wavefront OBJ geometry. Pyramida owns
+## Minimal runtime reader for Blender/Wavefront OBJ geometry. The game owns
 ## materials and behaviour; the OBJ owns editable vertices and named parts.
 static var _object_cache: Dictionary = {}
 

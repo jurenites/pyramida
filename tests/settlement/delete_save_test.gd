@@ -25,8 +25,10 @@ func run() -> void:
 	await process_frame
 	game.set_process(false)
 	game.menu.buttons.slot_0.pressed.emit()
+	while game.operation_busy: await process_frame
 	game.menu.buttons.normal.pressed.emit()
-	game._open_menu()
+	while game.operation_busy: await process_frame
+	await game._open_menu()
 	var preview = game.menu_preview
 	check(game.saves.write_slot(1, game.model), "Create a second independent save")
 	var other_save := FileAccess.get_file_as_string(game.saves.path_for(1))
@@ -82,9 +84,10 @@ func run() -> void:
 	check(game.menu.slots[0].text == "New game" and not game.menu.slots[0].disabled and game.menu.slots[0].tooltip_text.is_empty(), "Normal selection restores the New game action")
 	game.menu.slots[0].pressed.emit()
 	game.menu.buttons.normal.pressed.emit()
+	while game.operation_busy: await process_frame
 	check(game.session_started and game.saves.occupied(0), "Deleted slot can be reused for a new settlement")
 	check(not game.saves.delete_slot(-1) and not game.saves.delete_slot(3), "Deletion rejects out-of-range slots")
-	game._open_menu()
+	await game._open_menu()
 	game.menu.show_page("delete_slots")
 	# Force a removal failure without touching player files or depending on permissions.
 	DirAccess.remove_absolute(path + ".deleted")

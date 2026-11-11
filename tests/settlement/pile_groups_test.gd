@@ -60,6 +60,7 @@ func run() -> void:
 	check(Piles.members(offset, Vector3i.ZERO).size() == 2 and Piles.outline(Piles.members(offset, Vector3i.ZERO)).size() == 8, "Half-room staggered extension retains its true perimeter")
 	var build = Model.new()
 	build.setup()
+	preload("res://tests/settlement/supplied_pile_fixture.gd").add_to(build)
 	build.deposits.clear()
 	build.trees.clear()
 	build.stores.values()[0].store("stone", 1)

@@ -1,7 +1,7 @@
 extends RefCounted
 const UI=preload("res://scripts/ui_visual_tokens.gd")
 const BAD=Color("db735c")
-const REASONS={"support":"No support below", "cantilever":"Overhang cannot carry another floor", "occupied":"Cell already occupied", "path":"Keep the access path clear", "stair_exit":"Keep the stair exit open", "cable":"Cable crosses this cell", "bounds":"Outside the building boundary", "height":"Beyond the floor limit", "protected":"Hall or stair cannot be replaced"}
+const REASONS={"support":"No support below", "cantilever":"Overhang cannot carry another floor", "occupied":"Cell already occupied", "path":"Keep the access path clear", "stair_exit":"Keep the stair exit open", "cable":"Cable crosses this cell", "bounds":"Outside the building boundary", "height":"Beyond the floor limit", "protected":"Keep this structure", "building":"Frame belongs to another building"}
 static func marker(game, issue: Dictionary) -> Vector2:
 	return game.camera.unproject_position(Vector3(issue.cell)+Vector3(0.5,1.15,0.5))
 static func hint(game, screen: Vector2) -> String:

@@ -1,0 +1,68 @@
+{
+	"assembly_total": {
+		"cached_detail_meshes": 96,
+		"mesh_resources": 401,
+		"physical_mesh_instances": 602,
+		"render_nodes": 460,
+		"stock_components": {
+			"brick": 56,
+			"plank": 172
+		}
+	},
+	"homes": 4,
+	"installation_materials": {
+		"brick": 56,
+		"log": 5,
+		"plank": 12,
+		"pottery": 25,
+		"rope": 2
+	},
+	"scope": "Completed Home shells and utility meshes; excludes external stairs, terrain, citizens, UI and unused fixture stock.",
+	"shell": [
+		{
+			"cached_detail_meshes": 96,
+			"mesh_resources": 96,
+			"physical_mesh_instances": 110,
+			"render_nodes": 96,
+			"stock_components": {
+				"plank": 52
+			}
+		},
+		{
+			"cached_detail_meshes": 96,
+			"mesh_resources": 67,
+			"physical_mesh_instances": 78,
+			"render_nodes": 67,
+			"stock_components": {
+				"plank": 30
+			}
+		},
+		{
+			"cached_detail_meshes": 96,
+			"mesh_resources": 75,
+			"physical_mesh_instances": 150,
+			"render_nodes": 75,
+			"stock_components": {
+				"plank": 30
+			}
+		},
+		{
+			"cached_detail_meshes": 96,
+			"mesh_resources": 94,
+			"physical_mesh_instances": 118,
+			"render_nodes": 94,
+			"stock_components": {
+				"plank": 60
+			}
+		}
+	],
+	"utilities": {
+		"cached_detail_meshes": 96,
+		"mesh_resources": 128,
+		"physical_mesh_instances": 146,
+		"render_nodes": 128,
+		"stock_components": {
+			"brick": 56
+		}
+	}
+}

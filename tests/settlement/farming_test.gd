@@ -5,7 +5,9 @@ var failures: Array[String] = []
 var checks := 0
 func check(ok: bool, message: String) -> void:
 	checks += 1
-	if not ok: failures.append(message)
+	if not ok:
+		failures.append(message)
+		printerr("FAIL: " + message)
 func complete(world, kind: String, cell: Vector3i) -> bool:
 	if not world.request_build(kind, cell):
 		check(false, "Queue %s at %s: %s" % [kind, cell, world.last_message])
@@ -32,7 +34,7 @@ func _initialize() -> void:
 	check(Farm.footprint("soil_bed", Vector3i.ZERO).size == Vector2(2, 2), "Soil bed is one house footprint")
 	check(world.build_error("hay_field", Vector3i.ZERO).is_empty(), "Field accepts flat sand")
 	world.terrain_shapes[Vector3i.RIGHT] = [0.0, 0.1, 0.1, 0.0]
-	check(not world.build_error("hay_field", Vector3i.ZERO).is_empty(), "Any sloped part of the four-room footprint rejects a field")
+	check(world.build_error("hay_field", Vector3i.ZERO).is_empty(), "Field follows sloped ground within its supported footprint")
 	world.terrain_shapes.clear()
 	world.ground.erase(Vector3i.RIGHT)
 	check(not world.build_error("hay_field", Vector3i.ZERO).is_empty(), "Missing sand in one quarter rejects a field")
@@ -54,7 +56,7 @@ func _initialize() -> void:
 	check(world.buildings[roof].placement_offset == Farm.FIELD_OFFSET, "Field centre aligns exactly with the four room-sized soil beds")
 	check(not world.build_error("soil_bed", roof + Vector3i(2, 0, 0)).is_empty(), "An occupied bed cannot be replaced or doubled")
 	check(not world.Relocation.source_error(world, roof + Vector3i(2, 0, 0)).is_empty(), "Beds beneath a field cannot be moved or dismantled")
-	check(not world.build_error("house", roof + Vector3i(2, 0, 0)).is_empty(), "Building footprint cannot clip the edge of the shifted field")
+	check(world.build_error("house", roof + Vector3i(2, 0, 0)).is_empty(), "A supported building can cover a field quarter")
 	var saved = Model.new()
 	check(saved.restore(JSON.parse_string(JSON.stringify(world.snapshot()))), "Soil and field serialize together")
 	check(saved.soil_beds == world.soil_beds and saved.buildings == world.buildings, "Reload preserves four foundations and field alignment")
@@ -66,13 +68,14 @@ func _initialize() -> void:
 	world.rebuild_navigation()
 	crop.growth = 0.0
 	Farm.tick_crops(world, 24)
-	check(is_equal_approx(crop.growth, 2.4) and crop.food == 0, "Full overhead cover gives exactly ten percent growth")
+	check(is_equal_approx(crop.growth, 0.0) and crop.food == 0, "Full overhead cover stops all hay growth")
 	for cover in [Vector3i(2, 2, 0), Vector3i(2, 2, 2)]: world.platforms.erase(cover)
 	world.rebuild_navigation()
-	check(is_equal_approx(Farm.light_rate(world, roof, true), 0.55), "Half-covered field averages lit and shaded halves")
+	check(is_equal_approx(Farm.light_rate(world, roof, true), 0.5), "Half-covered field has two growable quarters")
 	for cover in [Vector3i(0, 2, 0), Vector3i(0, 2, 2)]: world.platforms.erase(cover)
 	world.rebuild_navigation()
-	Farm.tick_crops(world, 22)
+	Farm.water_crop(world, roof)
+	Farm.tick_crops(world, Farm.GROW_SECONDS)
 	check(crop.food == 4 and crop.growth == 0.0, "Removing the roof restores growth and ripens four hay")
 	world.platforms[Vector3i(4, 1, 0)] = true
 	world.rebuild_navigation()
@@ -82,7 +85,7 @@ func _initialize() -> void:
 	for bed in Farm.bed_cells(Vector3i.ZERO): complete(harvest, "soil_bed", bed)
 	complete(harvest, "hay_field", Vector3i.ZERO)
 	harvest.gardens[Vector3i.ZERO].food = 4
-	harvest.stores.values()[0].store("grain", 8)
+	harvest.stores[Vector3i(-4, 0, -4)].store("grain", 8)
 	check(harvest.set_role(0, "farmer"), "Grass gatherer assignment is available")
 	check(harvest.Jobs._assign_farm(harvest, harvest.workers[0]), "Assigned gatherer cuts ripe hay even when eight are already stored")
 	var carried := false
@@ -93,7 +96,7 @@ func _initialize() -> void:
 	check(carried and harvest.resource_total("grain") > 8 and harvest.gardens[Vector3i.ZERO].food < 4, "Harvest is cut, physically carried and delivered as the existing hay resource")
 	harvest.set_role(0, "builder")
 	# Leave room for the field's fourth crop bundle plus dismantled timber.
-	harvest.stores.values()[0].capacity += 4
+	harvest.stores[Vector3i(-4, 0, -4)].capacity += 4
 	check(harvest.Deconstruction.request(harvest, Vector3i.ZERO), "Gathered field can be dismantled independently of its soil")
 	for i in 3000:
 		harvest.tick(0.05)
@@ -117,15 +120,12 @@ func check_quarter_harvest() -> void:
 	check(crop.food == 4 and Farm.standing_quarters(crop) == 15, "New growth fills four quarters")
 	var field = preload("res://scripts/settlement/asset_library.gd").create("hay_field")
 	var plants: Node3D = field.get_node("Plants")
-	var citizen = preload("res://scripts/settlement/asset_library.gd").create("citizen_0")
-	var knee_height: float = citizen.get_node("LeftLeg").position.y + citizen.get_node("LeftLeg/Knee").position.y
-	var canopy: MeshInstance3D = plants.get_node("Quarter0/Canopy")
-	var canopy_top: float = plants.position.y + (canopy.transform * canopy.mesh.get_aabb()).end.y
-	check(is_equal_approx(canopy_top, knee_height), "Solid mature hay reaches the adult knee")
+	var blades := plants.get_node("Quarter0") as MultiMeshInstance3D
+	check(blades.multimesh.instance_count == 256 and blades.multimesh.mesh.get_faces().size() == 3, "Mature hay uses individually scattered single-triangle grass blades")
+	check(blades.multimesh.get_instance_transform(0).basis.y.length() >= 0.55, "Mature hay is taller than the old knee-height crop")
 	var soil: MeshInstance3D = field.get_node("Soil")
 	check((soil.transform * soil.mesh.get_aabb()).end.y <= 0.015, "Harvest exposes a ground-level bed")
 	check(soil.material_override.transparency == BaseMaterial3D.TRANSPARENCY_DISABLED, "Harvested soil is opaque")
-	citizen.free()
 	var fields = preload("res://scripts/settlement/hay_field_view.gd")
 	fields.sync(world, Vector3i.ZERO, field)
 	var restored_map = Model.new()

@@ -1,0 +1,80 @@
+{
+	"decorative_props": 0,
+	"far": {
+		"cached_detail_meshes": 0,
+		"mesh_resources": 431,
+		"physical_mesh_instances": 431,
+		"render_nodes": 431,
+		"stock_components": {}
+	},
+	"layouts": [
+		{
+			"cached_detail_meshes": 0,
+			"exemplar_save_bytes": 31,
+			"mesh_resources": 288,
+			"physical_mesh_instances": 550,
+			"render_nodes": 387,
+			"room_lamps": 4,
+			"rooms": 4,
+			"seed": 0,
+			"stock_components": {
+				"brick": 56,
+				"plank": 208
+			},
+			"terrace_m2": 9
+		},
+		{
+			"cached_detail_meshes": 0,
+			"exemplar_save_bytes": 31,
+			"mesh_resources": 388,
+			"physical_mesh_instances": 707,
+			"render_nodes": 481,
+			"room_lamps": 6,
+			"rooms": 6,
+			"seed": 1,
+			"stock_components": {
+				"brick": 56,
+				"plank": 265
+			},
+			"terrace_m2": 9
+		},
+		{
+			"cached_detail_meshes": 0,
+			"exemplar_save_bytes": 31,
+			"mesh_resources": 479,
+			"physical_mesh_instances": 857,
+			"render_nodes": 578,
+			"room_lamps": 8,
+			"rooms": 8,
+			"seed": 2,
+			"stock_components": {
+				"brick": 56,
+				"plank": 324
+			},
+			"terrace_m2": 9
+		},
+		{
+			"cached_detail_meshes": 0,
+			"exemplar_save_bytes": 31,
+			"mesh_resources": 432,
+			"physical_mesh_instances": 739,
+			"render_nodes": 531,
+			"room_lamps": 7,
+			"rooms": 7,
+			"seed": 4,
+			"stock_components": {
+				"brick": 56,
+				"plank": 253
+			},
+			"terrace_m2": 5
+		}
+	],
+	"prototype_utilities": {
+		"exhaust": 1,
+		"grid_terminal": 1,
+		"lantern": 2,
+		"material_supply": 1,
+		"socket": 1,
+		"stove": 1
+	}
+}

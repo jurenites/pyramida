@@ -2,13 +2,13 @@ schema_version = "1.0.0"
 
 id = "pyramida_building_tools"
 version = "0.1.0"
-name = "Pyramida Building Tools"
-tagline = "Round-trip Pyramida Building blueprints"
-maintainer = "Pyramida 2 contributors"
+name = "Town Building Tools"
+tagline = "Round-trip Town Building blueprints"
+maintainer = "Town contributors"
 type = "add-on"
 tags = ["Import-Export"]
 blender_version_min = "4.2.0"
 license = ["SPDX:GPL-3.0-or-later"]
 
 [permissions]
-files = "Read and write user-selected Pyramida Building blueprint files"
+files = "Read and write user-selected Town Building blueprint files"

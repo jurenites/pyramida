@@ -53,7 +53,7 @@ func run() -> void:
 	place(rotated,"cube",2,1)
 	check(rotated.has_access(rotated.rooms[2]),"Rotated stair connects its upper side landing to a corridor")
 	var points: Array = View.stair_points()
-	check(is_equal_approx(points[-1].y-points[0].y,1.0),"Stair rises exactly one floor")
+	check(is_equal_approx(points[-1].y,1.0),"Stair rises exactly one floor")
 	var first: Vector3 = points[1]-points[0]
 	var last: Vector3 = points[-1]-points[-2]
 	check(Vector2(first.x,first.z).normalized().dot(Vector2(last.x,last.z).normalized()) < -0.99,"Exit travel reverses 180 degrees")
@@ -79,7 +79,7 @@ func run() -> void:
 				check(is_equal_approx(upper.position.y-lower.position.y,1.0),"Stair has two mats exactly one floor apart")
 				var normal:=Vector3(Model.vec(room.normal))
 				var side:=Vector3(-normal.z,0,normal.x)
-				check((upper.position-lower.position).is_equal_approx(Vector3.UP+side*0.44),"Both mats follow rotated lower and upper flight endpoints")
+				check((upper.position-lower.position).is_equal_approx(Vector3.UP+side*0.50),"Both mats follow rotated lower and upper flight endpoints")
 				check(not lower.material_override.no_depth_test and not upper.material_override.no_depth_test,"Stair mats respect wall and floor depth")
 				check(node.get_node("Walls").get_child_count()==3,"Three solid stair walls have no window cutouts")
 				for wall_mesh in node.get_node("Walls").get_children():
@@ -95,15 +95,15 @@ func run() -> void:
 		for level in 2:
 			var flight: Node3D=game.geometry.get_node("Room%d/Staircase" % level)
 			for step in 5:
-				check(clear_body(game,flight,Vector3(-0.22,(step+1)*0.1,-0.236+step*0.088)),"Lower flight has headroom below the next storey")
-				check(clear_body(game,flight,Vector3(0.22,0.6+step*0.1,0.116-step*0.088)),"Returning flight is not filled by upper-floor concrete")
+				check(clear_body(game,flight,Vector3(-0.25,(step+1)*0.1,-0.45+step*0.1)),"Lower flight has headroom below the next storey")
+				check(clear_body(game,flight,Vector3(0.25,0.6+step*0.1,-0.05-step*0.1)),"Returning flight is not filled by upper-floor concrete")
 			for sample in 12:
 				var across: float=lerpf(-0.22,0.22,float(sample)/11)
 				check(clear_body(game,flight,Vector3(across,0.5,0.30)),"Rear turn has an open passage and headroom")
-				check(clear_body(game,flight,Vector3(across,1,-0.38)),"Intermediate landing lets people cross to the next flight")
+				check(clear_body(game,flight,Vector3(across,1.1 if across < 0.04 else 1.0,-0.45)),"Intermediate landing lets people cross to the next flight")
 			for sample in 8:
-				var forward: float=lerpf(-0.38,-0.22,float(sample)/7)
-				check(clear_body(game,flight,Vector3(0.22,1,forward)),"Upper exit joins the intermediate landing without a slab blocking it")
+				var forward: float=lerpf(-0.45,-0.41,float(sample)/7)
+				check(clear_body(game,flight,Vector3(0.25,1,forward)),"Upper exit joins the intermediate landing without a slab blocking it")
 	# The terminal rooftop enclosure must shelter the opening without sealing
 	# the final flight or rear turn. Intermediate stairs keep their open shaft.
 	for rotation in 4:
@@ -112,11 +112,11 @@ func run() -> void:
 		var flight: Node3D=game.geometry.get_node("Room0/Staircase")
 		check(game.geometry.get_node("Room0").has_node("RooftopAccess"),"An uncovered stair has a rooftop exit enclosure")
 		for step in 5:
-			check(clear_body(game,flight,Vector3(-0.22,(step+1)*0.1,-0.236+step*0.088)),"Rooftop cover leaves headroom on the lower flight")
-			check(clear_body(game,flight,Vector3(0.22,0.6+step*0.1,0.116-step*0.088)),"Half-width enclosure leaves the returning flight clear")
+			check(clear_body(game,flight,Vector3(-0.25,(step+1)*0.1,-0.45+step*0.1)),"Rooftop cover leaves headroom on the lower flight")
+			check(clear_body(game,flight,Vector3(0.25,0.6+step*0.1,-0.05-step*0.1)),"Half-width enclosure leaves the returning flight clear")
 		for sample in 12:
 			check(clear_body(game,flight,Vector3(lerpf(-0.22,0.22,float(sample)/11),0.5,0.30)),"Covered rear turn remains passable")
-		for z in [-0.38,-0.50,-0.64]: check(clear_body(game,flight,Vector3(0.22,1,z)),"Miniature door leaves a clear exit onto the roof")
+		for z in [-0.45,-0.50,-0.64]: check(clear_body(game,flight,Vector3(0.25,1,z)),"Miniature door leaves a clear exit onto the roof")
 		game.view_mode=1; game.refresh()
 		check(not game.geometry.get_node("Room0").has_node("RooftopAccess"),"Roofless view reveals the stair beneath its enclosure")
 		place(game.model,"cube",1,1); game.view_mode=0; game.refresh()

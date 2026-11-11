@@ -28,6 +28,7 @@ static func valid(citizen: Dictionary) -> bool:
 		and citizen.get("cloth_color", 0) in [0, 1, 2, 3, 4]
 
 static func tick(world, citizen: Dictionary, delta: float) -> void:
+	if preload("res://scripts/settlement/rain_exposure.gd").recover(citizen,delta): return
 	if not is_adult(citizen):
 		citizen.growth_seconds = float(citizen.get("growth_seconds", 0.0)) + delta * (2.0 if Economy.count_buildings(world, "school") > 0 else 1.0)
 		if citizen.growth_seconds >= adulthood_seconds():
@@ -40,7 +41,7 @@ static func tick(world, citizen: Dictionary, delta: float) -> void:
 	if world.Clearance.tick(world, citizen, delta):
 		# Separation must not starve the bounded job scheduler. New assignments
 		# can be selected now; their movement resumes after stepping aside.
-		if citizen.job.is_empty() and is_adult(citizen): world.tick_citizen_job(citizen, delta)
+		if not citizen.has("rescue_route") and citizen.job.is_empty() and is_adult(citizen): world.tick_citizen_job(citizen, delta)
 		return
 	if is_adult(citizen) or not citizen.job.is_empty() or citizen.hunger >= 30.0:
 		world.tick_citizen_job(citizen, delta)
@@ -55,8 +56,9 @@ static func tick(world, citizen: Dictionary, delta: float) -> void:
 			citizen.route_index = 0
 			return
 		var old: Vector3 = citizen.position
-		citizen.position = old.move_toward(world.navigation.movement_target(citizen.cell, next, old), delta * world.ChildPlay.speed(world, citizen))
-		if citizen.cell.y == next.y:
+		if not world.RopeBridges.can_step(world, citizen, next): return
+		citizen.position = old.move_toward(world.navigation.movement_target(citizen.cell, next, old), delta * world.ChildPlay.speed(world, citizen) * preload("res://scripts/settlement/rain_exposure.gd").movement(world,citizen,next,delta))
+		if citizen.cell.y == next.y and not world.navigation.room_paths.get(citizen.cell, {}).has(next):
 			citizen.position = world.navigation.ground_position(citizen.position, citizen.cell.y)
 		citizen.distance += old.distance_to(citizen.position)
 		if citizen.position.distance_to(world.navigation.surface_point(next)) < 0.001:

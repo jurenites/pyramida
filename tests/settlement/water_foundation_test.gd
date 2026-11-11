@@ -10,9 +10,10 @@ func _initialize() -> void:
 	world.trees.clear()
 	world.deposits.clear()
 	world.rebuild_navigation()
-	var shore := Vector3i(ceili(Volume.Coast.coast(0, world.world_seed)), 0, 0)
+	var shore := Vector3i(1,0,0)
+	while Volume.sea_depth(world,shore)==0: shore.x+=1
 	check(Volume.material_at(world, shore + Vector3i.DOWN) == "water", "Sea occupies a grid volume")
-	check(Volume.material_at(world, shore + Vector3i.DOWN * (Volume.Grid.STOREY.y + 1)) == "solid", "Sea has a solid bottom")
+	check(Volume.material_at(world, shore + Vector3i.DOWN * (Volume.sea_depth(world,shore) + 1)) == "solid", "Sea has a solid bottom")
 	check(Volume.material_at(world, Vector3i(0, -10000, 0)) == "solid", "Deep terrain resolves without allocating a column")
 	check(world.snap_cell("platform", "ground", shore) == shore, "Water platform snaps to shore elevation")
 	check(world.request_build("platform", shore), "Shallow shoreline platform is buildable: " + world.last_message)
@@ -23,9 +24,9 @@ func _initialize() -> void:
 	if not world.plans.is_empty(): world._complete_plan(world.plans.values().back())
 	check(world.build_error("house", extension).is_empty(), "Water platform supports a building")
 	check(not world.build_error("platform", shore + Vector3i(10, 0, 0)).is_empty(), "Deep water rejects short posts")
-	world.volume_edits[shore + Vector3i.DOWN * (Volume.Grid.STOREY.y + 1)] = "air"
+	world.volume_edits[shore + Vector3i.DOWN * (Volume.sea_depth(world,shore) + 1)] = "air"
 	check(not Volume.platform_grounded(world, shore), "Excavated seabed no longer anchors posts")
-	var well := Vector3i(0, 0, -4)
+	var well := Vector3i(-8, 0, 2) # Near the guaranteed puddle: capacity exceeds the stored bucket.
 	check(world.request_build("well", well), "Ground well can be built")
 	if not world.plans.is_empty(): world._complete_plan(world.plans.values().back())
 	world.wells[well].store("water", 1)

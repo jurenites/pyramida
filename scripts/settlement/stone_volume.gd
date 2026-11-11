@@ -1,5 +1,5 @@
 extends RefCounted
-## Filled logical quarry cells; the renderer adds only cosmetic edge shaping.
+## Filled logical quarry cells with connected, faceted terrace silhouettes.
 const Random = preload("res://scripts/deterministic_random.gd")
 const BLOCK_SIZE := 1.0
 const COLUMN_SIZE := 1.0
@@ -105,8 +105,7 @@ static func logical_amount(cell: Vector3i, world_seed: int, amount: int, saved_c
 	return clampi(roundi(float(amount) * full / saved_capacity), 1 if amount > 0 else 0, full)
 
 static func visual_faces(section: Dictionary, remaining: int) -> Array:
-	# Render simple six-sided solids. Consolidate the mining cells back into
-	# broad cuboids rather than drawing every hidden half-metre subdivision.
+	# Consolidate mining subdivisions before shaping the connected shelves.
 	var boxes: Array[AABB] = []
 	for chunk in remaining_chunks(section, remaining):
 		var box := AABB(chunk[0][0], Vector3.ZERO)
@@ -124,45 +123,39 @@ static func visual_faces(section: Dictionary, remaining: int) -> Array:
 				merged = true
 				break
 			if merged: break
-	var shape := visual_shape(int(section.seed))
 	var result: Array = []
 	for box in boxes:
 		var points: Array[Vector3] = []
 		for height in [box.position.y, box.end.y]:
 			for corner: Vector3 in CORNERS:
-				var point := Vector3(box.get_center().x + corner.x * box.size.x, height, box.get_center().z + corner.z * box.size.z)
-				point = point.rotated(Vector3.UP, section.turn) + Vector3(section.offset)
-				point = visual_point(point, shape)
-				points.append(point)
+				points.append(Vector3(box.get_center().x + corner.x * box.size.x, height, box.get_center().z + corner.z * box.size.z))
+		var faces: Array = []
 		for face in FACES:
 			var polygon: Array[Vector3] = []
 			for index in face: polygon.append(points[index])
+			faces.append(polygon)
+		# Cut only convex OUTER corners of the connected shelf. Neighbouring
+		# columns keep their shared planes; this never bevels every mining cube.
+		for corner: Vector3 in CORNERS:
+			var sx := int(signf(corner.x))
+			var sz := int(signf(corner.z))
+			if _shelf_neighbour(section, sx, 0) or _shelf_neighbour(section, 0, sz): continue
+			var bevel := 0.22 + Random.world_fraction(sx, sz, int(section.seed), 962) * 0.10
+			# Slightly battered facets, with flat, exact-height terrace tops.
+			var normal := Vector3(sx, 0.045, sz)
+			faces = clip(faces, normal, 1.0 - bevel)
+		for face in faces:
+			var polygon: Array[Vector3] = []
+			for point: Vector3 in face:
+				polygon.append(point.rotated(Vector3.UP, section.turn) + Vector3(section.offset))
 			result.append(polygon)
 	return result
 
-static func visual_shape(seed_value: int) -> Dictionary:
-	var rng := RandomNumberGenerator.new()
-	rng.seed = seed_value
-	# Shared, uneven grid lines move corners by roughly a tenth of a metre.
-	# Each column can have a different width without separating its neighbours.
-	var widths := Vector4(rng.randf_range(0.84, 1.12), rng.randf_range(0.84, 1.12), rng.randf_range(0.84, 1.12), rng.randf_range(0.84, 1.12))
-	var shift := Vector2(rng.randf_range(-0.08, 0.08), rng.randf_range(-0.08, 0.08))
-	var shear := Vector2(rng.randf_range(-0.12, 0.12), rng.randf_range(-0.12, 0.12))
-	var lean := Vector2(rng.randf_range(-0.035, 0.035), rng.randf_range(-0.035, 0.035))
-	var perspective := Vector3(rng.randf_range(0.022, 0.038), rng.randf_range(0.005, 0.016), rng.randf_range(0.022, 0.038))
-	if rng.randf() < 0.5: perspective.x = -perspective.x
-	if rng.randf() < 0.5: perspective.z = -perspective.z
-	var min_denominator := 1.0 - absf(perspective.x) * (maxf(widths.x, widths.y) + absf(shift.x)) - absf(perspective.z) * (maxf(widths.z, widths.w) + absf(shift.y)) + perspective.y * MAX_HEIGHT
-	return {"widths": widths, "shift": shift, "shear": shear, "lean": lean, "perspective": perspective, "height_scale": minf(1.0, min_denominator)}
-
-static func visual_point(point: Vector3, shape: Dictionary) -> Vector3:
-	var widths: Vector4 = shape.widths
-	var x: float = point.x * (widths.x if point.x < 0.0 else widths.y) + shape.shift.x
-	var z: float = point.z * (widths.z if point.z < 0.0 else widths.w) + shape.shift.y
-	var denominator: float = 1.0 + Vector3(x, point.y, z).dot(shape.perspective)
-	# A projective map preserves planes and straight edges. Both sides of every
-	# join use the same map, including small mined faces along a larger face.
-	return Vector3(x + z * shape.shear.x + point.y * shape.lean.x, point.y * shape.height_scale, z + x * shape.shear.y + point.y * shape.lean.y) / denominator
+static func _shelf_neighbour(section: Dictionary, dx: int, dz: int) -> bool:
+	var x := int(section.column) % 2 + dx
+	@warning_ignore("integer_division")
+	var z := int(section.column) / 2 + dz
+	return x >= 0 and x < 2 and z >= 0 and z < 2 and int(section.heights[z * 2 + x]) > int(section.layer)
 
 static func _can_merge_boxes(a: AABB, b: AABB) -> bool:
 	for axis in 3:

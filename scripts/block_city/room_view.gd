@@ -3,6 +3,7 @@ extends RefCounted
 const Lighting=preload("res://scripts/block_city/room_lighting.gd")
 const Equipment=preload("res://scripts/block_city/power_equipment.gd")
 const Model = preload("res://scripts/block_city/model.gd")
+const Stairs = preload("res://scripts/block_city/stair_geometry.gd")
 
 static func draw(game, parent: Node3D, room: Dictionary, view_mode: int, powered: Dictionary, reached: bool, room_set: Array = []) -> void:
 	var role: String = game.model.room_role(room)
@@ -29,15 +30,19 @@ static func draw(game, parent: Node3D, room: Dictionary, view_mode: int, powered
 	door_root.name = "Door"
 	parent.add_child(door_root)
 	if role=="stairs":
-		# Match the two ends of the U-turn: front-left below, front-right above.
-		doormat(game,door_root,room,reached,-0.22,0.0,"Doormat",0.34)
-		doormat(game,door_root,room,reached,0.22,1.0,"UpperDoormat",0.34)
+		var ports: Array=game.model.authored_ports(room)
+		for i in ports.size():
+			var port: Dictionary=ports[i]
+			var doorway: Dictionary=room.duplicate()
+			doorway.door=Model.arr(port.cell); doorway.normal=Model.arr(port.normal)
+			var connected: bool=reached and game.model.port_linked(room,port,network)
+			doormat(game,door_root,doorway,connected,port.across,0,"Doormat" if i==0 else "UpperDoormat",0.38)
 	else:
 		var index:=0
 		for entry in entries.values():
 			var doorway: Dictionary=room.duplicate()
 			doorway.door=Model.arr(entry.port.cell); doorway.normal=Model.arr(entry.port.normal)
-			doormat(game,door_root,doorway,entry.connected,0,0,"Doormat" if index==0 else "Doormat%d" % index)
+			doormat(game,door_root,doorway,entry.connected,float(entry.port.get("across",0)),0,"Doormat" if index==0 else "Doormat%d" % index,0.38 if entry.port.has("across") else 0.50)
 			var mat: Node=door_root.get_child(door_root.get_child_count()-1)
 			mat.set_meta("port_cell",entry.port.cell); mat.set_meta("port_normal",entry.port.normal)
 			if game.ghost!=null and (game.ghost.is_ancestor_of(parent) or parent==game.ghost):
@@ -52,15 +57,16 @@ static func draw(game, parent: Node3D, room: Dictionary, view_mode: int, powered
 			door_root.add_child(joint)
 			var normal: Vector3=Vector3(entry.port.normal)
 			var center:=Vector3(entry.port.cell)+Vector3(0.5,0.07,0.5)+normal*0.5
-			var dimensions:=Vector3(0.54,0.06,0.22) if normal.z!=0 else Vector3(0.22,0.06,0.54)
+			center+=Vector3(-normal.z,0,normal.x)*float(entry.port.get("across",0))
+			var width:=0.38 if entry.port.has("across") else 0.54
+			var dimensions:=Vector3(width,0.06,0.22) if normal.z!=0 else Vector3(0.22,0.06,width)
 			game.box(joint,center,dimensions,game.entry_color(entry.connected))
 			var dot:=MeshInstance3D.new()
 			var sphere:=SphereMesh.new()
 			sphere.radius=0.055; sphere.height=0.11
 			dot.mesh=sphere
 			dot.position=center+Vector3.UP*0.08
-			var material:=StandardMaterial3D.new()
-			material.albedo_color=game.entry_color(entry.connected)
+			var material: StandardMaterial3D=game.material(game.entry_color(entry.connected))
 			dot.material_override=material
 			joint.add_child(dot)
 	var walls := Node3D.new()
@@ -94,7 +100,10 @@ static func draw(game, parent: Node3D, room: Dictionary, view_mode: int, powered
 			var exit_normal := Model.vec(network[int(occ[lower])].normal)
 			opening.rotation.y=atan2(-float(exit_normal.x),-float(exit_normal.z))
 			for x in [-0.45,0.45]: game.box(opening,Vector3(x,-0.035,0),Vector3(0.06,0.07,0.96),floor_color)
-			game.box(opening,Vector3(0,-0.035,-0.38),Vector3(0.84,0.07,0.20),floor_color)
+			if game.model.quarter_stair(network[int(occ[lower])]):
+				game.box(opening,Vector3(0.25,-0.035,-0.25),Vector3(0.5,0.07,0.5),floor_color)
+			# This belongs to the receiving floor, never the stair prefab.
+			game.box(opening,Vector3(0,-0.035,-0.45),Vector3(0.84,0.07,0.10),floor_color)
 		else:
 			game.box(floors,Vector3(cell)+Vector3(0.5,0.035,0.5),Vector3(0.96,0.07,0.96),floor_color)
 		if role=="hall" and not hatch:
@@ -104,7 +113,7 @@ static func draw(game, parent: Node3D, room: Dictionary, view_mode: int, powered
 		if view_mode==0 and (role=="room" or (role=="hall" and not occ.has(cell+Vector3i.UP))):
 			# Full tile spans and one concrete material join adjacent roofs without seams.
 			game.box(roofs,Vector3(cell)+Vector3(0.5,0.965,0.5),Vector3(1.0,0.07,1.0),Model.CONCRETE_FLOOR)
-			if not occ.has(cell+Vector3i.UP): roof_rim(game,rim,cell,occ)
+			if not occ.has(cell+Vector3i.UP): roof_rim(game,rim,cell,occ,network)
 		for normal in Model.DIRECTIONS:
 			if cells.has(cell+normal): continue
 			var key: String="%s:%s" % [cell,normal]
@@ -119,8 +128,10 @@ static func draw(game, parent: Node3D, room: Dictionary, view_mode: int, powered
 				continue
 			if role=="stairs" and entry:
 				for side in [-1,1]: wall_box(game,door_root,cell,normal,side*0.45,0.45,0.06,0.90,0.10,color)
-				wall_box(game,door_root,cell,normal,-0.22,0.008 if hatch else 0.08,0.38,0.016,0.12,game.ACCESS)
-				wall_box(game,door_root,cell,normal,0.22,1.0,0.38,0.025,0.12,game.ACCESS)
+				wall_box(game,door_root,cell,normal,-0.25,0.008 if hatch else 0.08,0.38,0.016,0.12,game.entry_color(connected))
+				continue
+			if entry and entries[key].port.has("across"):
+				offset_door(game,door_root,cell,normal,float(entries[key].port.across),color,view_mode,game.entry_color(connected))
 				continue
 			wall(game,door_root if opening else walls,cell,normal,color,opening,outside and role=="room",view_mode,game.entry_color(connected),Lighting.UNLIT_GLASS,outside and role in ["room","hall"],role=="room" and not occ.has(cell+Vector3i.UP),powered.has(cell))
 	if role=="hall":
@@ -137,13 +148,19 @@ static func draw(game, parent: Node3D, room: Dictionary, view_mode: int, powered
 	if role=="stairs":
 		var base:=Model.vec(room.door)
 		var covered: bool=occ.has(base+Vector3i.UP)
-		stairs(game,parent,base,Model.vec(room.normal),color,covered)
-		if view_mode==0 and not covered: stair_rooftop_access(game,parent,base,Model.vec(room.normal),color)
+		var quarter: bool=game.model.quarter_stair(room)
+		stairs(game,parent,base,Model.vec(room.normal),color,covered,quarter)
+		if view_mode==0 and not covered: stair_rooftop_access(game,parent,base,Model.vec(room.normal),color,quarter)
 
-static func roof_rim(game, parent: Node3D, cell: Vector3i, occ: Dictionary) -> void:
+static func roof_rim(game, parent: Node3D, cell: Vector3i, occ: Dictionary, network: Array = []) -> void:
 	# Only the outer boundary gets a lip, never a divider between neighboring cells.
 	for normal in Model.DIRECTIONS:
 		if occ.has(cell+normal): continue
+		var passage:=false
+		for room in network:
+			for port in game.model.authored_ports(room):
+				if port.cell==cell+Vector3i.UP+normal and port.normal==-normal: passage=true
+		if passage: continue
 		var center:=Vector3(cell)+Vector3(0.5,1.045,0.5)+Vector3(normal)*0.47
 		var size:=Vector3(0.06,0.09,1.0)
 		if normal.z!=0:
@@ -233,50 +250,84 @@ static func wall(game, parent: Node3D, cell: Vector3i, normal: Vector3i, color: 
 		wall_box(game,parent,cell,normal,0,0.90,0.98,0.035,0.14,color.lightened(0.10))
 		wall_box(game,parent,cell,normal,0,0.965,1.0,0.06,0.16,color.lightened(0.22))
 
-static func stair_points() -> Array:
-	# Local coordinates: enter at front-left, turn on the rear landing,
-	# and exit at front-right exactly one level above the entrance.
-	return [Vector3(-0.22,0,-0.38),Vector3(-0.22,0.5,0.30),Vector3(0.22,0.5,0.30),Vector3(0.22,1,-0.38)]
+static func stair_points(quarter := false) -> Array:
+	return Stairs.route(quarter)
 
-static func stairs(game, parent: Node3D, cell: Vector3i, normal: Vector3i, color: Color, covered := false) -> void:
+static func stairs(game, parent: Node3D, cell: Vector3i, normal: Vector3i, color: Color, covered := false, quarter := false) -> void:
 	var flight := Node3D.new()
 	flight.name = "Staircase"
 	parent.add_child(flight)
 	flight.position = Vector3(cell)+Vector3(0.5,0,0.5)
 	flight.rotation.y = atan2(-float(normal.x),-float(normal.z))
 	if covered:
-		# Match the hall's corner supports and meet the next floor exactly.
-		# Keep the center clear for both flights and their transfer landings.
 		for x in [-0.43,0.43]:
 			for z in [-0.43,0.43]:
-				var pillar: MeshInstance3D=game.box(flight,Vector3(x,0.5,z),Vector3(0.12,1.0,0.12),Model.CONCRETE_COLUMN)
+				var pillar: MeshInstance3D=game.box(flight,Vector3(x,0.5,z),Vector3(0.10,1.0,0.10),Model.CONCRETE_COLUMN)
 				pillar.name="CornerPillar"
-	var tread := Model.CONCRETE_FLOOR
-	# Slender concrete treads, not columns filled down to the base. Repeating
-	# this module one storey above leaves the full flight passage open below it.
-	var thickness := 0.06
-	for i in 5:
-		var h := float(i+1)*0.1
-		game.box(flight,Vector3(-0.22,h-thickness/2,-0.236+i*0.088),Vector3(0.38,thickness,0.088),tread)
-		game.box(flight,Vector3(-0.22,h+0.008,-0.2675+i*0.088),Vector3(0.38,0.016,0.025),game.ACCESS)
-	var turn: MeshInstance3D=game.box(flight,Vector3(0,0.5-thickness/2,0.30),Vector3(0.82,thickness,0.28),tread)
-	turn.name="TurnLanding"
-	for i in 5:
-		var h := 0.6+float(i)*0.1
-		game.box(flight,Vector3(0.22,h-thickness/2,0.116-i*0.088),Vector3(0.38,thickness,0.088),tread)
-		game.box(flight,Vector3(0.22,h+0.008,0.1475-i*0.088),Vector3(0.38,0.016,0.025),game.ACCESS)
-	# A full-width front landing joins this exit to the next stair's entrance.
-	# Keep the divider behind it so people can cross between the two flights.
-	var landing: MeshInstance3D=game.box(flight,Vector3(0,1-thickness/2,-0.38),Vector3(0.82,thickness,0.20),tread)
-	landing.name="ExitLanding"
-	game.box(flight,Vector3(0,0.34,-0.03),Vector3(0.04,0.68,0.42),color.darkened(0.12))
+	for part in Stairs.parts(quarter):
+		if part.has("wedge"):
+			winder(game,flight,int(part.wedge),float(part.height))
+		else:
+			var mesh: MeshInstance3D=game.box(flight,part.position,part.size,game.ACCESS if part.get("edge",false) else Model.CONCRETE_FLOOR)
+			if part.has("name"): mesh.name=part.name
 
-static func stair_rooftop_access(game, parent: Node3D, cell: Vector3i, normal: Vector3i, color: Color) -> void:
+static func winder(game, parent: Node3D, index: int, height: float) -> void:
+	var polygon:=Stairs.wedge_polygon(index)
+	var surface:=SurfaceTool.new()
+	surface.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var top: Array=[]
+	var bottom: Array=[]
+	for v in polygon:
+		top.append(Vector3(v.x,height,v.y))
+		bottom.append(Vector3(v.x,height-Stairs.THICKNESS,v.y))
+	for triangle in [[0,1,2],[0,2,3]]:
+		for i in triangle: surface.add_vertex(top[i])
+		for i in [triangle[2],triangle[1],triangle[0]]: surface.add_vertex(bottom[i])
+	for i in 4:
+		var next: int=(i+1)%4
+		for vertex in [top[i],bottom[i],bottom[next],top[i],bottom[next],top[next]]: surface.add_vertex(vertex)
+	surface.generate_normals()
+	var mesh:=MeshInstance3D.new()
+	mesh.name="Winder%d" % index
+	mesh.mesh=surface.commit()
+	var material: StandardMaterial3D=game.material(Model.CONCRETE_FLOOR)
+	material.cull_mode=BaseMaterial3D.CULL_DISABLED
+	mesh.material_override=material
+	parent.add_child(mesh)
+	var a:=Vector3(polygon[0].x,height+0.006,polygon[0].y)
+	var b:=Vector3(polygon[1].x,height+0.006,polygon[1].y)
+	var edge: MeshInstance3D=game.box(parent,(a+b)/2,Vector3(a.distance_to(b),0.012,0.02),game.ACCESS)
+	edge.rotation.y=-atan2((b-a).z,(b-a).x)
+
+static func offset_door(game, parent: Node3D, cell: Vector3i, normal: Vector3i, across: float, color: Color, mode: int, frame: Color) -> void:
+	var height:=0.24 if mode==2 else 0.90
+	var half_width:=0.20
+	var left_width:=across-half_width+0.48
+	var right_width:=0.48-across-half_width
+	if left_width>0: wall_box(game,parent,cell,normal,-0.48+left_width/2,height/2,left_width,height,0.10,color)
+	if right_width>0: wall_box(game,parent,cell,normal,0.48-right_width/2,height/2,right_width,height,0.10,color)
+	for side in [-1,1]: wall_box(game,parent,cell,normal,across+side*half_width,minf(height,0.84)/2,0.02,minf(height,0.84),0.12,frame)
+	if mode!=2:
+		wall_box(game,parent,cell,normal,across,0.87,0.40,0.06,0.10,color)
+		wall_box(game,parent,cell,normal,across,0.84,0.42,0.025,0.12,frame)
+	wall_box(game,parent,cell,normal,across,-0.01,0.40,0.02,0.16,frame)
+
+static func stair_rooftop_access(game, parent: Node3D, cell: Vector3i, normal: Vector3i, color: Color, quarter := false) -> void:
 	var hut:=Node3D.new()
 	hut.name="RooftopAccess"
 	parent.add_child(hut)
 	hut.position=Vector3(cell)+Vector3(0.5,0,0.5)
 	hut.rotation.y=atan2(-float(normal.x),-float(normal.z))
+	if quarter:
+		# A raised cover leaves the winding flight open. Exit through the side
+		# directly beside the upper platform, never through the entrance face.
+		var cap: MeshInstance3D=game.box(hut,Vector3(0,1.80,0),Vector3(1,0.06,1),color.lightened(0.14))
+		cap.name="WeatherCap"
+		for z in [-0.46,0.46]: game.box(hut,Vector3(0,1.37,z),Vector3(1,0.80,0.08),color)
+		game.box(hut,Vector3(-0.46,1.37,0),Vector3(0.08,0.80,1),color)
+		game.box(hut,Vector3(0.46,1.37,0.25),Vector3(0.08,0.80,0.5),color)
+		game.box(hut,Vector3(0.46,1.74,-0.25),Vector3(0.08,0.06,0.5),color)
+		return
 	# The taller half sits over the returning flight, offset toward its exit.
 	# A low covered shoulder seals the other half without closing its headroom.
 	game.box(hut,Vector3(-0.24,1.23,0),Vector3(0.50,0.06,0.98),color)
@@ -290,7 +341,7 @@ static func stair_rooftop_access(game, parent: Node3D, cell: Vector3i, normal: V
 	# Small framed doorway and raised sill; no solid infill across the exit.
 	for x in [0.025,0.415]: game.box(hut,Vector3(x,1.35,-0.45),Vector3(0.07,0.70,0.10),color.lightened(0.18))
 	game.box(hut,Vector3(0.22,1.735,-0.45),Vector3(0.46,0.05,0.12),color.lightened(0.18))
-	game.box(hut,Vector3(0.22,1.015,-0.46),Vector3(0.34,0.03,0.16),color.lightened(0.28))
+	game.box(hut,Vector3(0.25,0.99,-0.46),Vector3(0.38,0.02,0.16),color.lightened(0.28))
 	var hinge:=Node3D.new()
 	hinge.name="MiniDoor"
 	hut.add_child(hinge)

@@ -25,7 +25,7 @@ const CONSTRUCTION_MATERIAL_ICON_BASE_PIXELS := 20.0
 const ICON_NUMBER_DEFAULT_SEPARATION_PIXELS := 2
 const ICON_NUMBER_COMPACT_SEPARATION_PIXELS := 4
 
-## Exactly two typography sizes: ordinary UI and the Pyramida title.
+## Exactly two typography sizes: ordinary UI and the game title.
 const UI_FONT_SIZE := 22 * POINT
 const TITLE_FONT_SIZE := 32 * POINT
 

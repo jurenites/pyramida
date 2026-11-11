@@ -1,4 +1,6 @@
 extends RefCounted
+var puddle_basins: Dictionary={}
+const Perf = preload("res://scripts/settlement/performance_log.gd")
 ## Explicit walkable surfaces. A floor above another floor has its own identity.
 ## Natural slopes follow their mesh; cliffs and built floors need explicit connectors.
 const Grid = preload("res://scripts/settlement/world_grid.gd")
@@ -7,8 +9,23 @@ const ROOM_SIZE := Grid.ROOM_SIZE
 const LEVEL_HEIGHT := Grid.LEVEL_HEIGHT
 const DIRECTIONS := [Vector3i.RIGHT, Vector3i.BACK, Vector3i.LEFT, Vector3i.FORWARD]
 const DIAGONALS := [Vector3i(1, 0, 1), Vector3i(1, 0, -1), Vector3i(-1, 0, 1), Vector3i(-1, 0, -1)]
+var stack_barriers: Dictionary={}
+var _built_stack_barriers: Dictionary={}
+var stack_solids: Array[AABB]=[]
+var building_stock_state: Array=[]
+var building_access: Dictionary={}
+var room_nodes: Dictionary={}
+var room_edges: Dictionary={}
+var room_heights: Dictionary={}
+var room_offsets: Dictionary={}
+var room_paths: Dictionary={}
+var room_stair_contacts: Dictionary={}
 var access_overrides: Dictionary = {}
 var surfaces: Dictionary = {}
+var support_poses: Dictionary = {}
+var terrain_barriers: Dictionary = {}
+var _built_terrain_barriers: Dictionary = {}
+var _built_support_poses: Dictionary = {}
 # Keep support surfaces separate from pedestrian clearance.
 var blocked: Dictionary = {}
 var edges: Dictionary = {}
@@ -19,6 +36,7 @@ var roads: Dictionary = {}
 var revision := 0
 const MAX_CACHED_SOURCES := 32
 var _searches: Dictionary = {}
+var _edge_lengths: Dictionary = {}
 var searches_built := 0
 var nodes_expanded := 0
 var _components: Dictionary = {}
@@ -29,38 +47,73 @@ var _next_component := 0
 static func point(cell: Vector3i) -> Vector3:
 	return Vector3(cell.x * CELL_SIZE, cell.y * LEVEL_HEIGHT, cell.z * CELL_SIZE)
 
+# Inputs that callers replace before rebuilding; retain the last built state.
+var _built_blocked: Dictionary = {}
+var _built_room_nodes: Dictionary = {}
+var _built_room_edges: Dictionary = {}
+var _built_connectors: Dictionary = {}
+
+func _changed_cells(before: Dictionary, after: Dictionary, affected: Dictionary) -> void:
+	for cell in before:
+		if not after.has(cell) or before[cell] != after[cell]: affected[cell] = true
+	for cell in after:
+		if not before.has(cell): affected[cell] = true
+
 func rebuild(next_surfaces: Dictionary, stairs: Dictionary, terrain_ramps: Dictionary = {}, shapes: Dictionary = {}) -> void:
+	var changed := {}
+	_changed_cells(_built_stack_barriers,stack_barriers,changed)
+	_built_stack_barriers=stack_barriers.duplicate(true)
+	_changed_cells(surfaces, next_surfaces, changed)
+	_changed_cells(_built_terrain_barriers,terrain_barriers,changed)
+	_built_terrain_barriers=terrain_barriers.duplicate(true)
+	_changed_cells(_built_support_poses,support_poses,changed)
+	_built_support_poses=support_poses.duplicate()
+	_changed_cells(_built_blocked, blocked, changed)
+	_changed_cells(terrain_shapes, shapes, changed)
+	_changed_cells(_built_room_nodes, room_nodes, changed)
+	_changed_cells(_built_room_edges, room_edges, changed)
+	var affected := changed.duplicate()
+	for cell: Vector3i in changed:
+		for direction: Vector3i in DIRECTIONS + DIAGONALS: affected[cell + direction] = true
+	# Old connector endpoints also need their ordinary edges restored on removal.
+	affected.merge(_built_connectors)
+	for cell in surfaces:
+		if not next_surfaces.has(cell): edges.erase(cell)
 	surfaces = next_surfaces.duplicate()
-	terrain_shapes = shapes.duplicate()
+	terrain_shapes = shapes.duplicate(true)
 	terrain_links = terrain_ramps.duplicate()
 	stair_links.clear()
-	edges.clear()
 	_searches.clear()
-	for cell: Vector3i in surfaces:
-		edges[cell] = _surface_neighbours(cell)
+	_edge_lengths.clear()
+	_built_connectors.clear()
 	# The ladder occupies B; its traversable edge connects A -> C through B.
 	for cell: Vector3i in stairs:
 		var direction: Vector3i = DIRECTIONS[int(stairs[cell])]
 		var lower := cell - direction * Grid.CELLS_PER_ROOM
 		var upper := stair_landing(cell, int(stairs[cell]))
 		if walkable(cell) and walkable(lower) and walkable(upper):
-			if not stair_links.has(lower):
-				stair_links[lower] = {}
+			if not stair_links.has(lower): stair_links[lower] = {}
 			stair_links[lower][upper] = cell
-			edges[lower].append(upper)
-			edges[upper].append(lower)
-	for lower: Vector3i in terrain_ramps:
-		var upper: Vector3i = terrain_ramps[lower]
-		if walkable(lower) and walkable(upper) and not edges[lower].has(upper):
-			edges[lower].append(upper)
-			edges[upper].append(lower)
+			_built_connectors[lower] = true
+			_built_connectors[upper] = true
+	for lower: Vector3i in terrain_links:
+		_built_connectors[lower] = true
+		_built_connectors[terrain_links[lower]] = true
+	for lower in room_paths:
+		_built_connectors[lower] = true
+		for upper in room_paths[lower]: _built_connectors[upper] = true
+	affected.merge(_built_connectors)
+	_refresh_edges(affected)
 	_rebuild_components()
+	_built_blocked = blocked.duplicate()
+	_built_room_nodes = room_nodes.duplicate()
+	_built_room_edges = room_edges.duplicate(true)
 	revision += 1
 
 func update_ground(added: Dictionary, removed: Dictionary, shapes: Dictionary = {}) -> void:
 	# Streaming changes only natural ground. Built surfaces and all active
 	# connectors are pinned by the model, so their identities stay untouched.
-	terrain_shapes = shapes.duplicate()
+	terrain_shapes = shapes.duplicate(true)
 	var affected := {}
 	for cell: Vector3i in removed:
 		surfaces.erase(cell)
@@ -72,15 +125,8 @@ func update_ground(added: Dictionary, removed: Dictionary, shapes: Dictionary = 
 			affected[cell] = true
 			for direction: Vector3i in DIRECTIONS + DIAGONALS:
 				affected[cell + direction] = true
-	for cell: Vector3i in affected:
-		if not surfaces.has(cell): continue
-		edges[cell] = _surface_neighbours(cell)
-	for lower: Vector3i in stair_links:
-		for upper: Vector3i in stair_links[lower]:
-			_restore_edge(lower, upper)
-	for lower: Vector3i in terrain_links:
-		_restore_edge(lower, terrain_links[lower])
-	_searches.clear()
+	_refresh_edges(affected)
+	_invalidate_searches(affected)
 	if not removed.is_empty():
 		# Deletions can split a component; additions only need local unions.
 		_rebuild_components()
@@ -91,12 +137,55 @@ func update_ground(added: Dictionary, removed: Dictionary, shapes: Dictionary = 
 				_component_parents[_next_component] = _next_component
 				_component_sizes[_next_component] = 1
 				_next_component += 1
-		for cell: Vector3i in affected:
-			for neighbour: Vector3i in edges.get(cell, []):
-				_join_components(cell, neighbour)
+		_join_affected(affected)
 	revision += 1
 
+func remove_obstacle(cell: Vector3i) -> void:
+	# Removing a trunk only opens edges. Keep terrain, distant search frontiers
+	# and existing component identities; no full-map connectivity pass is needed.
+	if not blocked.erase(cell): return
+	var started := Perf.begin()
+	var affected := {cell: true}
+	for direction: Vector3i in DIRECTIONS + DIAGONALS:
+		affected[cell + direction] = true
+	_refresh_edges(affected)
+	_invalidate_searches(affected)
+	_join_affected(affected)
+	revision += 1
+	Perf.end("navigation.remove_obstacle", started)
+
+func _join_affected(affected: Dictionary) -> void:
+	for cell: Vector3i in affected:
+		for neighbour: Vector3i in edges.get(cell, []):
+			_join_components(cell, neighbour)
+
+func _refresh_edges(affected: Dictionary) -> void:
+	for cell: Vector3i in affected:
+		if not surfaces.has(cell): continue
+		edges[cell] = _surface_neighbours(cell)
+	for lower: Vector3i in stair_links:
+		for upper: Vector3i in stair_links[lower]:
+			_restore_edge(lower, upper)
+	for lower: Vector3i in terrain_links:
+		_restore_edge(lower, terrain_links[lower])
+	for lower in room_paths:
+		for upper in room_paths[lower]: _restore_edge(lower,upper)
+
+func _invalidate_searches(affected: Dictionary) -> void:
+	for cell in affected: _edge_lengths.erase(cell)
+	# Unvisited distant chunks cannot change an already settled local route.
+	# Invalidate any search whose settled OR tentative frontier touches an edit.
+	for origin: Vector3i in _searches.keys():
+		var costs: Dictionary = _searches[origin].costs
+		for cell: Vector3i in affected:
+			if costs.has(cell):
+				_searches.erase(origin)
+				break
+
 func surface_height(cell: Vector3i, position: Vector3) -> float:
+	if puddle_basins.has(cell): return preload("res://scripts/settlement/puddle_basin.gd").height(cell,puddle_basins[cell],position)
+	if room_heights.has(cell): return float(room_heights[cell])
+	if support_poses.has(cell): return support_poses[cell].origin.y
 	if not terrain_shapes.has(cell): return cell.y * LEVEL_HEIGHT
 	var h: Array = terrain_shapes[cell]
 	var u := clampf(position.x / CELL_SIZE - cell.x + 0.5, 0.0, 1.0)
@@ -112,7 +201,7 @@ func surface_height(cell: Vector3i, position: Vector3) -> float:
 	return h[0] * (1.0 - v) + h[2] * u + h[3] * (v - u)
 
 func surface_point(cell: Vector3i) -> Vector3:
-	var result := point(cell)
+	var result: Vector3 = point(cell)+room_offsets[cell] if room_offsets.has(cell) else (support_poses[cell].origin if support_poses.has(cell) else point(cell))
 	result.y = surface_height(cell, result)
 	return result
 
@@ -121,10 +210,28 @@ func ground_position(position: Vector3, level: int) -> Vector3:
 	if surfaces.has(cell): position.y = surface_height(cell, position)
 	return position
 
+func _support_contains(cell: Vector3i, position: Vector3) -> bool:
+	var local: Vector3 = support_poses[cell].affine_inverse()*position if support_poses.has(cell) else position-point(cell)
+	return absf(local.x)<=0.501 and absf(local.z)<=0.501
+
 func _touching(a: Vector3i, b: Vector3i, escaping := false) -> bool:
+	if stack_barriers.get(a,[]).has(b): return false
+	if terrain_barriers.get(a,[]).has(b): return false
+	if (room_nodes.has(a) or room_nodes.has(b)) and not room_edges.get(a,[]).has(b): return false
 	if not escaping and (blocked.has(a) or blocked.has(b)): return false
 	if not surfaces.has(a) or not surfaces.has(b): return false
-	if not terrain_shapes.has(a) and not terrain_shapes.has(b): return true
+	if room_nodes.has(a) or room_nodes.has(b): return true
+	if support_poses.has(a) or support_poses.has(b):
+		var pa := surface_point(a); var pb := surface_point(b)
+		var axis := (pb-pa).normalized()
+		var tangent := Vector3(-axis.z,0,axis.x)
+		# A citizen needs a continuous strip, not merely nearby post centres.
+		for step in 17:
+			var centre := pa.lerp(pb,float(step)/16.0)
+			for side in [-0.18,0.18]:
+				var sample: Vector3 = centre+tangent*side
+				if not _support_contains(a,sample) and not _support_contains(b,sample): return false
+	if not terrain_shapes.has(a) and not terrain_shapes.has(b): return absf(surface_height(a, point(a)) - surface_height(b, point(b))) < 0.001
 	var middle := (point(a) + point(b)) * 0.5
 	var across := Vector3(b.z - a.z, 0, a.x - b.x) * CELL_SIZE * 0.5
 	for sample in [middle - across, middle + across]:
@@ -139,10 +246,11 @@ func _surface_neighbours(cell: Vector3i) -> Array:
 		var side_x := cell + Vector3i(direction.x, 0, 0)
 		var side_z := cell + Vector3i(0, 0, direction.z)
 		var next := cell + direction
+		if (room_nodes.has(cell) or room_nodes.has(next)) and room_nodes.get(cell,-1)!=room_nodes.get(next,-1): continue
 		# All four edges must meet; diagonals never cut across gaps or cliffs.
 		# The two edges from this cell were already checked above. Reuse them
 		# while integrating terrain instead of resampling their slopes twice.
-		if result.has(side_x) and result.has(side_z) and _touching(side_x, next) and _touching(side_z, next):
+		if result.has(side_x) and result.has(side_z) and _touching(side_x, next) and _touching(side_z, next) and not stack_barriers.get(cell,[]).has(next):
 			result.append(next)
 	return result
 
@@ -201,6 +309,10 @@ func _join_components(a: Vector3i, b: Vector3i) -> void:
 
 func _restore_edge(lower: Vector3i, upper: Vector3i) -> void:
 	if not walkable(lower) or not walkable(upper): return
+	var points: Array=room_paths.get(lower,{}).get(upper,[surface_point(lower),surface_point(upper)])
+	for box in stack_solids:
+		for i in range(1,points.size()):
+			if box.intersects_segment(points[i-1],points[i])!=null: return
 	if not edges[lower].has(upper): edges[lower].append(upper)
 	if not edges[upper].has(lower): edges[upper].append(lower)
 
@@ -251,16 +363,40 @@ func escape_route(start: Vector3i) -> Array[Vector3i]:
 				queue.append(next)
 	return []
 
+func distance_lower_bound(start: Vector3i, finish: Vector3i) -> float:
+	if not blocked.has(start) and not blocked.has(finish):
+		return Vector2(start.x - finish.x, start.z - finish.z).length() * CELL_SIZE
+	var result := INF
+	for origin in access_cells(start):
+		for destination in access_cells(finish):
+			result = minf(result, Vector2(origin.x - destination.x, origin.z - destination.z).length() * CELL_SIZE)
+	return result
+
+func can_reach(start: Vector3i, finish: Vector3i) -> bool:
+	# Connectivity is already maintained with the graph. Existence checks do
+	# not need a shortest-path tree or a reconstructed route.
+	if not blocked.has(start) and not blocked.has(finish):
+		return surfaces.has(start) and surfaces.has(finish) and _component_root(start) == _component_root(finish)
+	for origin in access_cells(start):
+		for destination in access_cells(finish):
+			if _component_root(origin) == _component_root(destination): return true
+	return false
+
 func route(start: Vector3i, finish: Vector3i) -> Array[Vector3i]:
 	if not blocked.has(start) and not blocked.has(finish): return _route(start, finish)
 	var best: Array[Vector3i] = []
 	var cost := INF
 	for origin in access_cells(start):
 		for destination in access_cells(finish):
+			# A solid building can have many perimeter access cells. Do not run
+			# searches that cannot beat the route already found (physical length).
+			var lower_bound := Vector2(origin.x - destination.x, origin.z - destination.z).length() * CELL_SIZE
+			if lower_bound >= cost: continue
 			var candidate := _route(origin, destination)
 			if not candidate.is_empty() and distance(candidate) < cost:
 				best = candidate
 				cost = distance(candidate)
+				if is_zero_approx(cost): return best
 	return best
 
 func _route(start: Vector3i, finish: Vector3i) -> Array[Vector3i]:
@@ -298,6 +434,7 @@ func _new_search(start: Vector3i) -> Dictionary:
 func _advance_search(search: Dictionary, finish: Vector3i) -> void:
 	if search.settled.has(finish):
 		return
+	var started := Perf.begin()
 	var frontier: Array = search.frontier
 	var costs: Dictionary = search.costs
 	var previous: Dictionary = search.previous
@@ -319,7 +456,9 @@ func _advance_search(search: Dictionary, finish: Vector3i) -> void:
 		# A discovered node is only tentative. Stop after settling and relaxing it
 		# so subsequent queries can safely resume, including beyond this target.
 		if current == finish:
+			Perf.end("navigation.search", started)
 			return
+	Perf.end("navigation.search", started)
 
 static func _less(a: Array, b: Array) -> bool:
 	return a[0] < b[0] or (a[0] == b[0] and a[1] < b[1])
@@ -360,8 +499,20 @@ func distance(path: Array[Vector3i]) -> float:
 	return total
 
 func edge_distance(a: Vector3i, b: Vector3i) -> float:
+	# Slopes and authored stair/bridge curves are shared by every journey.
+	# Measure each edge once until the corresponding geometry changes.
+	if not _edge_lengths.has(a): _edge_lengths[a] = {}
+	if not _edge_lengths[a].has(b): _edge_lengths[a][b] = _measure_edge(a, b)
+	return _edge_lengths[a][b]
+
+func _measure_edge(a: Vector3i, b: Vector3i) -> float:
+	if room_paths.get(a, {}).has(b):
+		var total := 0.0
+		var path: Array = room_paths[a][b]
+		for i in range(1, path.size()): total += path[i - 1].distance_to(path[i])
+		return total
 	if ladder_cell(a, b) != null:
-		return ROOM_SIZE + Vector2(ROOM_SIZE, absf(point(a).y - point(b).y)).length()
+		return ROOM_SIZE + Vector2(ROOM_SIZE, absf(surface_point(a).y - surface_point(b).y)).length()
 	if terrain_links.get(a) == b or terrain_links.get(b) == a:
 		# Climb to the cliff lip, then cross the upper half-cell.
 		var run := Vector2(point(a).x - point(b).x, point(a).z - point(b).z).length()
@@ -373,6 +524,7 @@ func edge_distance(a: Vector3i, b: Vector3i) -> float:
 	return point(a).distance_to(point(b))
 
 func movement_target(current: Vector3i, next: Vector3i, position: Vector3) -> Vector3:
+	if room_paths.get(current,{}).has(next): return preload("res://scripts/settlement/room_navigation.gd").target(room_paths[current][next],position)
 	var destination := surface_point(next)
 	if ladder_cell(current, next) != null:
 		return ladder_waypoints(current, next, position)[0]
@@ -391,8 +543,9 @@ func ladder_cell(a: Vector3i, b: Vector3i) -> Variant:
 	return stair_links.get(a, {}).get(b, stair_links.get(b, {}).get(a))
 
 func ladder_waypoints(current: Vector3i, next: Vector3i, position: Vector3) -> Array[Vector3]:
-	var start := point(current)
-	var finish := point(next)
+	# Arrivals are tested against the actual floor, including soil and room height.
+	var start := surface_point(current)
+	var finish := surface_point(next)
 	var direction := Vector3(finish.x - start.x, 0, finish.z - start.z).normalized()
 	var progress := (position - start).dot(direction)
 	var result: Array[Vector3] = []

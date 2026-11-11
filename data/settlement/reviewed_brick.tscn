@@ -1,0 +1,13 @@
+[gd_scene format=3]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_883h6"]
+albedo_color = Color(0.7254902, 0.4509804, 0.3372549, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_2lug6"]
+size = Vector3(0.45, 0.2, 0.25)
+
+[node name="Brick" type="Node3D" unique_id=1852978030]
+
+[node name="Brick" type="MeshInstance3D" parent="." unique_id=1251644748]
+material_override = SubResource("StandardMaterial3D_883h6")
+mesh = SubResource("BoxMesh_2lug6")

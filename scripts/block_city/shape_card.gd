@@ -1,8 +1,10 @@
 extends Control
+const Stairs=preload("res://scripts/block_city/stair_geometry.gd")
 const UI=preload("res://scripts/ui_visual_tokens.gd")
 var cells: Array=[]
 var tint:=Color.WHITE
 var role:="room"
+var quarter_stair:=false
 var palette:=false
 var selected:=false
 
@@ -48,19 +50,21 @@ func _draw() -> void:
 		block(Vector3(0.77,0.42,0.96),Vector3(0.06,0.09,0.04),origin,unit,Color("edbd59"))
 		return
 	if role=="stairs":
-		# A cutaway one-cell shell and two flights inside its actual volume.
-		block(Vector3.ZERO,Vector3(1,0.07,1),origin,unit,tint)
-		block(Vector3(0,0,0),Vector3(0.06,1,1),origin,unit,tint)
-		block(Vector3(0.06,0,0),Vector3(0.94,1,0.06),origin,unit,tint)
-		for i in 5:
-			var h:=float(i+1)*0.1
-			block(Vector3(0.09,h-0.06,0.692-i*0.088),Vector3(0.38,0.06,0.088),origin,unit,tint.lightened(0.3))
-			block(Vector3(0.09,h,0.692-i*0.088),Vector3(0.38,0.012,0.025),origin,unit,Color("edbd59"))
-		block(Vector3(0.09,0.44,0.06),Vector3(0.82,0.06,0.28),origin,unit,tint.lightened(0.3))
-		for i in 5:
-			var h:=0.6+i*0.1
-			block(Vector3(0.53,h-0.06,0.252+i*0.088),Vector3(0.38,0.06,0.088),origin,unit,tint.lightened(0.3))
-			block(Vector3(0.53,h,0.315+i*0.088),Vector3(0.38,0.012,0.025),origin,unit,Color("edbd59"))
+		# Same parts as the world mesh, mirrored toward the thumbnail camera.
+		block(Vector3.ZERO,Vector3(1,0.04,1),origin,unit,tint)
+		var pieces: Array=Stairs.parts(quarter_stair)
+		pieces.sort_custom(func(a,b):return float(a.get("height",a.get("position",Vector3.ZERO).y))<float(b.get("height",b.get("position",Vector3.ZERO).y)))
+		for part in pieces:
+			var color:=Color("edbd59") if part.get("edge",false) else tint.lightened(0.3)
+			if part.has("wedge"):
+				var polygon:=PackedVector2Array()
+				for v in Stairs.wedge_polygon(part.wedge): polygon.append(project(Vector3(v.x+0.5,part.height,0.5-v.y),origin,unit))
+				draw_colored_polygon(polygon,color)
+				draw_line(polygon[0],polygon[1],Color("edbd59"),1.0,true)
+			else:
+				var at: Vector3=part.position
+				at=Vector3(at.x+0.5,at.y,0.5-at.z)-part.size/2
+				block(at,part.size,origin,unit,color)
 		return
 	if role=="hall":
 		block(Vector3.ZERO,Vector3(extent.x,0.08,extent.z),origin,unit,tint)

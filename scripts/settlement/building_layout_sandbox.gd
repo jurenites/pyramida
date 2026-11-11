@@ -4,7 +4,7 @@ const Assets = preload("res://scripts/settlement/asset_library.gd")
 const Catalog = preload("res://data/settlement/catalog.gd")
 const Tokens = preload("res://scripts/ui_visual_tokens.gd")
 const View = preload("res://scripts/settlement/structure_workshop_view.gd")
-const PATH := "user://structures/building_layout.json"
+const PATH := "user://structures/building_arrangement.json"
 signal finished(to_editor: bool)
 var storage_path := PATH
 var restore_last := true
@@ -16,8 +16,8 @@ var future: Array = []
 var selected := -1
 var snap := 0.5
 var zoom := 32.0
-var yaw := 0.55
-var pitch := 0.85
+var yaw := -0.65
+var pitch := 0.68
 var focus := Vector3.ZERO
 var root: Control
 var container: SubViewportContainer
@@ -33,10 +33,14 @@ var dragging := false
 var orbiting := false
 var panning := false
 var drag_offset := Vector3.ZERO
-var show_labels := true
+var show_labels := false
+var grid: Node3D
+var show_grid := false
 var palette: ItemList
 var specimens: Array = []
 var save_timer := 0.0
+var pixelated := false
+var pixel_button: Button
 
 func _ready() -> void:
 	layer = 30
@@ -71,6 +75,8 @@ func _create_ui() -> void:
 		var hover := style.duplicate()
 		hover.bg_color = Color("fff4d9")
 		theme.set_stylebox("hover", type, hover)
+		var pressed := style.duplicate(); pressed.bg_color = Color("edc994")
+		theme.set_stylebox("pressed", type, pressed)
 		for state in ["font_color", "font_hover_color", "font_pressed_color"]: theme.set_color(state, type, Color("64452f"))
 	theme.set_stylebox("panel", "ItemList", style)
 	theme.set_color("font_color", "ItemList", Color("64452f"))
@@ -92,7 +98,11 @@ func _create_ui() -> void:
 	_button(toolbar, "−", "Zoom out · mouse wheel", func(): zoom_by(1.2))
 	_button(toolbar, "+", "Zoom in · mouse wheel", func(): zoom_by(1.0 / 1.2))
 	_button(toolbar, "Fit", "Frame all buildings · F", fit_all)
-	_button(toolbar, "Top", "Top-down footprint comparison", func(): pitch = PI * 0.499; _camera())
+	_button(toolbar, "Iso", "Game camera angle", func(): yaw = -0.65; pitch = 0.68; _camera())
+	pixel_button = _button(toolbar, "Pixel", "Pixelated world preview", func(): set_pixelated(not pixelated))
+	pixel_button.toggle_mode = true
+	_button(toolbar, "Empty", "Clear arrangement (undoable)", func(): remember(); entries.clear(); selected = -1; _rebuild())
+	_button(toolbar, "Grid", "Toggle metre grid", func(): show_grid = not show_grid; grid.visible = show_grid)
 	var snapping := OptionButton.new()
 	for title in ["Free", "0.5 m", "1 m"]: snapping.add_item(title)
 	snapping.select(1)
@@ -105,7 +115,7 @@ func _create_ui() -> void:
 	_button(toolbar, "Undo", "Undo · Ctrl/Cmd+Z", undo)
 	_button(toolbar, "Redo", "Redo · Ctrl/Cmd+Shift+Z", redo)
 	_button(toolbar, "Labels", "Toggle building labels", func(): show_labels = not show_labels; _rebuild())
-	_button(toolbar, "All tiers", "Reset to the comparison gallery (undoable)", func(): remember(); gallery())
+	_button(toolbar, "Gallery", "Show current models (undoable)", func(): remember(); gallery())
 	var body := HBoxContainer.new()
 	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	layout.add_child(body)
@@ -119,7 +129,7 @@ func _create_ui() -> void:
 	container.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	container.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	container.focus_mode = Control.FOCUS_ALL
-	container.tooltip_text = "Drag: move · Right-drag: orbit · Middle-drag: pan · Wheel: zoom"
+	container.tooltip_text = "Drag onto a building to stack · Shift-drag: keep height · Right-drag: orbit · Middle-drag: pan"
 	container.gui_input.connect(_view_input)
 	body.add_child(container)
 	viewport = SubViewport.new()
@@ -164,9 +174,12 @@ func _create_scene() -> void:
 	scene.add_child(environment)
 	var light := DirectionalLight3D.new()
 	light.rotation_degrees = Vector3(-55, -25, 0)
+	Assets.Illustration.configure_sun(light, 100)
 	scene.add_child(light)
-	View.box(scene, Vector3(1000, 0.02, 1000), Vector3(0, -0.04, 0), Color("f5e5c7"))
-	View.grid(scene, 0, 100, Color("ded3bb"))
+	var depot = preload("res://scripts/settlement/stone_storage_view.gd")
+	var ground := MeshInstance3D.new(); ground.mesh = depot.pad_mesh(); ground.scale = Vector3(300, 1, 300); ground.position.y = -depot.PAD_HEIGHT / 2; ground.material_override = depot.Stone.material(); scene.add_child(ground)
+	grid = Node3D.new(); scene.add_child(grid); grid.visible = show_grid
+	View.grid(grid, 0, 100, Color("e8d8b9"))
 	models = Node3D.new()
 	scene.add_child(models)
 	selection = Node3D.new()
@@ -180,17 +193,15 @@ func _create_scene() -> void:
 	for group: Array in Catalog.CATEGORIES.values():
 		for kind: String in group:
 			if kind not in Catalog.SEEDS and kind not in kinds: kinds.append(kind)
-	for kind in Catalog.COSTS:
-		if kind not in kinds and kind not in Catalog.SEEDS and Catalog.DEFINITIONS.has(kind) and ResourceLoader.exists("res://data/settlement/" + kind + ".tscn"): kinds.append(kind)
 	for kind: String in kinds:
-		var tiers := 3 if kind in ["windmill", "sawmill", "stone_storage", "well"] else (2 if kind == "platform" else 1)
+		var tiers := 3 if kind in ["house", "well"] else 1
 		for tier in range(1, tiers + 1):
 			var spec := {"kind": kind, "tier": tier}
 			specimens.append(spec)
 			palette.add_item(title(spec))
 
 func title(entry: Dictionary) -> String:
-	return entry.kind.replace("_", " ").capitalize() + (" · T%d" % entry.tier if entry.kind in ["windmill", "sawmill", "stone_storage", "platform", "well"] else "")
+	return Catalog.title(entry.kind) + (" · T%d" % entry.tier if entry.kind in ["house", "well"] else "")
 
 func gallery() -> void:
 	entries.clear()
@@ -207,7 +218,7 @@ func dimensions(entry: Dictionary) -> Vector3:
 	var size: Vector3 = Catalog.DEFINITIONS[entry.kind].size
 	if entry.kind == "platform": return Vector3(2, entry.tier, 2)
 	if entry.kind == "windmill" and entry.tier < 3: size.y = 1.15
-	if entry.kind == "well": size.y = [0.15, 0.42, 1.85][entry.tier - 1]
+	if entry.kind == "well": size.y = [0.15, 0.52, 1.85][entry.tier - 1]
 	return size
 
 func _rebuild() -> void:
@@ -215,16 +226,18 @@ func _rebuild() -> void:
 	nodes.clear()
 	for index in entries.size():
 		var entry: Dictionary = entries[index]
-		var holder := Node3D.new()
+		var holder := Assets.create(entry.kind)
 		holder.position = entry.at
 		holder.rotation.y = -int(entry.turn) * PI / 2
 		models.add_child(holder)
 		nodes.append(holder)
-		var asset := Assets.create(entry.kind)
-		holder.add_child(asset)
+		var asset := holder
+		asset.set_meta("asset", entry.kind)
+		asset.set_meta("cell", Vector3i(entry.at.round()))
 		match str(entry.kind):
 			"windmill": preload("res://scripts/settlement/mill_view.gd").sync(asset, entry.tier)
-			"sawmill": preload("res://scripts/settlement/sawmill_view.gd").sync(asset, entry.tier)
+			"sawmill":
+				if not asset.has_meta("reviewed_model"): preload("res://scripts/settlement/sawmill_view.gd").sync(asset, entry.tier)
 			"stone_storage": preload("res://scripts/settlement/stone_storage_view.gd").sync(asset, entry.tier)
 			"well": preload("res://scripts/settlement/well_view.gd").sync(asset, entry.tier, 1, entry.tier)
 			"waterworks": preload("res://scripts/settlement/well_view.gd").sync(asset, 3, 1, 3, true)
@@ -241,9 +254,8 @@ func _rebuild() -> void:
 		collider.shape = box
 		collider.position.y = size.y * 0.5
 		body.add_child(collider)
-		_outline(holder, size, Color("b79167"), 0.018)
 		var access := asset.get_node_or_null("AccessFront") as Node3D
-		if access != null:
+		if access != null and show_labels:
 			var marker := access.position
 			marker.y = 0.045
 			View.box(holder, Vector3(0.24, 0.035, 0.24), marker, Color("287d82"))
@@ -258,6 +270,7 @@ func _rebuild() -> void:
 			label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 			label.position = Vector3(0, 0.3, size.z * 0.5 + 0.7)
 			holder.add_child(label)
+	_join_models()
 	_refresh_selection()
 	save_timer = 0.5
 
@@ -348,13 +361,18 @@ func _camera() -> void:
 	camera.size = zoom
 	camera.position = focus + Vector3(sin(yaw) * cos(pitch), sin(pitch), cos(yaw) * cos(pitch)) * 300
 	camera.look_at(focus)
+	save_timer = 0.5
 
 func ground_point(at: Vector2, height: float) -> Variant:
 	return Plane(Vector3.UP, height).intersects_ray(camera.project_ray_origin(at), camera.project_ray_normal(at))
 
-func pick(at: Vector2) -> int:
+func pick(at: Vector2, excluded := -1) -> int:
 	var origin := camera.project_ray_origin(at)
 	var query := PhysicsRayQueryParameters3D.create(origin, origin + camera.project_ray_normal(at) * 2000)
+	if excluded >= 0:
+		var excluded_bodies: Array[RID] = []
+		for body: StaticBody3D in nodes[excluded].find_children("*", "StaticBody3D", true, false): excluded_bodies.append(body.get_rid())
+		query.exclude = excluded_bodies
 	var hit := scene.get_world_3d().direct_space_state.intersect_ray(query)
 	return int(hit.collider.get_meta("entry", -1)) if not hit.is_empty() else -1
 
@@ -367,17 +385,18 @@ func _view_input(event: InputEvent) -> void:
 		if event.button_index == MOUSE_BUTTON_MIDDLE: panning = event.pressed
 		if event.button_index == MOUSE_BUTTON_LEFT:
 			if event.pressed:
-				selected = pick(event.position)
+				selected = pick(event.position / container.stretch_shrink)
 				_refresh_selection()
 				if selected >= 0:
 					if event.alt_pressed: duplicate_selected()
 					remember()
-					var point = ground_point(event.position, entries[selected].at.y)
+					var point = ground_point(event.position / container.stretch_shrink, entries[selected].at.y)
 					if point != null:
 						drag_offset = entries[selected].at - point
 						dragging = true
 			else:
 				dragging = false
+				_rebuild()
 				save_timer = 0.1
 	if event is InputEventMouseMotion:
 		if orbiting:
@@ -389,11 +408,15 @@ func _view_input(event: InputEvent) -> void:
 			focus += (-camera.global_basis.x * event.relative.x + Vector3(sin(yaw), 0, cos(yaw)) * event.relative.y) * factor
 			_camera()
 		elif dragging and selected >= 0:
-			var point = ground_point(event.position, entries[selected].at.y)
-			if point != null:
-				entries[selected].at = snapped_position(point + drag_offset)
-				nodes[selected].position = entries[selected].at
-				_refresh_selection()
+			var at: Vector2 = event.position / container.stretch_shrink
+			var target := pick(at, selected)
+			if target >= 0 and not event.shift_pressed:
+				entries[selected].at = entries[target].at + Vector3.UP * dimensions(entries[target]).y
+			else:
+				var point = ground_point(at, entries[selected].at.y if event.shift_pressed else 0.0)
+				if point != null: entries[selected].at = snapped_position(point + Vector3(drag_offset.x, 0, drag_offset.z))
+			nodes[selected].position = entries[selected].at
+			_refresh_selection()
 	container.accept_event()
 
 func _input(event: InputEvent) -> void:
@@ -434,7 +457,7 @@ func save_layout(path := "") -> bool:
 	DirAccess.make_dir_recursive_absolute(path.get_base_dir())
 	var file := FileAccess.open(path, FileAccess.WRITE)
 	if file == null: return false
-	file.store_string(JSON.stringify({"version": 1, "entries": packed, "camera": {"focus": [focus.x, focus.y, focus.z], "zoom": zoom, "yaw": yaw, "pitch": pitch}, "snap": snap}))
+	file.store_string(JSON.stringify({"version": 1, "entries": packed, "camera": {"focus": [focus.x, focus.y, focus.z], "zoom": zoom, "yaw": yaw, "pitch": pitch}, "snap": snap, "pixelated": pixelated}))
 	return true
 
 func _load(path := "") -> bool:
@@ -448,6 +471,8 @@ func _load(path := "") -> bool:
 		if not specimens.any(func(spec): return spec.kind == entry.kind and spec.tier == entry.get("tier")): return false
 		loaded.append({"kind": entry.kind, "tier": int(entry.tier), "turn": posmod(int(entry.get("turn", 0)), 4), "at": Vector3(float(entry.at[0]), float(entry.at[1]), float(entry.at[2]))})
 	entries = loaded
+	snap = float(data.get("snap", 0.5))
+	set_pixelated(bool(data.get("pixelated", false)))
 	var pose: Dictionary = data.get("camera", {})
 	if pose.get("focus") is Array and pose.focus.size() == 3:
 		focus = Vector3(float(pose.focus[0]), float(pose.focus[1]), float(pose.focus[2]))
@@ -458,5 +483,36 @@ func _load(path := "") -> bool:
 
 func close(to_editor: bool) -> void:
 	save_layout()
+	if get_tree().current_scene == self:
+		if to_editor: get_tree().change_scene_to_file("res://scenes/settlement/StructureWorkshop.tscn")
+		else: get_tree().quit()
+		return
 	finished.emit(to_editor)
 	queue_free()
+
+func set_pixelated(enabled: bool) -> void:
+	pixelated = enabled
+	pixel_button.set_pressed_no_signal(enabled)
+	container.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST if enabled else CanvasItem.TEXTURE_FILTER_LINEAR
+	container.stretch_shrink = 3 if enabled else 1
+	viewport.msaa_3d = Viewport.MSAA_DISABLED if enabled else Viewport.MSAA_4X
+	save_timer = 0.5
+
+func _join_models() -> void:
+	var model = preload("res://scripts/settlement/world_model.gd").new()
+	var views := {}
+	for index in entries.size():
+		var entry: Dictionary = entries[index]; var cell := Vector3i(entry.at.round())
+		model.buildings[cell] = {"kind": entry.kind, "direction": entry.turn, "house_tier": entry.tier, "placement_offset": entry.at - Vector3(cell)}
+		views[cell] = nodes[index]
+	preload("res://scripts/settlement/connected_frames.gd").sync(model, views)
+	preload("res://scripts/settlement/structure_frame.gd").sync(model, views)
+	preload("res://scripts/settlement/house_roofs.gd").sync(model, views)
+	for node: Node3D in nodes:
+		var kind: String = node.get_meta("asset")
+		var cell: Vector3i = node.get_meta("cell")
+		if kind == "hay_barn": preload("res://scripts/settlement/barn_roof.gd").sync(node, hash(cell))
+		if kind == "log_shed": preload("res://scripts/settlement/shed_roof.gd").sync(node, hash(cell))
+		if kind == "road": preload("res://scripts/settlement/stone_road.gd").sync(node, cell, 1729, model)
+		if kind == "mill" and node.has_node("StackSupport"): node.get_node("StackSupport").visible = model.needs_stack_support(cell)
+		if kind in ["log_shed", "hay_barn"] and node.has_node("Canopy"): node.get_node("Canopy").visible = not model.roof_panel_covered(cell, Vector3.ZERO)

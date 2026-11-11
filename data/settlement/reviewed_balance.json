@@ -1,0 +1,491 @@
+{
+  "source": "Pyramida_Game_Balance_Reviewed.numbers",
+  "buildings": [
+    {
+      "id": "house",
+      "name": "House",
+      "size_m": [
+        2,
+        2,
+        2
+      ],
+      "input": "[Vase+Water][Food]",
+      "verb": null,
+      "capacity": null,
+      "output": null,
+      "cost": {
+        "grain": 2,
+        "log": 2
+      },
+      "cost_status": "reviewed"
+    },
+    {
+      "id": "support",
+      "name": "Support",
+      "size_m": [
+        1,
+        1,
+        1
+      ],
+      "input": null,
+      "verb": null,
+      "capacity": null,
+      "output": null,
+      "cost": {
+        "log": 2
+      },
+      "cost_status": "reviewed"
+    },
+    {
+      "id": "stair",
+      "name": "Stair",
+      "size_m": [
+        1,
+        1,
+        1
+      ],
+      "input": null,
+      "verb": null,
+      "capacity": null,
+      "output": null,
+      "cost": {
+        "log": 1,
+        "plank": 1
+      },
+      "cost_status": "reviewed"
+    },
+    {
+      "id": "road",
+      "name": "Road",
+      "size_m": [
+        1,
+        1,
+        1
+      ],
+      "input": null,
+      "verb": null,
+      "capacity": null,
+      "output": null,
+      "cost": {
+        "stone": 1
+      },
+      "cost_status": "reviewed"
+    },
+    {
+      "id": "sawmill",
+      "name": "Sawmill",
+      "size_m": [
+        2,
+        3,
+        2
+      ],
+      "input": "[Log]",
+      "verb": "saw",
+      "capacity": 4,
+      "output": "[Plank]",
+      "cost": {
+        "log": 4
+      },
+      "cost_status": "reviewed"
+    },
+    {
+      "id": "log_shed",
+      "name": "Shed",
+      "size_m": [
+        1,
+        2,
+        1
+      ],
+      "input": "[Log], [Plank]",
+      "verb": "store",
+      "capacity": 8,
+      "output": "[Log], [Plank]",
+      "cost": {
+        "log": 2,
+        "plank": 1
+      },
+      "cost_status": "reviewed"
+    },
+    {
+      "id": "hay_barn",
+      "name": "Barn",
+      "size_m": [
+        1,
+        2,
+        1
+      ],
+      "input": "[Hay],[Flour]",
+      "verb": "store",
+      "capacity": 8,
+      "output": "[Hay],[Flour]",
+      "cost": {
+        "grain": 2,
+        "log": 2
+      },
+      "cost_status": "reviewed"
+    },
+    {
+      "id": "stone_storage",
+      "name": "Depot",
+      "size_m": [
+        3,
+        3,
+        2
+      ],
+      "input": "[Stone], [Slab]",
+      "verb": "store",
+      "capacity": 18,
+      "output": "[Stone], [Slab]",
+      "cost": {
+        "plank": 3,
+        "stone": 3
+      },
+      "cost_status": "reviewed"
+    },
+    {
+      "id": "brickyard",
+      "name": "Brickyard",
+      "size_m": [
+        3,
+        3,
+        2
+      ],
+      "input": "[Clay], [Brick]",
+      "verb": "store",
+      "capacity": 18,
+      "output": "[Clay], [Brick]",
+      "cost": {
+        "stone": 3,
+        "clay": 3
+      },
+      "cost_status": "reviewed"
+    },
+    {
+      "id": "well",
+      "name": "Well",
+      "size_m": [
+        1,
+        1,
+        2
+      ],
+      "input": null,
+      "verb": "store",
+      "capacity": 3,
+      "output": "[Water]",
+      "cost": {
+        "log": 2,
+        "stone": 4
+      },
+      "cost_status": "reviewed"
+    },
+    {
+      "id": "hay_field",
+      "name": "Field",
+      "size_m": [
+        4,
+        4,
+        1
+      ],
+      "input": "[Hay]",
+      "verb": "harvest",
+      "capacity": null,
+      "output": "[Hay]",
+      "cost": {
+        "grain": 4,
+        "log": 1
+      },
+      "cost_status": "reviewed"
+    },
+    {
+      "id": "mill",
+      "name": "Mill",
+      "size_m": [
+        3,
+        3,
+        5
+      ],
+      "input": "[Hay]",
+      "verb": "mill",
+      "capacity": null,
+      "output": "[Flour]",
+      "cost": {
+        "plank": 4,
+        "stone": 4
+      },
+      "cost_status": "reviewed",
+      "size_note": "3 X 3 base, with stacking above the main roof at five metres. Ignore the blade sweep for placement; visual blade length is unchanged."
+    },
+    {
+      "id": "bakery",
+      "name": "Bakery",
+      "size_m": [
+        2,
+        3,
+        2
+      ],
+      "input": "[Flour]",
+      "verb": "bake",
+      "capacity": null,
+      "output": "[Food]",
+      "cost": {
+        "grain": 4,
+        "stone": 4
+      },
+      "cost_status": "reviewed"
+    },
+    {
+      "id": "quarry",
+      "name": "Quarry",
+      "size_m": [
+        3,
+        3,
+        2
+      ],
+      "input": "[Stone]",
+      "verb": "mine, store",
+      "capacity": 4,
+      "output": "[Stone]",
+      "cost": {},
+      "cost_status": "confirmed_free"
+    },
+    {
+      "id": "masonry",
+      "name": "Masonry",
+      "size_m": [
+        3,
+        3,
+        2
+      ],
+      "input": "[Stone]",
+      "verb": "cut",
+      "capacity": null,
+      "output": "[Slab]",
+      "cost": {
+        "log": 4,
+        "plank": 4
+      },
+      "cost_status": "reviewed"
+    },
+    {
+      "id": "claypit",
+      "name": "Claypit",
+      "size_m": [
+        3,
+        3,
+        2
+      ],
+      "input": null,
+      "verb": null,
+      "capacity": null,
+      "output": "[Clay]",
+      "cost": {
+        "log": 2
+      },
+      "cost_status": "provisional_balance"
+    },
+    {
+      "id": "pottery_workshop",
+      "name": "Pottery",
+      "size_m": [
+        2,
+        3,
+        2
+      ],
+      "input": "[Clay]",
+      "verb": "make",
+      "capacity": null,
+      "output": "[Vase]",
+      "cost": {
+        "stone": 4,
+        "clay": 4
+      },
+      "cost_status": "reviewed"
+    },
+    {
+      "id": "kiln",
+      "name": "Kiln",
+      "size_m": [
+        2,
+        3,
+        2
+      ],
+      "input": "[Clay]",
+      "verb": "fire",
+      "capacity": null,
+      "output": "[Brick]",
+      "cost": {
+        "block": 4,
+        "clay": 4
+      },
+      "cost_status": "reviewed"
+    },
+    {
+      "id": "mine",
+      "name": "Mine",
+      "size_m": [
+        3,
+        3,
+        2
+      ],
+      "input": null,
+      "verb": "mine",
+      "capacity": null,
+      "output": "[Ore]",
+      "cost": {
+        "log": 4
+      },
+      "cost_status": "provisional_balance"
+    },
+    {
+      "id": "tilery",
+      "name": "Tilery",
+      "size_m": [
+        2,
+        3,
+        2
+      ],
+      "input": "[Clay]",
+      "verb": "fire",
+      "capacity": 4,
+      "output": "[Imbrex]",
+      "cost": {
+        "stone": 4,
+        "clay": 4
+      },
+      "cost_status": "provisional_balance"
+    }
+  ],
+  "house_tiers": {
+    "max_tier": 3,
+    "roof_materials": [
+      "hay",
+      "plank",
+      "imbrex"
+    ],
+    "upgrade_costs": {
+      "2": {
+        "log": 2,
+        "plank": 4
+      },
+      "3": {
+        "plank": 2,
+        "imbrex": 4
+      }
+    },
+    "cost_status": "provisional_balance",
+    "stacking_from_tier": 2
+  },
+  "well": {
+    "depths_m": [
+      0.6666666667,
+      1.3333333333,
+      2
+    ],
+    "on_puddle_capacity": [
+      3,
+      6,
+      9
+    ],
+    "away_capacity": [
+      1,
+      3,
+      6
+    ],
+    "shallow_capacity_by_distance_m": {
+      "0": 3,
+      "2": 2,
+      "4": 1
+    },
+    "near_deep_rule": "use_away_capacity",
+    "max_units": 3
+  },
+  "vase": {
+    "water_capacity": 1,
+    "house_vases": 3
+  },
+  "delivery": {
+    "ground_overflow": true,
+    "direct_construction_delivery": true,
+    "preserve_occupation": true
+  },
+  "claypit_requires_puddle": true,
+  "extraction": {
+    "claypit": {
+      "resource": "clay",
+      "seconds": 4,
+      "reserve": 240
+    },
+    "mine": {
+      "resource": "ore",
+      "seconds": 6,
+      "reserve": 120
+    }
+  },
+  "extraction_note": "Initial adjustable subsoil reserves; Quarry uses existing finite stone deposits.",
+  "recipes": {
+    "sawmill": {
+      "input": "log",
+      "output": "plank",
+      "role": "sawyer",
+      "verb": "saw"
+    },
+    "mill": {
+      "input": "grain",
+      "output": "flour",
+      "role": "miller",
+      "verb": "mill"
+    },
+    "bakery": {
+      "input": "flour",
+      "output": "food",
+      "role": "baker",
+      "verb": "bake"
+    },
+    "masonry": {
+      "input": "stone",
+      "output": "block",
+      "role": "mason",
+      "verb": "cut"
+    },
+    "pottery_workshop": {
+      "input": "clay",
+      "output": "pottery",
+      "role": "potter",
+      "verb": "make"
+    },
+    "kiln": {
+      "input": "clay",
+      "output": "brick",
+      "role": "kilner",
+      "verb": "fire"
+    },
+    "tilery": {
+      "input": "clay",
+      "output": "imbrex",
+      "role": "tiler",
+      "verb": "fire"
+    }
+  },
+  "resource_labels": {
+    "grain": "Hay",
+    "block": "Slab",
+    "pottery": "Vase",
+    "food": "Food",
+    "imbrex": "Imbrex"
+  },
+  "production_buffer_default": 2,
+  "additional_construction": {
+    "rope_maker": {"log": 4}
+  },
+  "rope_bridge_cost": {
+    "planks_per_metre": 1.0,
+    "rope_per_metre": 0.5,
+    "rounding": "ceil_each_material",
+    "cost_status": "existing_prototype"
+  },
+  "source_differences": {
+    "sawmill": "Attached Numbers G6 includes 4 Hay in addition to 4 Log. Runtime retains 4 Log only pending a balance decision.",
+    "mill": "Attached Numbers B13 is 3 X 3 X 2. Current approved model and stacking height is 3 X 3 X 5.",
+    "well": "Attached Numbers uses 8 m for the third depth; runtime shaft depths are 2, 4, 6 m. Capacities agree."
+  }
+}

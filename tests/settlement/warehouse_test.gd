@@ -46,12 +46,14 @@ func _initialize() -> void:
 func run() -> void:
 	var world = fresh()
 	var cell := Vector3i(4, 0, 0)
-	build(world, "stockpile", cell)
+	world.add_store(cell)
+	world.construction_materials[cell] = {"stone": 1}
+	check(not world.request_build("stockpile", Vector3i.ZERO), "Retired piles cannot be built")
 	var inventory = world.stores[cell]
 	inventory.store("pottery", 5)
 	inventory.store("block", 2)
 	inventory.reserve(0, "pottery")
-	check(world.request_build("stockpile", cell), "Pile upgrades to pottery rack")
+	check(world.request_build("goods_rack", cell), "Legacy supplies upgrade to dedicated pottery rack")
 	check(world.plans.values().back().kind == "goods_rack", "Tier two is rack")
 	check(not world.Relocation.source_error(world, cell).is_empty(), "Upgrade locks moving source")
 	world._complete_plan(world.plans.values().back())
@@ -61,7 +63,7 @@ func run() -> void:
 	for resource in world.Economy.RESOURCES:
 		check(world.Economy.accepts(world, cell, resource) == (resource == "pottery"), "Rack fixed pottery acceptance: " + resource)
 	world = reload_world(world)
-	check(world.request_build("stockpile", cell), "Rack upgrades to small warehouse")
+	check(world.request_build("small_warehouse", cell), "Rack upgrades to small warehouse")
 	check(world.plans.values().back().materials == {"plank": 10, "block": 6}, "Warehouse uses expensive processed materials")
 	world = reload_world(world)
 	world._complete_plan(world.plans.values().back())

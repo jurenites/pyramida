@@ -68,19 +68,11 @@ func run() -> void:
 	var scenery := Scenery.new()
 	root.add_child(scenery)
 	scenery.setup(world)
-	scenery.sync_grass(world, true)
-	var visible := 0
 	for chunk in scenery.chunks.values():
-		var batch: MultiMesh = chunk.get_node("Grass").multimesh
-		if batch == null: continue
-		visible += batch.instance_count
-		for index in batch.instance_count:
-			var position := batch.get_instance_transform(index).origin
-			var cell := Vector3i(roundi(position.x), 0, roundi(position.z))
-			check(world.exploration.contains(Vector3(cell)), "Grass respects citizen exploration")
-	check(visible > 100, "Opening grass is visibly present")
+		check(not chunk.has_node("Grass"), "Terrain contains no decorative grass")
+	check(world.gardens.size() == 3, "Only three harvestable opening patches replace blanket grass")
 	scenery.free()
-	test_placement_preserves_grass()
+	test_legacy_grass()
 	if failures.is_empty():
 		print("PASS: %d vegetation patch, streaming, save and visibility checks" % checks)
 		quit()
@@ -88,37 +80,11 @@ func run() -> void:
 		for failure in failures: printerr("FAIL: " + failure)
 		quit(1)
 
-func grass_transforms(scenery) -> Array:
-	var result := []
-	for chunk in scenery.chunks.values():
-		var batch: MultiMesh = chunk.get_node("Grass").multimesh
-		if batch == null: continue
-		for index in batch.instance_count: result.append(batch.get_instance_transform(index))
-	return result
-
-func test_placement_preserves_grass() -> void:
-	for kind in ["house", "hay_field", "seed_tree", "seed_vegetables"]:
-		var world = Model.new()
-		world.setup()
-		world.trees.clear()
-		world.deposits.clear()
-		var scenery := Scenery.new()
-		root.add_child(scenery)
-		scenery.setup(world)
-		scenery.sync_grass(world, false)
-		var before := grass_transforms(scenery)
-		check(not before.is_empty(), "Placement fixture has natural grass")
-		check(world.request_build(kind, Vector3i.ZERO), "Queue grass preservation fixture: " + kind)
-		scenery.sync_grass(world, false)
-		check(grass_transforms(scenery) == before, "Planning %s keeps every grass tuft" % kind)
-		world._complete_plan(world.plans[world.next_plan_id - 1])
-		scenery.sync_grass(world, false)
-		check(grass_transforms(scenery) == before, "Completed %s keeps grass without clearing padding" % kind)
-		scenery.free()
+func test_legacy_grass() -> void:
 	var world = Model.new()
 	world.setup()
 	check(not world.request_build("seed_grass", Vector3i.ZERO) and world.plans.is_empty(), "Grass planting creates no order")
-	check(not world.Catalog.CATEGORIES.nature.has("seed_grass"), "Nature excludes grass planting")
+	check(not world.Catalog.CATEGORIES.has("nature"), "Nature excludes grass planting")
 	preload("res://scripts/settlement/planting.gd").complete(world, {"kind": "seed_grass", "cell": Vector3i.ZERO})
 	var restored = Model.new()
 	check(restored.restore(JSON.parse_string(JSON.stringify(world.snapshot()))) and restored.gardens[Vector3i.ZERO].species == "grass", "Existing grass patches remain save compatible")

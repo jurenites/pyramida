@@ -1,0 +1,13 @@
+Reviewed Tier 1 implementation validation
+
+PASS: 182 reviewed balance checks (costs, source placement, Wells, production, buffers, floor drops, courier staging, saves, cancellation, startup Field, metre stairs and free Quarry relocation).
+PASS: live rendering and menu smoke test for all 19 reviewed buildings; no duplicate workplace meshes.
+PASS: 37 existing construction cancellation checks.
+PASS: 32 linked asset checks.
+PASS: 28 builder order checks before the final source/relocation additions.
+
+The broader runtime_test.gd reports six existing failures, reproduced unchanged using /private/tmp/pyramida-reviewed-baseline in a separate temporary project: citizen selection circles, menu button total, and four roof/cutaway placement assertions.
+
+Model preview: reviewed-buildings.png
+Balance source: ../../data/settlement/reviewed_balance.json
+Original workbook is unchanged. Claypit (2 Logs), Mine (4 Logs), subsoil reserves, and unspecified workshop buffers are provisional balancing choices.

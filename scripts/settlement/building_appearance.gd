@@ -3,7 +3,7 @@ extends RefCounted
 const Catalog = preload("res://data/settlement/catalog.gd")
 const TimberPalette = preload("res://scripts/settlement/timber_palette.gd")
 const LIMIT := 2048
-const PRIMITIVES := ["log", "plank", "grain", "berry", "tree", "palm", "raw_stone", "block", "rock", "utility_ac", "utility_dish", "utility_pipe", "stick", "bed", "bench", "table", "urn", "food_crate", "water_bucket", "pottery", "roof_face", "ceramic_roof_tile", "metal_roof_sheet"]
+const PRIMITIVES := ["log", "plank", "grain", "berry", "tree", "palm", "raw_stone", "block", "rock", "utility_ac", "utility_dish", "utility_pipe", "stick", "bed", "bench", "table", "urn", "food_crate", "water_bucket", "pottery", "roof_face", "ceramic_roof_tile", "metal_roof_sheet", "roof_corner", "roof_wedge", "roof_long_wedge", "roof_fat_wedge"]
 const SOURCE_COMPONENTS := {"roof_face": ["house", "Roof/Cap"]}
 const Contract = preload("res://scripts/settlement/asset_contract.gd")
 static var directory := "user://building_appearances"
@@ -18,12 +18,18 @@ static func buildings() -> Array:
 	if not building_kinds.is_empty(): return building_kinds
 	var result: Array = []
 	for kind: String in Catalog.COSTS:
-		if not Catalog.DEFINITIONS.get(kind, {}).get("living", false) and ResourceLoader.exists("res://data/settlement/" + kind + ".tscn"):
+		if not Catalog.DEFINITIONS.get(kind, {}).get("living", false) and ResourceLoader.exists(asset_path(kind)):
 			result.append(kind)
 	building_kinds = result
 	return building_kinds
 
+static func asset_path(kind: String) -> String:
+	var reviewed := "res://data/settlement/reviewed_" + kind + ".tscn"
+	return reviewed if ResourceLoader.exists(reviewed) else "res://data/settlement/" + kind + ".tscn"
+
 static func original(kind: String) -> Node3D:
+	if kind in preload("res://scripts/settlement/roof_kit.gd").SIZES:
+		return preload("res://scripts/settlement/roof_kit.gd").create(kind)
 	if kind in SOURCE_COMPONENTS:
 		# Reuse the building's exact mesh/material and authored scale, anchored
 		# at its own floor centre for independent insertion in the workspace.
@@ -36,7 +42,7 @@ static func original(kind: String) -> Node3D:
 		var root := Node3D.new()
 		root.add_child(mesh)
 		return root
-	if not scenes.has(kind): scenes[kind] = load(import_path(kind) if imported(kind) else "res://data/settlement/" + kind + ".tscn")
+	if not scenes.has(kind): scenes[kind] = load(import_path(kind) if imported(kind) else asset_path(kind))
 	var node := (scenes[kind] as PackedScene).instantiate() as Node3D
 	TimberPalette.prepare(node, kind)
 	return node
@@ -66,7 +72,9 @@ static func _collect(root: Node3D, node: Node3D, parent: Transform3D, visible: b
 		_collect(root, child, pose, shown, entries)
 
 static func source(kind: String, path: String) -> MeshInstance3D:
-	return (library(kind)[path].scene as PackedScene).instantiate() as MeshInstance3D
+	var mesh := (library(kind)[path].scene as PackedScene).instantiate() as MeshInstance3D
+	mesh.set_meta("source_component", path)
+	return mesh
 
 static func defaults(kind: String) -> Array:
 	var result: Array = []
@@ -333,3 +341,11 @@ static func imported(kind: String) -> bool:
 
 static func import_path(kind: String) -> String:
 	return mesh_directory.path_join(kind + ".tscn")
+
+static func compatible_parts(root: Node3D, kind: String) -> bool:
+	var custom := saved(kind)
+	if custom.is_empty(): return false
+	for part: Dictionary in custom.parts:
+		var path: String = part.get("component", "")
+		if part.kind == kind and not path.is_empty() and not root.has_node(path): return false
+	return true

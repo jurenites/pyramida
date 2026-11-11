@@ -1,4 +1,4 @@
-# Pyramida 2 — Foundation Specification
+# Town — Foundation Specification
 
 Status: design direction, subordinate to the current code and tests.
 
@@ -9,7 +9,7 @@ This document records agreed direction, not implementation status. [README.md](R
 ## 1. Target first-playable scope
 
 Biophilic design is an approach to architecture
-The target first playable is a peaceful, vegetarian construction sandbox inspired by the basic loop of Sokpop's *Pyramida*, with original code and assets. This section is a roadmap; it does not claim every listed item is implemented.
+The target first playable is a peaceful, vegetarian construction sandbox focused on gathering, crafting and growing a town, with original code and assets. This section is a roadmap; it does not claim every listed item is implemented.
 
 Include first:
 
@@ -55,7 +55,7 @@ One World Unit contains exactly:
 2 × 2 × 2 Sub-Units = 8 Sub-Units
 ```
 
-No real-world metre value is assigned yet.
+Updated 30 October 2026: one World Unit is 1 × 1 × 1 m, and each Sub-Unit is 0.5 × 0.5 × 0.5 m. A minimum room module is 2 × 2 × 2 m, rather than one World Unit. See [building measurements and progression](docs/BUILDING_MEASUREMENTS.md) for dimensions, remaining shell/clearance decisions, and the distinction from older room-relative prototype coordinates. This terminology update does not rescale existing assets or saves.
 
 ### 2.2 Sub-Unit
 

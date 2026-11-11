@@ -2,8 +2,9 @@ extends RefCounted
 ## Visual wood choices share the exact same stock geometry and construction recipe.
 const SPECIES := ["tree", "palm", "dead_tree"]
 const LABELS := ["Tree", "Palm", "Dead tree"]
-const BARK := [Color("986a4b"), Color("74513e"), Color("777269")]
-const WOOD := [Color("d1a775"), Color("bb9166"), Color("bdb5a2")]
+const Palette=preload("res://scripts/game_palette.gd")
+const BARK := [Color("986a4b"), Palette.TIMBER_SIDE, Palette.HOME_DOORWAY]
+const WOOD := [Color("d1a775"), Palette.PEACH_SHADOW, Palette.SAND_SURFACE]
 static var materials: Dictionary = {}
 
 static func material(species: String, stock: String, surface: int) -> StandardMaterial3D:
@@ -36,4 +37,11 @@ static func apply(root: Node3D, species: String) -> void:
 		mesh.material_override = null
 		for surface in mesh.mesh.get_surface_count():
 			mesh.set_surface_override_material(surface, material(species, stock, 1 if mesh.get_meta("timber_cut", false) else surface))
+		if mesh.has_meta("timber_paint"):
+			var colour: Color = mesh.get_meta("timber_paint")
+			var paint_key := "paint:" + colour.to_html()
+			if not materials.has(paint_key):
+				var paint := StandardMaterial3D.new(); paint.albedo_color = colour; paint.roughness = 0.92
+				materials[paint_key] = paint
+			mesh.material_override = materials[paint_key]
 		mesh.set_meta("timber_species", species)

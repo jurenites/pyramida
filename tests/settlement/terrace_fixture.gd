@@ -1,6 +1,7 @@
 extends RefCounted
 ## Explicit built settlement for tests of upper-floor hauling, not new-game defaults.
 static func add_to(model) -> void:
+	preload("res://tests/settlement/supplied_pile_fixture.gd").add_to(model)
 	# Isolate vertical logistics from the new foraging economy.
 	model.deposits.clear()
 	for cell in [Vector3i(0, 1, 0), Vector3i(2, 1, 0), Vector3i(0, 1, 2), Vector3i(2, 1, 2)]:

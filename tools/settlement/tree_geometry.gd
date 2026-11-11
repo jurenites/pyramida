@@ -3,24 +3,21 @@ extends RefCounted
 const Timber = preload("res://scripts/settlement/timber_kit.gd")
 const TRUNK_RADIUS := Timber.LOG_DIAMETER * 0.5
 const STUMP_HEIGHT := 0.18
-const LOG_HEIGHT := 0.88
-const BARK := Color("986a4b")
-const CUT := Color("d1a775")
+const LOG_HEIGHT := Timber.LOG_LENGTH
+const TimberPalette = preload("res://scripts/settlement/timber_palette.gd")
+const BARK: Color = TimberPalette.BARK[0]
+const CUT: Color = TimberPalette.WOOD[0]
 const LEAVES := Color("7e985b")
 
 static func build(kit, parent: Node3D, dead := false) -> void:
-	var bark := BARK.darkened(0.12) if dead else BARK
+	var bark := BARK
 	kit.cylinder(parent, "Stump", Vector3(0, 0.07, 0), TRUNK_RADIUS, STUMP_HEIGHT + 0.04, bark, TRUNK_RADIUS, 7)
 	kit.cylinder(parent, "StumpCut", Vector3(0, STUMP_HEIGHT + 0.002, 0), TRUNK_RADIUS, 0.008, CUT, -1, 7)
-	var joints := [Vector3(0, STUMP_HEIGHT, 0), Vector3(0.035, STUMP_HEIGHT + LOG_HEIGHT, 0.015),
-		Vector3(-0.035, STUMP_HEIGHT + LOG_HEIGHT * 2, -0.02), Vector3(0.025, STUMP_HEIGHT + LOG_HEIGHT * 3, 0)]
+	var joints := [Vector3(0, STUMP_HEIGHT, 0)]
+	for direction in [Vector3(0.035, 1, 0.015), Vector3(-0.07, 1, -0.035), Vector3(0.06, 1, 0.02)]:
+		joints.append(joints[-1] + direction.normalized() * LOG_HEIGHT)
 	for index in 3:
-		var segment := Node3D.new()
-		segment.name = "Segment%d" % (index + 1)
-		parent.add_child(segment)
-		var radius := TRUNK_RADIUS * (1.0 - index * 0.02)
-		branch(kit, segment, "Trunk", joints[index], joints[index + 1], radius, radius - TRUNK_RADIUS * 0.02, bark)
-		kit.cylinder(segment, "CutFace", joints[index + 1] + Vector3.UP * 0.003, radius - TRUNK_RADIUS * 0.02, 0.012, CUT, -1, 7)
+		var segment := Timber.tree_segment(parent, index, joints[index], joints[index + 1] - joints[index])
 		if index == 1:
 			branch(kit, segment, "BrokenBranch", Vector3(0, 1.48, 0), Vector3(-0.33, 1.71, 0.11), 0.09, 0.045, bark)
 		if index == 2:

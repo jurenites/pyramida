@@ -7,6 +7,7 @@ static var GROW_SECONDS := Balance.number("crop_growth_seconds")
 const HARVEST := 3
 const HAY_HARVEST := 4
 const FIELD_OFFSET := Vector3(Grid.ROOM_SIZE * 0.5, 0, Grid.ROOM_SIZE * 0.5)
+const GROUND_SEEDS := ["seed_tree", "seed_palm", "seed_vegetables", "seed_grass"]
 
 static func standing_quarters(crop: Dictionary) -> int:
 	# Older saves retain their remaining yield, represented as contiguous quarters.
@@ -16,7 +17,7 @@ static func quarter_at(local_position: Vector3) -> int:
 	return int(local_position.x >= 0.0) + 2 * int(local_position.z >= 0.0)
 
 static func quarter_cell(world, cell: Vector3i, quarter: int) -> Vector3i:
-	var building: Dictionary = world.buildings[cell]
+	var building: Dictionary = field_layout(world, cell)
 	var local := Vector3(1 if quarter % 2 else -1, 0, 1 if quarter >= 2 else -1) * Grid.ROOM_SIZE * 0.5
 	var offset: Vector3 = building.get("placement_offset", Vector3.ZERO)
 	offset += local.rotated(Vector3.UP, -int(building.get("direction", 0)) * PI * 0.5)
@@ -24,6 +25,7 @@ static func quarter_cell(world, cell: Vector3i, quarter: int) -> Vector3i:
 
 static func cut_quarter(crop: Dictionary, quarter := -1) -> void:
 	var standing := standing_quarters(crop)
+	if standing == 0: return
 	# Jobs saved before quarters existed still finish one valid cut.
 	if quarter < 0 or (standing & (1 << quarter)) == 0:
 		for candidate in HAY_HARVEST:
@@ -33,6 +35,10 @@ static func cut_quarter(crop: Dictionary, quarter := -1) -> void:
 	if quarter < 0: return
 	crop.standing_quarters = standing & ~(1 << quarter)
 	crop.food -= 1
+	if crop.has("quarter_growth"):
+		crop.quarter_growth[quarter] = 0.0
+		crop.quarter_water[quarter] = 0
+		update_totals(crop)
 
 static func bed_cells(cell: Vector3i) -> Array[Vector3i]:
 	return [cell, cell + Vector3i(2, 0, 0), cell + Vector3i(0, 0, 2), cell + Vector3i(2, 0, 2)]
@@ -40,18 +46,24 @@ static func bed_cells(cell: Vector3i) -> Array[Vector3i]:
 static func footprint(kind: String, cell: Vector3i, offset := Vector3.ZERO, direction := 0) -> Rect2:
 	var width: float = Grid.CELL_SIZE if kind in ["well", "berry", "seed_bush", "seed_vine", "vine_tree", "seed_grass", "grass_patch"] else Grid.ROOM_SIZE
 	if kind in ["seed_vine", "vine_tree"]: width = 0.16
+	# Seeds reserve their root spot, not a mature canopy or a building-sized plot.
+	if kind in GROUND_SEEDS: width = 0.5
 	if kind == "hay_field": width *= 2.0
 	if kind == "stone_storage": width = 3.0
 	if kind in ["goods_rack", "small_warehouse"]: width = 1.0
 	var centre := Vector2(cell.x * Grid.CELL_SIZE + offset.x, cell.z * Grid.CELL_SIZE + offset.z)
 	var size := Vector2(1, 2) if kind in ["hay_barn", "log_shed"] else Vector2.ONE * width
-	if kind in ["hay_barn", "log_shed"] and direction % 2 == 1: size = Vector2(size.y, size.x)
+	if kind == "rope_maker": size = Vector2(2, 3)
+	if Catalog.Reviewed.has(kind):
+		var dimensions := Catalog.Reviewed.size(kind)
+		size = Vector2(dimensions.x, dimensions.z)
+	if direction % 2 == 1: size = Vector2(size.y, size.x)
 	return Rect2(centre - size * 0.5, size)
 
 static func overlaps(kind: String, cell: Vector3i, other_kind: String, other: Vector3i, offset := Vector3.ZERO, other_offset := Vector3.ZERO, direction := 0, other_direction := 0) -> bool:
 	# Ordinary buildings retain their logical room footprint despite visual nudges.
-	if kind not in ["hay_field", "seed_vine", "vine_tree"] and other_kind not in ["seed_vine", "vine_tree"]: offset = Vector3.ZERO
-	if other_kind not in ["hay_field", "seed_vine", "vine_tree"] and kind not in ["seed_vine", "vine_tree"]: other_offset = Vector3.ZERO
+	if kind not in ["hay_barn", "hay_field", "seed_vine", "vine_tree"] and other_kind not in ["hay_barn", "seed_vine", "vine_tree"]: offset = Vector3.ZERO
+	if other_kind not in ["hay_barn", "hay_field", "seed_vine", "vine_tree"] and kind not in ["hay_barn", "seed_vine", "vine_tree"]: other_offset = Vector3.ZERO
 	var height := int(Catalog.building_height(kind)) if kind in Catalog.ROOFS or kind == "stairs" else 1
 	var other_height := int(Catalog.building_height(other_kind)) if other_kind in Catalog.ROOFS or other_kind == "stairs" else 1
 	return cell.y < other.y + other_height and other.y < cell.y + height and footprint(kind, cell, offset, direction).intersects(footprint(other_kind, other, other_offset, other_direction))
@@ -64,32 +76,40 @@ static func occupied(world, kind: String, cell: Vector3i, offset := Vector3.ZERO
 		for dx in range(-2, 3):
 			for dz in range(-2, 3):
 				var other := cell + Vector3i(dx, dy, dz)
-				if world.buildings.has(other) and overlaps(kind, cell, world.buildings[other].kind, other, offset, world.buildings[other].get("placement_offset", Vector3.ZERO)): return true
+				if world.buildings.has(other) and overlaps(kind, cell, world.buildings[other].kind, other, offset, world.buildings[other].get("placement_offset", Vector3.ZERO), direction, int(world.buildings[other].get("direction", 0))): return true
 	# Preserve the cheap room-grid query while generating an unbuilt world.
-	if not world.buildings.values().any(func(b): return b.kind in ["stone_storage", "goods_rack", "small_warehouse"]) and kind not in ["goods_rack", "small_warehouse", "stone_storage", "hay_barn", "log_shed", "sawmill", "well", "waterworks", "soil_bed", "berry", "hay_field", "platform"] and world.vines.is_empty() and world.soil_beds.is_empty() and kind not in Catalog.SEEDS and world.gardens.is_empty():
+	if not Catalog.Reviewed.has(kind) and not world.buildings.values().any(func(b): return b.kind in ["stone_storage", "goods_rack", "small_warehouse", "sawmill", "mill", "bakery", "masonry", "pottery_workshop", "kiln", "quarry", "claypit", "mine", "brickyard"]) and kind not in ["goods_rack", "small_warehouse", "stone_storage", "hay_barn", "log_shed", "sawmill", "well", "waterworks", "soil_bed", "berry", "hay_field", "platform"] and world.vines.is_empty() and world.soil_beds.is_empty() and kind not in Catalog.SEEDS and world.gardens.is_empty():
 		for collection in [world.buildings, world.stores, world.stairs, world.trees, world.wells, world.water_sources, world.deposits]:
 			if world._overlaps_collection(collection, cell): return true
 		return false
 	# Bounded neighbourhood keeps streaming-world placement independent of map size.
 	for field in ["buildings", "stores", "gardens", "stairs", "trees", "wells", "water_sources", "deposits", "soil_beds", "vines"]:
-		if field == "soil_beds" and kind in ["hay_field", "platform", "seed_vegetables", "seed_grass", "seed_bush", "berry"]: continue
+		if field == "soil_beds" and kind in GROUND_SEEDS: continue
+		if field == "soil_beds" and (kind in ["hay_field", "platform", "seed_vegetables", "seed_grass", "seed_bush", "berry"] or kind in Catalog.ROOFS): continue
 		var collection: Dictionary = world.get(field)
 		for x in range(-4, 5):
 			for z in range(-4, 5):
 				var other := cell + Vector3i(x, 0, z)
 				if not collection.has(other): continue
+				if field == "gardens" and collection[other].get("species") == "grass" and collection[other].food <= 0 and not collection[other].get("first_growth", false): continue
+				if kind in GROUND_SEEDS and (field in ["trees", "vines"] or (field == "gardens" and collection[other].has("species")) or (field == "deposits" and collection[other].kind == "berry")):
+					if other == cell: return true
+					continue
 				if other == cell and field in ["stores", "buildings"] and world.goods_upgrade(kind, cell): continue
-				if field == "buildings" and other == cell and kind == "sawmill" and collection[other].kind == "sawmill": continue
+				if field in ["buildings", "stores"] and other == cell and kind == "sawmill" and world.buildings.get(other, {}).get("kind") == "sawmill" and not world.buildings[other].get("reviewed", false): continue
 				if field == "deposits" and collection[other].kind == "limestone" and (collection[other].inventory.count("stone") == 0 or collection[other].inventory.capacity > 30): continue
-				if field == "water_sources" and kind == "well" and collection[other].kind == "puddle": continue
+				if field == "water_sources" and kind in ["well", "claypit"] and collection[other].kind == "puddle": continue
 				if other == cell and world.wells.has(cell) and kind in ["well", "waterworks"] and field in ["buildings", "wells", "water_sources"]: continue
 				var plot_kind: String = {"stores": "stockpile", "gardens": "garden", "soil_beds": "soil_bed", "vines": "vine_tree"}.get(field, "")
 				var other_kind: String = world.buildings.get(other, {}).get("kind", plot_kind)
 				if field == "deposits": other_kind = collection[other].kind
+				if field == "gardens" and is_hay(world, other): other_kind = "hay_field"
 				if field == "gardens" and collection[other].get("species") == "grass": other_kind = "grass_patch"
+				if other_kind == "hay_field" and kind in Catalog.ROOFS: continue
 				if kind == "platform" and (other_kind in Catalog.PLATFORM_COVERABLE or other_kind == "grass_patch"): continue
 				var other_offset: Vector3 = world.buildings.get(other, {}).get("placement_offset", Vector3.ZERO)
 				if field == "vines": other_offset = collection[other].get("placement_offset", Vector3.ZERO)
+				if field == "gardens" and is_hay(world, other): other_offset = field_layout(world, other).get("placement_offset", Vector3.ZERO)
 				if overlaps(kind, cell, other_kind, other, offset, other_offset, direction, int(world.buildings.get(other, {}).get("direction", 0))): return true
 	return false
 
@@ -106,6 +126,8 @@ static func bush_soil_ready(world, cell: Vector3i) -> bool:
 	return true
 
 static func foundation_error(world, kind: String, cell: Vector3i) -> String:
+	if kind in GROUND_SEEDS:
+		return "" if world.ground.has(cell) else "Soil required"
 	if kind in ["berry", "seed_bush"]:
 		return "" if bush_soil_ready(world, cell) else "Prepared soil required"
 	if kind in Catalog.SEEDS:
@@ -122,17 +144,19 @@ static func foundation_error(world, kind: String, cell: Vector3i) -> String:
 	if kind != "hay_field": return ""
 	for bed: Vector3i in bed_cells(cell):
 		if world.soil_beds.has(bed) and not world.Relocation.locked(world, bed): continue
-		# Each room-sized quadrant needs soil or flat natural sand throughout.
+		# Each quadrant follows natural ground at its level, or prepared elevated soil.
 		for support in Grid.support_cells(bed):
 			if not Catalog.in_bounds(support): return "Outside the building area"
-			if support.y != 0 or not world.ground.has(support) or world.terrain_shapes.has(support):
-				return "Sand or four soil beds required"
+			if not world.ground.has(support):
+				return "Ground or four soil beds required"
 	return ""
 
 static func bed_in_use(world, bed: Vector3i) -> bool:
 	for cell: Vector3i in world.deposits:
 		if world.deposits[cell].kind == "berry" and overlaps("soil_bed", bed, "berry", cell): return true
 	for cell: Vector3i in world.gardens:
+		if world.gardens[cell].get("species") == "grass" and world.gardens[cell].food <= 0 and not world.gardens[cell].get("first_growth", false): continue
+		if is_hay(world, cell) and overlaps("soil_bed", bed, "hay_field", cell, Vector3.ZERO, field_layout(world, cell).get("placement_offset", Vector3.ZERO)): return true
 		if world.gardens[cell].has("species") and overlaps("soil_bed", bed, "garden", cell): return true
 	for plan: Dictionary in world.plans.values():
 		if world.Deconstruction.is_salvage(plan): continue
@@ -171,6 +195,10 @@ static func light_rate(world, cell: Vector3i, field := false) -> float:
 	return world.crop_light_cache[key]
 
 static func _light_rate(world, cell: Vector3i, field: bool) -> float:
+	if field and is_hay(world, cell):
+		var available := 0
+		for quarter in HAY_HARVEST: available += int(quarter_open(world, cell, quarter))
+		return available / float(HAY_HARVEST)
 	var base := Vector3(cell.x * Grid.CELL_SIZE, cell.y * Grid.LEVEL_HEIGHT + 0.35, cell.z * Grid.CELL_SIZE)
 	if not field: return 1.0 if sky_open(world, base) else Balance.number("shade_growth_multiplier")
 	base += Vector3(world.buildings.get(cell, {}).get("placement_offset", Vector3.ZERO))
@@ -181,15 +209,145 @@ static func _light_rate(world, cell: Vector3i, field: bool) -> float:
 			open += int(sky_open(world, base + Vector3(x, 0, z) * Grid.CELL_SIZE))
 	return lerpf(Balance.number("shade_growth_multiplier"), 1.0, float(open) / (samples.size() * samples.size()))
 
+# The field keeps its own layout when a building occupies its anchor quarter.
+static func is_hay(world, cell: Vector3i) -> bool:
+	return world.gardens.get(cell, {}).has("field_layout") or world.buildings.get(cell, {}).get("kind") == "hay_field"
+
+static func field_layout(world, cell: Vector3i) -> Dictionary:
+	var building: Dictionary = world.buildings.get(cell, {})
+	return building if building.get("kind") == "hay_field" else world.gardens.get(cell, {}).get("field_layout", building)
+
+static func remember_field(world, cell: Vector3i) -> void:
+	if not is_hay(world, cell): return
+	var crop: Dictionary = world.gardens[cell]
+	if world.buildings.get(cell, {}).get("kind") == "hay_field":
+		crop.field_layout = world.buildings[cell].duplicate(true)
+		crop.field_materials = world.construction_materials.get(cell, {}).duplicate(true)
+
+static func restore_field(world, cell: Vector3i) -> void:
+	if is_hay(world, cell) and not world.buildings.has(cell):
+		world.buildings[cell] = field_layout(world, cell).duplicate(true)
+		world.construction_materials[cell] = world.gardens[cell].get("field_materials", {}).duplicate(true)
+
+static func ensure_quarters(crop: Dictionary) -> void:
+	if crop.has("quarter_growth"): return
+	crop.quarter_growth = [0.0, 0.0, 0.0, 0.0]
+	crop.quarter_water = [0, 0, 0, 0]
+	crop.standing_quarters = standing_quarters(crop)
+	for quarter in HAY_HARVEST:
+		crop.quarter_growth[quarter] = float(crop.growth)
+		crop.quarter_water[quarter] = int(crop.water)
+
+static func update_totals(crop: Dictionary) -> void:
+	crop.food = 0
+	crop.growth = 0.0
+	crop.water = 0
+	for quarter in HAY_HARVEST:
+		crop.food += int((int(crop.standing_quarters) & (1 << quarter)) != 0)
+		crop.growth = maxf(crop.growth, crop.quarter_growth[quarter])
+		crop.water = maxi(crop.water, crop.quarter_water[quarter])
+
+static func quarter_open(world, cell: Vector3i, quarter: int) -> bool:
+	if world.crop_light_revision != world.navigation.revision:
+		world.crop_light_revision = world.navigation.revision
+		world.crop_light_cache.clear()
+	var key := [cell, "quarter", quarter]
+	if not world.crop_light_cache.has(key): world.crop_light_cache[key] = _quarter_open(world, cell, quarter)
+	return world.crop_light_cache[key]
+
+static func _quarter_open(world, cell: Vector3i, quarter: int) -> bool:
+	# Any roof/building footprint touching a quarter blocks that entire harvest unit.
+	var centre := quarter_cell(world, cell, quarter)
+	var plot := footprint("soil_bed", centre).grow(-0.001)
+	for other: Vector3i in world.buildings:
+		var building: Dictionary = world.buildings[other]
+		if building.kind == "hay_field": continue
+		if other.y + Catalog.building_height(building.kind) <= cell.y: continue
+		if plot.intersects(footprint(building.kind, other, building.get("placement_offset", Vector3.ZERO), int(building.get("direction", 0)))): return false
+	for other: Vector3i in world.platforms:
+		if other.y > cell.y and plot.intersects(footprint("platform", other)): return false
+	for other: Vector3i in world.soil_beds:
+		if other.y > cell.y and plot.intersects(footprint("soil_bed", other)): return false
+	return true
+
+static func watering_targets(world, cell: Vector3i) -> Array[Vector3i]:
+	if not is_hay(world, cell): return [cell]
+	var result: Array[Vector3i] = []
+	for quarter in HAY_HARVEST:
+		if quarter_open(world, cell, quarter): result.append(quarter_cell(world, cell, quarter))
+	return result
+
+static func needs_water(world, cell: Vector3i) -> bool:
+	var crop: Dictionary = world.gardens[cell]
+	if not is_hay(world, cell): return crop.water == 0 and crop.food == 0 and crop.get("species") != "grass"
+	ensure_quarters(crop)
+	for quarter in HAY_HARVEST:
+		if quarter_open(world, cell, quarter) and (standing_quarters(crop) & (1 << quarter)) == 0 and crop.quarter_water[quarter] == 0: return true
+	return false
+
+static func water_crop(world, cell: Vector3i, rain := false) -> void:
+	var crop: Dictionary = world.gardens[cell]
+	if is_hay(world, cell):
+		ensure_quarters(crop)
+		for quarter in HAY_HARVEST:
+			if quarter_open(world, cell, quarter) and (standing_quarters(crop) & (1 << quarter)) == 0:
+				crop.quarter_water[quarter] = 1
+		update_totals(crop)
+	elif not rain or sky_open(world, Vector3(cell.x * Grid.CELL_SIZE, cell.y * Grid.LEVEL_HEIGHT + 0.35, cell.z * Grid.CELL_SIZE)):
+		crop.water = 1
+
+static func rain_crops(world) -> void:
+	for cell: Vector3i in world.gardens: water_crop(world, cell, true)
+
 static func tick_crops(world, delta: float) -> void:
 	for cell: Vector3i in world.gardens:
 		var crop: Dictionary = world.gardens[cell]
+		if is_hay(world, cell):
+			ensure_quarters(crop)
+			# Accept legacy/manual callers that set the shared water flag directly.
+			if crop.water > 0 and not crop.quarter_water.has(1): water_crop(world, cell)
+			var before := standing_quarters(crop)
+			for quarter in HAY_HARVEST:
+				var bit := 1 << quarter
+				if not quarter_open(world, cell, quarter):
+					crop.standing_quarters = int(crop.standing_quarters) & ~bit
+					crop.quarter_growth[quarter] = 0.0
+					crop.quarter_water[quarter] = 0
+					continue
+				if (standing_quarters(crop) & bit) != 0 or crop.quarter_water[quarter] <= 0: continue
+				crop.quarter_growth[quarter] += delta
+				if crop.quarter_growth[quarter] >= Balance.number("crop_growth_seconds"):
+					crop.standing_quarters = int(crop.standing_quarters) | bit
+					crop.quarter_growth[quarter] = 0.0
+					crop.quarter_water[quarter] = 0
+			update_totals(crop)
+			if standing_quarters(crop) != before: world.revision += 1
+			continue
+		# Retain exhausted grass as saved history, without refilling its harvest.
+		# Only a legacy sowing order may grow a new patch for the first time.
+		if crop.get("species") == "grass" and not crop.get("first_growth", false): continue
 		if (crop.water <= 0 and crop.get("species") != "grass") or crop.food > 0: continue
 		crop.growth += delta * light_rate(world, cell, true)
 		if crop.growth >= Balance.number("crop_growth_seconds"):
-			var hay: bool = world.buildings.get(cell, {}).get("kind") == "hay_field"
-			crop.food = HAY_HARVEST if hay else HARVEST
-			if hay: crop.standing_quarters = (1 << HAY_HARVEST) - 1
+			crop.food = HARVEST
 			crop.water = 0
 			crop.growth = 0.0
+			crop.erase("first_growth")
 			world.revision += 1
+
+static func cells(kind: String, cell: Vector3i, direction := 0, offset := Vector3.ZERO) -> Array[Vector3i]:
+	var rect := footprint(kind, cell, offset if kind == "hay_barn" else Vector3.ZERO, direction)
+	var result: Array[Vector3i] = []
+	for x in range(ceili(rect.position.x), floori(rect.end.x) + 1):
+		for z in range(ceili(rect.position.y), floori(rect.end.y) + 1):
+			result.append(Vector3i(x, cell.y, z))
+	return result
+
+static func entrances(world, kind: String, cell: Vector3i, direction := 0) -> Array[Vector3i]:
+	var result: Array[Vector3i] = []
+	var occupied_cells := cells(kind, cell, direction, world.buildings.get(cell, {}).get("placement_offset", Vector3.ZERO))
+	for body in occupied_cells:
+		for step: Vector3i in world.DIRECTIONS:
+			var candidate := body + step
+			if candidate not in occupied_cells and candidate not in result and world.navigation.walkable(candidate): result.append(candidate)
+	return result

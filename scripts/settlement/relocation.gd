@@ -4,7 +4,7 @@ const Catalog = preload("res://data/settlement/catalog.gd")
 const Grid = preload("res://scripts/settlement/world_grid.gd")
 const Inventory = preload("res://scripts/settlement/inventory.gd")
 const Labour = preload("res://scripts/applied_labour.gd")
-const FIELDS := ["buildings", "platforms", "stairs", "stores", "wells", "gardens", "trees", "deposits", "soil_beds"]
+const FIELDS := ["buildings", "platforms", "stairs", "stores", "wells", "gardens", "trees", "deposits", "soil_beds", "vines"]
 
 static func kind_at(world, cell: Vector3i) -> String:
 	if world.deposits.get(cell, {}).get("kind") == "berry": return "berry"
@@ -20,24 +20,35 @@ static func kind_at(world, cell: Vector3i) -> String:
 	return ""
 
 static func portable_plant(plan: Dictionary) -> bool:
-	return not plan.get("collect_bush", false) and (plan.kind in ["tree", "berry"] or (plan.kind == "garden" and plan.required == 0))
+	return not plan.get("collect_bush", false) and not plan.get("collect_vine", false) and (plan.kind in ["tree", "berry", "vine_tree"] or (plan.kind == "garden" and plan.required == 0))
 
 static func locked(world, cell: Vector3i) -> bool:
 	for plan: Dictionary in world.plans.values():
 		if world.Deconstruction.is_salvage(plan): continue
 		if plan.has("relocation") and plan.relocation.source == cell: return true
-		if plan.cell == cell and (world.wells.has(cell) or world.buildings.get(cell, {}).get("kind") == "sawmill" or plan.get("goods_upgrade", false)): return true
+		if plan.cell == cell and (world.wells.has(cell) or world.buildings.get(cell, {}).get("kind") == "sawmill" or plan.get("goods_upgrade", false) or plan.get("house_upgrade", false)): return true
 	return false
+
+static func pending_move(world, cell: Vector3i) -> Dictionary:
+	for plan: Dictionary in world.plans.values():
+		if plan.get("deconstruction", false) or plan.get("collect_bush", false) or plan.get("collect_vine", false): continue
+		if plan.has("relocation") and plan.relocation.source == cell and plan.relocation.stage == "dismantle": return plan
+	return {}
 
 static func source_error(world, cell: Vector3i, existing := false) -> String:
 	var kind := kind_at(world, cell)
+	if kind=="house" and preload("res://scripts/settlement/home_assembly.gd").has_utilities(world,cell): return "Connected utilities must stay in place"
+	if kind=="support" and preload("res://scripts/settlement/support_runtime.gd").carries_neighbor(world,cell): return "This log supports a neighboring building"
+	if world.RopeBridges.supports_bridge(world, cell, kind): return "Move or remove the attached bridge first"
 	if kind.is_empty() or (not existing and locked(world, cell)): return "relocation_unavailable_text"
+	if kind == "house" and world.Houses.frame_needed(world, cell): return "relocation_support_text"
 	if kind == "tree" and world.is_stump(cell) and not existing: return "relocation_unavailable_text"
 	if not world.exploration.contains(world.navigation.point(cell)): return "relocation_unavailable_text"
 	if kind == "berry": return ""
 	if kind == "vine_tree": return "" if world.vines[cell].health > 0 else "relocation_unavailable_text"
 	if kind == "soil_bed" and world.Farming.bed_in_use(world, cell): return "relocation_support_text"
 	if world.needs_stack_support(cell): return "relocation_support_text"
+	if world.StructureLayout.restoring_deck_occupied(world, cell): return "relocation_support_text"
 	if kind == "platform":
 		if world.occupied(cell): return "relocation_support_text"
 		for plan: Dictionary in world.plans.values():
@@ -54,13 +65,16 @@ static func source_error(world, cell: Vector3i, existing := false) -> String:
 				return "relocation_support_text"
 	return ""
 
-static func destination_error(world, source: Vector3i, target: Vector3i, direction: int, offset: Vector3) -> String:
-	var error := source_error(world, source)
+static func destination_error(world, source: Vector3i, target: Vector3i, direction: int, offset: Vector3, ignored_plan_id := -1) -> String:
+	if ignored_plan_id != -1 and pending_move(world, source).get("id", -1) != ignored_plan_id: return "relocation_unavailable_text"
+	var error := source_error(world, source, ignored_plan_id != -1)
 	if not error.is_empty(): return error
 	var kind := kind_at(world, source)
 	if source == target or world.goods_upgrade(kind, target): return "This space is occupied"
+	if kind == "support" and world.buildings.get(target, {}).get("kind") == "support": return "This space is occupied"
 	if world.buildings.get(target, {}).get("kind") == "sawmill": return "This space is occupied"
 	if kind != "well" and world.wells.has(target): return "This space is occupied"
+	if kind == "well" and world.wells.has(target) and world.Hydrology.units(world.buildings[source]) + world.Hydrology.units(world.buildings[target]) > 3: return "Already fully upgraded"
 	if kind == "hay_field": offset = world.Farming.FIELD_OFFSET
 	if world.Farming.overlaps(kind, source, kind, target, world.buildings.get(source, {}).get("placement_offset", Vector3.ZERO), offset): return "This space is occupied"
 	if target.y > source.y and Grid.overlaps(source, Vector3i(target.x, source.y, target.z)):
@@ -74,8 +88,11 @@ static func destination_error(world, source: Vector3i, target: Vector3i, directi
 	var placement_kind := "garden" if kind == "tree" else kind
 	if kind == "garden" and world.gardens[source].has("species"):
 		placement_kind = "seed_grass" if world.gardens[source].species == "grass" else "seed_vegetables"
-	error = world.build_error(placement_kind, target, direction, offset, -1, world.Platforms.tier(world.platforms[source]) if kind == "platform" else 1)
+	error = preload("res://scripts/settlement/vines.gd").placement_error(world, target, offset, ignored_plan_id) if kind == "vine_tree" else world.build_error(placement_kind, target, direction, offset, ignored_plan_id, world.Platforms.tier(world.platforms[source]) if kind == "platform" else 1)
 	if not error.is_empty(): return error
+	if kind=="support":
+		error=preload("res://scripts/settlement/support_runtime.gd").foundation_error(world,target,offset,float(world.buildings[source].get("support_yaw",0.0)),ignored_plan_id,source)
+		if not error.is_empty(): return error
 	var reachable := false
 	for start: Vector3i in source_work_cells(world, kind, source, direction):
 		if not world.nearest_route(start, world.work_cells(kind, target, direction, world.Platforms.tier(world.platforms[source]) if kind == "platform" else 0)).is_empty():
@@ -93,7 +110,7 @@ static func request(world, source: Vector3i, target: Vector3i, direction: int, o
 	if dismantle_only and (kind not in Catalog.COSTS or target != source): return false
 	if collect_only and (kind != "berry" or target != source or dismantle_only): return false
 	if kind == "hay_field" and not dismantle_only: offset = world.Farming.FIELD_OFFSET
-	var materials: Dictionary = {} if kind in ["tree", "berry"] else world.construction_materials.get(source, Catalog.recipe(kind)).duplicate()
+	var materials: Dictionary = {} if kind in ["tree", "berry", "vine_tree"] else world.construction_materials.get(source, Catalog.recipe(kind)).duplicate()
 	if kind == "soil_bed": materials = world.soil_beds[source].materials.duplicate()
 	var required := 0
 	for amount: int in materials.values(): required += amount
@@ -106,8 +123,12 @@ static func request(world, source: Vector3i, target: Vector3i, direction: int, o
 		"placement_offset": offset, "relocation": {"source": source, "pickup_cell": source,
 		"stage": "dismantle", "parts": parts, "payload": {}, "owner": -1,
 		"labour": Labour.new(maxf(2.0, required * 1.0))}}
+	if Catalog.Reviewed.has(kind) and (world.buildings.get(source, {}).get("reviewed", false) or materials == Catalog.recipe(kind)): world.plans[id].reviewed = true
+	if kind == "support": world.plans[id].support_yaw=float(world.buildings[source].get("support_yaw",0.0))
+	if kind == "support" and not dismantle_only: preload("res://scripts/settlement/support_foundation.gd").price_plan(world, world.plans[id])
 	if kind == "stone_storage": world.plans[id].storage_tier = int(world.buildings[source].get("storage_tier", 1))
 	if kind == "windmill": world.plans[id].mill_tier = int(world.buildings[source].get("mill_tier", 3))
+	if kind == "house": world.plans[id].house_tier = preload("res://scripts/settlement/house_tiers.gd").tier(world.buildings[source])
 	if kind == "platform": world.plans[id].platform_tier = world.Platforms.tier(world.platforms[source])
 	if dismantle_only: world.plans[id]["deconstruction"] = true
 	if collect_only: world.plans[id].collect_bush = true
@@ -126,15 +147,17 @@ static func request(world, source: Vector3i, target: Vector3i, direction: int, o
 			worker.route_index = 0
 			if not worker.cargo.is_empty():
 				worker.job = {"kind": "restock", "phase": "store", "target": worker.cell, "labour": Labour.new(0.6)}
-	world.rebuild_navigation()
+	# The existing building stays solid until dismantling actually finishes.
+	world.revision += 1
 	return true
 
 static func assign(world, worker: Dictionary, plan: Dictionary) -> bool:
 	var move: Dictionary = plan.relocation
-	if move.stage == "rebuild" and not portable_plant(plan): return false
+	if move.stage == "rebuild" and plan.required > 0 and not portable_plant(plan): return false
 	if move.owner != -1: return false
 	if move.stage == "dismantle" and not source_error(world, move.source, true).is_empty(): return false
 	var cell: Vector3i = move.source if move.stage == "dismantle" else move.pickup_cell
+	if move.stage == "rebuild" and plan.required == 0 and not portable_plant(plan): cell = plan.cell
 	var candidates := source_work_cells(world, plan.kind, cell, plan.direction)
 	var route: Array[Vector3i] = world.nearest_route(worker.cell, candidates)
 	if route.is_empty(): return false
@@ -145,11 +168,26 @@ static func assign(world, worker: Dictionary, plan: Dictionary) -> bool:
 
 static func material_source(world, worker: Dictionary, plan: Dictionary, resource: String) -> Dictionary:
 	var move: Dictionary = plan.relocation
-	if move.stage != "rebuild" or move.parts.available(resource) <= 0: return {}
-	var route: Array[Vector3i] = world.navigation.route(worker.cell, move.pickup_cell)
-	var destination: Array[Vector3i] = world.nearest_route(move.pickup_cell, world.work_cells(plan.kind, plan.cell, plan.direction))
-	if route.is_empty() or destination.is_empty(): return {}
-	return {"inventory": move.parts, "route": route, "target": destination.back()}
+	if move.stage != "rebuild": return {}
+	var sources: Array[Dictionary] = [{"cell": move.pickup_cell, "inventory": move.parts}]
+	for dropped: Dictionary in world.plans.values():
+		if dropped.get("parts_owner", -1) == plan.id:
+			sources.append({"cell": dropped.cell, "inventory": dropped.relocation.parts})
+	var best := {}
+	var shortest := INF
+	for source: Dictionary in sources:
+		if source.inventory.available(resource) <= 0: continue
+		var route: Array[Vector3i] = world.navigation.route(worker.cell, source.cell)
+		if route.is_empty(): continue
+		var destination: Array[Vector3i] = world.nearest_route(route.back(), world.work_cells(plan.kind, plan.cell, plan.direction))
+		if destination.is_empty(): continue
+		var distance: float = world.navigation.distance(route)
+		if distance < shortest:
+			shortest = distance
+			best = {"inventory": source.inventory, "route": route, "target": destination.back()}
+	if best.is_empty() and plan.kind == "support":
+		return world.Jobs._source_for(world, worker, resource, world.work_cells(plan.kind, plan.cell, plan.direction), null, 0, true)
+	return best
 
 static func tick_work(world, worker: Dictionary, delta: float) -> void:
 	var plan: Dictionary = world.plans[worker.job.plan_id]
@@ -159,6 +197,10 @@ static func tick_work(world, worker: Dictionary, delta: float) -> void:
 		_start_plant_carry(world, worker, plan)
 		return
 	if not worker.job.labour.apply(worker.id, delta * world.Economy.work_speed(world) * (0.5 if worker.hunger >= 120 else 1.0)): return
+	if move.stage == "rebuild" and plan.required == 0 and not portable_plant(plan):
+		world._complete_plan(plan)
+		worker.job = {}
+		return
 	if move.stage == "dismantle":
 		# Recheck structural use: another order may have changed the source while walking.
 		if not source_error(world, move.source, true).is_empty(): return
@@ -168,15 +210,20 @@ static func tick_work(world, worker: Dictionary, delta: float) -> void:
 		if plan.get("collect_vine", false):
 			preload("res://scripts/settlement/vines.gd").finish_collect(world, worker, plan)
 			return
+		if plan.get("deconstruction", false): world.timber_dismantled.emit(plan)
 		world.water_orders.erase(move.source)
 		for field in FIELDS:
+			if field == "vines" and plan.kind != "vine_tree": continue
 			if field == "soil_beds" and plan.kind != "soil_bed": continue
+			if field == "gardens" and plan.kind != "hay_field" and world.Farming.is_hay(world, move.source): continue
 			if world.get(field).has(move.source):
 				move.payload[field] = world.get(field)[move.source]
 				world.get(field).erase(move.source)
+		var recovered: Dictionary = world.construction_materials.get(move.source, plan.materials).duplicate() if plan.kind == "support" else plan.materials
 		if plan.kind != "soil_bed": world.construction_materials.erase(move.source)
+		world.Farming.restore_field(world, move.source)
 		move.pickup_cell = worker.cell
-		for resource: String in plan.materials: move.parts.store(resource, plan.materials[resource])
+		for resource: String in recovered: move.parts.store(resource, recovered[resource])
 		if plan.get("deconstruction", false):
 			world.Deconstruction.unpack(world, plan)
 			worker.job = {}
@@ -199,6 +246,12 @@ static func tick_work(world, worker: Dictionary, delta: float) -> void:
 static func finish_plant(world, plan: Dictionary) -> void:
 	if plan.kind == "garden": world.construction_materials[plan.cell] = {}
 	for field: String in plan.relocation.payload: world.get(field)[plan.cell] = plan.relocation.payload[field]
+	if plan.kind == "vine_tree":
+		var vine: Dictionary = world.vines[plan.cell]
+		vine.nodes = []; vine.parents = []
+		vine.growth = 0.0
+		vine.radius = preload("res://scripts/settlement/vines.gd").START_RADIUS
+		vine.placement_offset = plan.get("placement_offset", Vector3.ZERO)
 	world.plans.erase(plan.id)
 	for worker: Dictionary in world.workers:
 		if worker.get("assigned_plan_id", -1) == plan.id: worker.assigned_plan_id = -1

@@ -5,11 +5,22 @@ const Coast = preload("res://scripts/settlement/greece_landscape.gd")
 const Grid = preload("res://scripts/settlement/world_grid.gd")
 
 static func sea_depth(world, cell: Vector3i) -> int:
+	if preload("res://scripts/settlement/solid_islands.gd").enabled(world):
+		var distance: float = preload("res://scripts/settlement/solid_islands.gd").shore_distance(Vector2(cell.x,cell.z),world.world_seed,world.generator_version)
+		if world.generator_version>=17:
+			return 0 if distance<=0 else maxi(1,ceili(-preload("res://scripts/settlement/solid_islands.gd").seabed_height(Vector2(cell.x,cell.z),world.world_seed,world.generator_version)))
+		return 0 if distance<=0 else 1+floori(distance/6)
 	if world.difficulty != "easy": return 0
-	var distance: float = cell.x - Coast.coast(cell.z, world.world_seed)
-	return 0 if distance <= 0.0 else Grid.STOREY.y + floori(distance / 6.0)
+	var distance: float = preload("res://scripts/settlement/archipelago_landscape.gd").shore_distance(Vector2(cell.x,cell.z),world.world_seed) if world.generator_version >= 6 else cell.x - Coast.coast(cell.z, world.world_seed)
+	return 0 if distance <= 0.0 else (1 if world.generator_version >= 6 else Grid.STOREY.y) + floori(distance / 6.0)
 
 static func material_at(world, cell: Vector3i) -> String:
+	if world.volume_edits.has(cell): return world.volume_edits[cell]
+	if preload("res://scripts/settlement/solid_islands.gd").enabled(world):
+		if preload("res://scripts/settlement/solid_islands.gd").solid(world,Vector3(cell)+Vector3.UP*0.5): return "solid"
+		var depth := sea_depth(world,cell)
+		if depth>0 and cell.y<0: return "water" if cell.y>=-depth else "solid"
+		return "air"
 	var column_cell := Vector2i(cell.x, cell.z)
 	if world.surface_edits.has(column_cell):
 		return "solid" if cell.y < int(world.surface_edits[column_cell]) else "air"

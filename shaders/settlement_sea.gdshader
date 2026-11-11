@@ -1,13 +1,17 @@
 shader_type spatial;
 render_mode unshaded, cull_disabled;
 uniform float coast_phase = 0.0;
+uniform bool islands = false;
+uniform sampler2D depth_map : filter_linear, repeat_disable;
+uniform vec2 chunk_origin;
+uniform float depth_span = 16.0;
 varying vec2 world_position;
 void vertex() {
 	world_position = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xz;
 }
 void fragment() {
 	float shore = 24.0 + sin(world_position.y * 0.045 + coast_phase) * 5.0 + sin(world_position.y * 0.12 + coast_phase) * 1.8;
-	float depth = world_position.x - shore;
+	float depth = islands ? texture(depth_map, ((world_position-chunk_origin)/depth_span*(vec2(textureSize(depth_map,0))-1.0)+0.5)/vec2(textureSize(depth_map,0))).r : world_position.x - shore;
 	if (depth < -0.65) { discard; }
 	vec3 shallow = vec3(0.30, 0.66, 0.62);
 	vec3 deep = vec3(0.13, 0.43, 0.53);

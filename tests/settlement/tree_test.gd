@@ -89,11 +89,23 @@ func test_visuals(kind: String) -> void:
 	asset.set_meta("collider", body)
 	check(asset.has_node("AccessFront"), "%s retains an authored access point" % kind)
 	check(asset.has_node("Segment3/Crown") == (kind == "living"), "Only living trees have greenery")
+	var previous_height := INF
 	for amount in [3, 2, 1]:
 		tree.inventory.amounts.log = amount
 		TreeView.sync(asset, tree)
-		var expected_height: float = (3.15 if kind == "dead" else 3.72) if amount == 3 else 0.18 + amount * 0.88
-		check(is_equal_approx(shape.shape.size.y, expected_height) and is_equal_approx(shape.position.y, expected_height * 0.5), "Picking collider shrinks with remaining trunk")
+		check(shape.shape.size.y < previous_height, "Picking collider shrinks with remaining trunk")
+		previous_height = shape.shape.size.y
+		var bounds := AABB(shape.position - shape.shape.size * 0.5, shape.shape.size).grow(0.0001)
+		for part: MeshInstance3D in asset.find_children("*", "MeshInstance3D", true, false):
+			var pose := part.transform
+			var shown := part.visible
+			var parent := part.get_parent()
+			while parent != asset:
+				shown = shown and parent.visible
+				pose = parent.transform * pose
+				parent = parent.get_parent()
+			if shown:
+				for vertex in part.mesh.get_faces(): check(bounds.has_point(pose * vertex), "Picking encloses authored tree stock and branches")
 		for index in 3:
 			check(asset.get_node("Segment%d" % (index + 1)).visible == (index < amount), "%s %d/3 has correct removable trunk section" % [kind, amount])
 		check(asset.get_node("Stump").visible and asset.get_node("StumpCut").visible == (amount == 0), "Trunk base remains while logs can still be harvested")

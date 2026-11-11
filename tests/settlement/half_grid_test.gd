@@ -20,14 +20,14 @@ func _initialize() -> void:
 			if cell.y >= 3: raised += 1
 			if maxi(absi(cell.x), absi(cell.z)) <= Generator.SAFE_RADIUS:
 				check(cell.y == 0 and not generated.shapes.has(cell), "Opening is flat and free of talus")
-		check(float(flat) / generated.ground.size() > 0.78, "At least 78 percent of the landscape stays flat")
-		check(raised > 40 and raised < 400, "Small isolated patches contain tall intact columns")
+		check(float(flat) / generated.ground.size() > 0.65, "Most of the landscape remains open flat land")
+		check(raised > 100 and raised < 1000, "Separated formations contain broad elevated terraces")
 		check(generated.shapes.size() > 100, "Buttes have gravel aprons")
 		check(generated == Generator.generate(seed_), "Seed reproduces every height and detail")
 		for cell: Vector3i in generated.shapes:
 			check(not generated.water.has(cell) and not generated.nature.has(cell), "No resources float on sloping debris")
 			var corners: Array = generated.shapes[cell]
-			check(corners.max() <= 2.6 and corners.min() >= 0, "Talus heights stay bounded below the solid tower")
+			check(corners.max() <= 6.0 and corners.min() >= cell.y, "Terrace shoulders stay within their generated height range")
 	var model = Model.new()
 	model.setup()
 	model.deposits.clear()

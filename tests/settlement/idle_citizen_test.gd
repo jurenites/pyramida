@@ -84,7 +84,7 @@ func run() -> void:
 	check(game.hud.idle_button.get_theme_stylebox("disabled") is StyleBoxEmpty, "Person icon stays borderless when the queue empties")
 	game._select_next_idle_citizen()
 	check(game.selected_workers == [4], "Empty queue does not select an unrelated citizen")
-	game._choose_slot(0, true)
+	await game._choose_slot(0, true)
 	game.speed = 0
 	check(game.model.idle_citizen_ids().is_empty(), "New settlement resets idle delay")
 	for worker in game.model.workers:

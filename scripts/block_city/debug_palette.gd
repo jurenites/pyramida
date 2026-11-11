@@ -17,10 +17,12 @@ func setup(model) -> void:
 		card.palette=true
 		card.cells=model.oriented({"shape":shape.id}).cells
 		card.role=model.room_role({"shape":shape.id})
+		card.quarter_stair=model.quarter_stair({"shape":shape.id})
 		var extent:=Vector3i.ZERO
 		for cell in card.cells: extent=extent.max(cell+Vector3i.ONE)
 		card.tooltip_text=("Hall" if card.role=="hall" else ("Stairs" if card.role=="stairs" else ("Elevator" if card.role=="elevator" else "Room")))+" · %d×%d×%d" % [extent.x,extent.z,extent.y]
 		if card.role=="pole": card.tooltip_text="Pole · ½ height · 3 terminals"
+		if card.role=="stairs": card.tooltip_text="Stairs · %d° · 2×2×2 m" % (90 if card.quarter_stair else 180)
 		if shape.id=="flat_l": card.tooltip_text="Room · L · M to mirror"
 		if shape.id=="flat_l_mirror": card.tooltip_text="Room · mirrored L"
 		grid.add_child(card); card.mouse_filter=Control.MOUSE_FILTER_STOP

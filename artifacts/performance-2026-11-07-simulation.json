@@ -1,0 +1,731 @@
+{
+  "date": "2026-11-07",
+  "engine": "Godot 4.7.1.stable.official.a13da4feb",
+  "architecture": "arm64",
+  "workload": {
+    "seed": 1409,
+    "citizens": 6,
+    "ticks": 1200,
+    "step_seconds": 0.05,
+    "mode": "headless; sequential optimized/baseline runs",
+    "households": "Cloned household allocations reconciled before both measured loops"
+  },
+  "comparison": "Pre-change navigation, world model and deconstruction versus local obstacle removal and topology-free empty-salvage cleanup; all other runtime code identical",
+  "runs": [
+    {
+      "profile_ticks": false,
+      "results": {
+        "baseline": {
+          "local_routes": {
+            "cells": 10202,
+            "distance_checksum": 22.9705624580383,
+            "rebuild_ms": 126.581,
+            "six_disconnected_routes_ms": 0.011,
+            "six_local_routes_ms": 4.244
+          },
+          "simulation": {
+            "cells": 9227,
+            "citizens": 6,
+            "deliveries": 19,
+            "meals": 6,
+            "p99_tick_ms": 38.38,
+            "searches": 56,
+            "simulation_seconds": 60,
+            "state_sha256": "533032003c8d2d1996fafd79d9d815014d399fbb40d74d47555b8ed6b55c5a89",
+            "total_ms": 4453.701,
+            "worst_tick_ms": 570.008
+          }
+        },
+        "optimized": {
+          "local_routes": {
+            "cells": 10202,
+            "distance_checksum": 22.9705624580383,
+            "rebuild_ms": 121.336,
+            "six_disconnected_routes_ms": 0.011,
+            "six_local_routes_ms": 3.926
+          },
+          "simulation": {
+            "cells": 9227,
+            "citizens": 6,
+            "deliveries": 19,
+            "meals": 6,
+            "p99_tick_ms": 22.514,
+            "searches": 46,
+            "simulation_seconds": 60,
+            "state_sha256": "533032003c8d2d1996fafd79d9d815014d399fbb40d74d47555b8ed6b55c5a89",
+            "total_ms": 2135.946,
+            "worst_tick_ms": 65.683
+          }
+        }
+      }
+    },
+    {
+      "profile_ticks": true,
+      "results": {
+        "baseline": {
+          "local_routes": {
+            "cells": 10202,
+            "distance_checksum": 22.9705624580383,
+            "rebuild_ms": 119.454,
+            "six_disconnected_routes_ms": 0.011,
+            "six_local_routes_ms": 3.944
+          },
+          "simulation": {
+            "cells": 9227,
+            "citizens": 6,
+            "deliveries": 19,
+            "meals": 6,
+            "p99_tick_ms": 37.819,
+            "searches": 56,
+            "simulation_seconds": 60,
+            "slow_ticks": [
+              {
+                "profile": {
+                  "cpu_scopes_inclusive": [
+                    {
+                      "calls": 1,
+                      "max_ms": 594.273,
+                      "mean_ms": 594.273,
+                      "scope": "simulation.citizens",
+                      "total_ms": 594.273
+                    },
+                    {
+                      "calls": 1,
+                      "max_ms": 1.158,
+                      "mean_ms": 1.158,
+                      "scope": "simulation.economy",
+                      "total_ms": 1.158
+                    },
+                    {
+                      "calls": 1,
+                      "max_ms": 0.163,
+                      "mean_ms": 0.163,
+                      "scope": "simulation.plants",
+                      "total_ms": 0.163
+                    },
+                    {
+                      "calls": 1,
+                      "max_ms": 0.022,
+                      "mean_ms": 0.022,
+                      "scope": "simulation.cleanup",
+                      "total_ms": 0.022
+                    },
+                    {
+                      "calls": 1,
+                      "max_ms": 0.006,
+                      "mean_ms": 0.006,
+                      "scope": "simulation.exploration",
+                      "total_ms": 0.006
+                    },
+                    {
+                      "calls": 1,
+                      "max_ms": 0.001,
+                      "mean_ms": 0.001,
+                      "scope": "simulation.water",
+                      "total_ms": 0.001
+                    }
+                  ]
+                },
+                "step": 1174,
+                "us": 595630
+              },
+              {
+                "profile": {
+                  "cpu_scopes_inclusive": [
+                    {
+                      "calls": 1,
+                      "max_ms": 573.739,
+                      "mean_ms": 573.739,
+                      "scope": "simulation.citizens",
+                      "total_ms": 573.739
+                    },
+                    {
+                      "calls": 1,
+                      "max_ms": 0.883,
+                      "mean_ms": 0.883,
+                      "scope": "simulation.economy",
+                      "total_ms": 0.883
+                    },
+                    {
+                      "calls": 1,
+                      "max_ms": 0.205,
+                      "mean_ms": 0.205,
+                      "scope": "simulation.exploration",
+                      "total_ms": 0.205
+                    },
+                    {
+                      "calls": 1,
+                      "max_ms": 0.159,
+                      "mean_ms": 0.159,
+                      "scope": "simulation.plants",
+                      "total_ms": 0.159
+                    },
+                    {
+                      "calls": 1,
+                      "max_ms": 0.015,
+                      "mean_ms": 0.015,
+                      "scope": "simulation.cleanup",
+                      "total_ms": 0.015
+                    },
+                    {
+                      "calls": 1,
+                      "max_ms": 0.001,
+                      "mean_ms": 0.001,
+                      "scope": "simulation.water",
+                      "total_ms": 0.001
+                    }
+                  ]
+                },
+                "step": 634,
+                "us": 575009
+              },
+              {
+                "profile": {
+                  "cpu_scopes_inclusive": [
+                    {
+                      "calls": 1,
+                      "max_ms": 563.512,
+                      "mean_ms": 563.512,
+                      "scope": "simulation.cleanup",
+                      "total_ms": 563.512
+                    },
+                    {
+                      "calls": 1,
+                      "max_ms": 0.983,
+                      "mean_ms": 0.983,
+                      "scope": "simulation.economy",
+                      "total_ms": 0.983
+                    },
+                    {
+                      "calls": 1,
+                      "max_ms": 0.178,
+                      "mean_ms": 0.178,
+                      "scope": "simulation.plants",
+                      "total_ms": 0.178
+                    },
+                    {
+                      "calls": 1,
+                      "max_ms": 0.158,
+                      "mean_ms": 0.158,
+                      "scope": "simulation.exploration",
+                      "total_ms": 0.158
+                    },
+                    {
+                      "calls": 1,
+                      "max_ms": 0.091,
+                      "mean_ms": 0.091,
+                      "scope": "simulation.citizens",
+                      "total_ms": 0.091
+                    },
+                    {
+                      "calls": 1,
+                      "max_ms": 0.001,
+                      "mean_ms": 0.001,
+                      "scope": "simulation.water",
+                      "total_ms": 0.001
+                    }
+                  ]
+                },
+                "step": 993,
+                "us": 564929
+              },
+              {
+                "profile": {
+                  "cpu_scopes_inclusive": [
+                    {
+                      "calls": 1,
+                      "max_ms": 551.292,
+                      "mean_ms": 551.292,
+                      "scope": "simulation.cleanup",
+                      "total_ms": 551.292
+                    },
+                    {
+                      "calls": 1,
+                      "max_ms": 1.064,
+                      "mean_ms": 1.064,
+                      "scope": "simulation.economy",
+                      "total_ms": 1.064
+                    },
+                    {
+                      "calls": 1,
+                      "max_ms": 0.174,
+                      "mean_ms": 0.174,
+                      "scope": "simulation.plants",
+                      "total_ms": 0.174
+                    },
+                    {
+                      "calls": 1,
+                      "max_ms": 0.1,
+                      "mean_ms": 0.1,
+                      "scope": "simulation.citizens",
+                      "total_ms": 0.1
+                    },
+                    {
+                      "calls": 1,
+                      "max_ms": 0.003,
+                      "mean_ms": 0.003,
+                      "scope": "simulation.exploration",
+                      "total_ms": 0.003
+                    },
+                    {
+                      "calls": 1,
+                      "max_ms": 0.001,
+                      "mean_ms": 0.001,
+                      "scope": "simulation.water",
+                      "total_ms": 0.001
+                    }
+                  ]
+                },
+                "step": 991,
+                "us": 552641
+              },
+              {
+                "profile": {
+                  "cpu_scopes_inclusive": [
+                    {
+                      "calls": 1,
+                      "max_ms": 62.11,
+                      "mean_ms": 62.11,
+                      "scope": "simulation.citizens",
+                      "total_ms": 62.11
+                    },
+                    {
+                      "calls": 6,
+                      "max_ms": 24.438,
+                      "mean_ms": 10.236,
+                      "scope": "navigation.search",
+                      "total_ms": 61.416
+                    },
+                    {
+                      "calls": 1,
+                      "max_ms": 1.216,
+                      "mean_ms": 1.216,
+                      "scope": "simulation.economy",
+                      "total_ms": 1.216
+                    },
+                    {
+                      "calls": 1,
+                      "max_ms": 0.271,
+                      "mean_ms": 0.271,
+                      "scope": "simulation.plants",
+                      "total_ms": 0.271
+                    },
+                    {
+                      "calls": 1,
+                      "max_ms": 0.016,
+                      "mean_ms": 0.016,
+                      "scope": "simulation.cleanup",
+                      "total_ms": 0.016
+                    },
+                    {
+                      "calls": 1,
+                      "max_ms": 0.004,
+                      "mean_ms": 0.004,
+                      "scope": "simulation.exploration",
+                      "total_ms": 0.004
+                    },
+                    {
+                      "calls": 1,
+                      "max_ms": 0.001,
+                      "mean_ms": 0.001,
+                      "scope": "simulation.water",
+                      "total_ms": 0.001
+                    }
+                  ]
+                },
+                "step": 1127,
+                "us": 63627
+              }
+            ],
+            "state_sha256": "533032003c8d2d1996fafd79d9d815014d399fbb40d74d47555b8ed6b55c5a89",
+            "total_ms": 4475.003,
+            "worst_tick_ms": 595.63
+          }
+        },
+        "optimized": {
+          "local_routes": {
+            "cells": 10202,
+            "distance_checksum": 22.9705624580383,
+            "rebuild_ms": 122.9,
+            "six_disconnected_routes_ms": 0.012,
+            "six_local_routes_ms": 3.932
+          },
+          "simulation": {
+            "cells": 9227,
+            "citizens": 6,
+            "deliveries": 19,
+            "meals": 6,
+            "p99_tick_ms": 21.42,
+            "searches": 46,
+            "simulation_seconds": 60,
+            "slow_ticks": [
+              {
+                "profile": {
+                  "cpu_scopes_inclusive": [
+                    {
+                      "calls": 1,
+                      "max_ms": 57.095,
+                      "mean_ms": 57.095,
+                      "scope": "simulation.citizens",
+                      "total_ms": 57.095
+                    },
+                    {
+                      "calls": 6,
+                      "max_ms": 22.468,
+                      "mean_ms": 9.25816666666667,
+                      "scope": "navigation.search",
+                      "total_ms": 55.549
+                    },
+                    {
+                      "calls": 1,
+                      "max_ms": 1.166,
+                      "mean_ms": 1.166,
+                      "scope": "simulation.economy",
+                      "total_ms": 1.166
+                    },
+                    {
+                      "calls": 1,
+                      "max_ms": 0.183,
+                      "mean_ms": 0.183,
+                      "scope": "simulation.exploration",
+                      "total_ms": 0.183
+                    },
+                    {
+                      "calls": 1,
+                      "max_ms": 0.16,
+                      "mean_ms": 0.16,
+                      "scope": "simulation.plants",
+                      "total_ms": 0.16
+                    },
+                    {
+                      "calls": 1,
+                      "max_ms": 0.016,
+                      "mean_ms": 0.016,
+                      "scope": "simulation.cleanup",
+                      "total_ms": 0.016
+                    },
+                    {
+                      "calls": 1,
+                      "max_ms": 0.001,
+                      "mean_ms": 0.001,
+                      "scope": "simulation.water",
+                      "total_ms": 0.001
+                    }
+                  ]
+                },
+                "step": 1176,
+                "us": 58627
+              },
+              {
+                "profile": {
+                  "cpu_scopes_inclusive": [
+                    {
+                      "calls": 1,
+                      "max_ms": 56.627,
+                      "mean_ms": 56.627,
+                      "scope": "simulation.citizens",
+                      "total_ms": 56.627
+                    },
+                    {
+                      "calls": 6,
+                      "max_ms": 22.74,
+                      "mean_ms": 9.35483333333333,
+                      "scope": "navigation.search",
+                      "total_ms": 56.129
+                    },
+                    {
+                      "calls": 1,
+                      "max_ms": 1.098,
+                      "mean_ms": 1.098,
+                      "scope": "simulation.economy",
+                      "total_ms": 1.098
+                    },
+                    {
+                      "calls": 1,
+                      "max_ms": 0.162,
+                      "mean_ms": 0.162,
+                      "scope": "simulation.plants",
+                      "total_ms": 0.162
+                    },
+                    {
+                      "calls": 1,
+                      "max_ms": 0.015,
+                      "mean_ms": 0.015,
+                      "scope": "simulation.cleanup",
+                      "total_ms": 0.015
+                    },
+                    {
+                      "calls": 1,
+                      "max_ms": 0.003,
+                      "mean_ms": 0.003,
+                      "scope": "simulation.exploration",
+                      "total_ms": 0.003
+                    },
+                    {
+                      "calls": 1,
+                      "max_ms": 0.001,
+                      "mean_ms": 0.001,
+                      "scope": "simulation.water",
+                      "total_ms": 0.001
+                    }
+                  ]
+                },
+                "step": 1127,
+                "us": 57912
+              },
+              {
+                "profile": {
+                  "cpu_scopes_inclusive": [
+                    {
+                      "calls": 1,
+                      "max_ms": 50.266,
+                      "mean_ms": 50.266,
+                      "scope": "simulation.citizens",
+                      "total_ms": 50.266
+                    },
+                    {
+                      "calls": 3,
+                      "max_ms": 22.149,
+                      "mean_ms": 16.2723333333333,
+                      "scope": "navigation.search",
+                      "total_ms": 48.817
+                    },
+                    {
+                      "calls": 1,
+                      "max_ms": 1.059,
+                      "mean_ms": 1.059,
+                      "scope": "simulation.economy",
+                      "total_ms": 1.059
+                    },
+                    {
+                      "calls": 1,
+                      "max_ms": 0.161,
+                      "mean_ms": 0.161,
+                      "scope": "simulation.plants",
+                      "total_ms": 0.161
+                    },
+                    {
+                      "calls": 1,
+                      "max_ms": 0.014,
+                      "mean_ms": 0.014,
+                      "scope": "simulation.cleanup",
+                      "total_ms": 0.014
+                    },
+                    {
+                      "calls": 1,
+                      "max_ms": 0.005,
+                      "mean_ms": 0.005,
+                      "scope": "simulation.exploration",
+                      "total_ms": 0.005
+                    },
+                    {
+                      "calls": 1,
+                      "max_ms": 0.001,
+                      "mean_ms": 0.001,
+                      "scope": "simulation.water",
+                      "total_ms": 0.001
+                    }
+                  ]
+                },
+                "step": 1113,
+                "us": 51511
+              },
+              {
+                "profile": {
+                  "cpu_scopes_inclusive": [
+                    {
+                      "calls": 1,
+                      "max_ms": 48.721,
+                      "mean_ms": 48.721,
+                      "scope": "simulation.citizens",
+                      "total_ms": 48.721
+                    },
+                    {
+                      "calls": 6,
+                      "max_ms": 22.207,
+                      "mean_ms": 7.85483333333333,
+                      "scope": "navigation.search",
+                      "total_ms": 47.129
+                    },
+                    {
+                      "calls": 1,
+                      "max_ms": 1.135,
+                      "mean_ms": 1.135,
+                      "scope": "simulation.economy",
+                      "total_ms": 1.135
+                    },
+                    {
+                      "calls": 1,
+                      "max_ms": 0.221,
+                      "mean_ms": 0.221,
+                      "scope": "simulation.plants",
+                      "total_ms": 0.221
+                    },
+                    {
+                      "calls": 1,
+                      "max_ms": 0.014,
+                      "mean_ms": 0.014,
+                      "scope": "simulation.cleanup",
+                      "total_ms": 0.014
+                    },
+                    {
+                      "calls": 1,
+                      "max_ms": 0.005,
+                      "mean_ms": 0.005,
+                      "scope": "simulation.exploration",
+                      "total_ms": 0.005
+                    },
+                    {
+                      "calls": 1,
+                      "max_ms": 0.002,
+                      "mean_ms": 0.002,
+                      "scope": "simulation.water",
+                      "total_ms": 0.002
+                    }
+                  ]
+                },
+                "step": 1006,
+                "us": 50104
+              },
+              {
+                "profile": {
+                  "cpu_scopes_inclusive": [
+                    {
+                      "calls": 1,
+                      "max_ms": 46.17,
+                      "mean_ms": 46.17,
+                      "scope": "simulation.citizens",
+                      "total_ms": 46.17
+                    },
+                    {
+                      "calls": 6,
+                      "max_ms": 21.978,
+                      "mean_ms": 7.35,
+                      "scope": "navigation.search",
+                      "total_ms": 44.1
+                    },
+                    {
+                      "calls": 1,
+                      "max_ms": 1.11,
+                      "mean_ms": 1.11,
+                      "scope": "simulation.economy",
+                      "total_ms": 1.11
+                    },
+                    {
+                      "calls": 1,
+                      "max_ms": 0.174,
+                      "mean_ms": 0.174,
+                      "scope": "simulation.plants",
+                      "total_ms": 0.174
+                    },
+                    {
+                      "calls": 1,
+                      "max_ms": 0.024,
+                      "mean_ms": 0.024,
+                      "scope": "simulation.cleanup",
+                      "total_ms": 0.024
+                    },
+                    {
+                      "calls": 1,
+                      "max_ms": 0.004,
+                      "mean_ms": 0.004,
+                      "scope": "simulation.exploration",
+                      "total_ms": 0.004
+                    },
+                    {
+                      "calls": 1,
+                      "max_ms": 0.001,
+                      "mean_ms": 0.001,
+                      "scope": "simulation.water",
+                      "total_ms": 0.001
+                    }
+                  ]
+                },
+                "step": 1020,
+                "us": 47489
+              }
+            ],
+            "state_sha256": "533032003c8d2d1996fafd79d9d815014d399fbb40d74d47555b8ed6b55c5a89",
+            "total_ms": 2138.223,
+            "worst_tick_ms": 58.627
+          }
+        }
+      }
+    }
+  ],
+  "saved_state_identical": true,
+  "runtime_source_sha256": {
+    "scripts/settlement/navigation.gd": {
+      "before": "b8959202bfb9fbbaf7cb455dfece97f81fc41d4cd279fa41e69028b2a078f6a3",
+      "after": "a2760703846e211bc60c1b54c900ec32aea345690f8d279c0ec2492d2edc766d"
+    },
+    "scripts/settlement/world_model.gd": {
+      "before": "aa1490205d05bb5a85a5c24fc9b6584a2752fa97208292f1b33eeb351d7897a6",
+      "after": "566393cf11fbccd63a8a610d181c2c366faf7be97c4dda551806581d9e27424e"
+    },
+    "scripts/settlement/deconstruction.gd": {
+      "before": "7cbf760a73d253d47868a263d462d9120854b34e452482c14c401067c68ab0a7",
+      "after": "48efdc6cb18577e441e44d0ca5065e6e5fd76b382a8f81c14ca1bb0f6c61c216"
+    }
+  },
+  "tests": [
+    {
+      "test": "citizen_performance",
+      "passed": true,
+      "seconds": 1.04
+    },
+    {
+      "test": "navigation",
+      "passed": true,
+      "seconds": 0.45
+    },
+    {
+      "test": "journey_navigation",
+      "passed": true,
+      "seconds": 0.83
+    },
+    {
+      "test": "slope_navigation",
+      "passed": true,
+      "seconds": 11.83
+    },
+    {
+      "test": "chunk_stream",
+      "passed": true,
+      "seconds": 15.57
+    },
+    {
+      "test": "citizen_reassignment",
+      "passed": true,
+      "seconds": 1.53
+    },
+    {
+      "test": "deconstruction",
+      "passed": false,
+      "seconds": 79.22
+    },
+    {
+      "test": "stump_removal",
+      "passed": true,
+      "seconds": 94.06
+    },
+    {
+      "test": "background_save",
+      "passed": true,
+      "seconds": 26.9
+    }
+  ],
+  "validation_notes": [
+    "Citizen performance rerun passed after adding connector endpoint and overlap cases.",
+    "git diff --check passed for all changed code, tests and performance documentation.",
+    "The original citizen performance fixture failed six assertions; current fixtures cover House Hay requirements, dedicated storage, physical cargo dropping and recovery.",
+    "The broader deconstruction suite failed. Its first Pantry fixture error was reproduced using preserved pre-change model/navigation/deconstruction implementations. Other failures in that suite were not individually baseline-compared.",
+    "Full project suite not run; no player saves read or written."
+  ],
+  "limitations": [
+    "CPU timings, not rendered FPS; development-machine samples.",
+    "Long path searches and general topology rebuilds remain synchronous.",
+    "Streaming integration, grass reveals and save snapshot capture are outside this change.",
+    "Profiling adds bookkeeping; the unprofiled pair is the primary timing comparison."
+  ]
+}

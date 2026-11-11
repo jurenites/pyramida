@@ -98,7 +98,8 @@ func run() -> void:
 	for sample in [{"phase": 0.499, "night": false, "day": "1"}, {"phase": 0.5, "night": true, "day": "1"}, {"phase": 0.75, "night": true, "day": "1"}, {"phase": 1.0, "night": false, "day": "2"}]:
 		model.time = Settings.SIMULATION_DAY_SECONDS * sample.phase
 		hud.update(model, -1, 1)
-		check(hud.day_icon.is_night == sample.night and hud.day_label.text == sample.day, "Sun/moon and numeric day follow the saved clock boundary")
+		check(hud.day_icon.is_night == sample.night and hud.day_label.text == "Day " + sample.day, "Sun/moon and numeric day follow the saved clock boundary")
+		check(is_equal_approx(hud.day_track.phase, hud.day_icon.phase), "Daylight/night track follows the same saved cycle")
 		if sample.night:
 			check(hud.root.modulate.b > hud.root.modulate.r, "UI takes on a blue tint at nightfall")
 			var outline_colour: Color = hud.root.modulate * hud.idle_button.modulate

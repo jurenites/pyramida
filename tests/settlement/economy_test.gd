@@ -13,6 +13,7 @@ func run_for(world, seconds: float) -> void:
 func fresh():
 	var world = Model.new()
 	world.setup()
+	preload("res://tests/settlement/supplied_pile_fixture.gd").add_to(world)
 	for worker in world.workers: worker.role = "idle"
 	# Economy fixtures operate on known deposits; fog behavior has its own suite.
 	for cell: Vector3i in world.deposits: world.exploration.reveal(Jobs.Navigation.point(cell))

@@ -86,18 +86,19 @@ func run() -> void:
 	game.model = world
 	game.world.sync(world, 0, -1)
 	var node: Node3D = game.world.entity_views["vine:%s" % cell]
-	check(node.position.is_equal_approx(world.Navigation.point(cell) + offset), "Rendered root and its collider share the saved position")
-	game.hud.show_category("nature")
+	var root_position: Vector3 = world.Navigation.point(cell) + offset
+	root_position.y = world.navigation.surface_height(cell, root_position)
+	check(node.position.is_equal_approx(root_position), "Rendered root and its collider follow soil at the saved position")
+	check(not game.hud.category_lists.has("nature"), "Nature category removed")
 	game.hud.update(world, -1, 1)
-	var row: Button = game.hud.buttons.seed_vine
-	check(row.visible and row.disabled and row.get_meta("plant_title").text.ends_with("(0)"), "Exhausted vine item stays visible and disabled with (0)")
+	check(not game.hud.buttons.has("seed_vine"), "Nature menu excludes vines")
 	world.vine_roots = 2
 	game.hud.update(world, -1, 1)
-	check(not row.disabled and row.get_meta("plant_title").text.ends_with("(2)"), "Available roots enable the item and update its count")
+	check(not game.hud.buttons.has("seed_vine"), "Collected roots do not add a Nature menu entry")
 	world.vine_roots = 0
 	world.vine_discovered = false
 	game.hud.update(world, -1, 1)
-	check(not row.visible and not game.hud.buttons.seed_tree.disabled, "Undiscovered vines are hidden and other seeds stay enabled")
+	check(not game.hud.buttons.has("seed_vine") and not game.hud.buttons.has("seed_tree"), "Seeds remain absent from the build menu")
 	game._set_tool("seed_vine")
 	game.rig.focus = Vector3.ZERO
 	game.rig.update_camera()
@@ -112,8 +113,17 @@ func run() -> void:
 	game.selected_workers.assign([0])
 	for frame in 2: await physics_frame
 	game.command_at(game.rig.camera.unproject_position(world.Navigation.point(source) + Vector3.UP * 0.2))
-	check(world.plans.values().any(func(plan): return plan.get("collect_vine", false) and plan.cell == source), "Right-clicking a wild root queues collection")
-	check(world.workers[0].get("assigned_plan_id", -1) != -1, "Right-click assigns the selected adult to collect")
+	check(not world.plans.values().any(func(plan): return plan.get("collect_vine", false)), "Right-click no longer collects an unusable spare root")
+	game.selected_object = {"cell": source, "kind": "vine_tree", "entity_key": "vine:%s" % source}
+	game.selected = -1
+	game.hud.update(world, -1, 1, game.selected_object)
+	check(game.hud.move_button.visible and game.hud.move_label == "Move", "Selected vine offers Move")
+	game.hud.move_button.pressed.emit()
+	check(game.relocation_source == source and game.tool == "vine_tree", "Move starts destination placement")
+	check(game.preview.get_child_count() > 0, "Vine destination has a visible root preview")
+	placement = game.placement_at(game.rig.camera.unproject_position(target))
+	check(not placement.is_empty() and (world.Navigation.point(placement.cell) + placement.offset).distance_to(target) < 0.01, "Moving vine preserves free cursor placement")
+	check(not world.plans.values().any(func(plan): return plan.get("collect_vine", false)), "Move does not queue the old collect-root action")
 	game.free()
 	for failure in failures: printerr("FAIL: " + failure)
 	if failures.is_empty(): print("PASS: %d collected vine root checks" % checks)

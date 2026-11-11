@@ -1,7 +1,7 @@
 extends CanvasLayer
 const VisualTokens = preload("res://scripts/ui_visual_tokens.gd")
 const PlacementOutline = preload("res://scripts/settlement/placement_outline.gd")
-const Houses = preload("res://scripts/settlement/house_groups.gd")
+const HouseSelection = preload("res://scripts/settlement/house_selection.gd")
 const Piles = preload("res://scripts/settlement/pile_groups.gd")
 const Economy = preload("res://scripts/settlement/economy.gd")
 const Jobs = preload("res://scripts/settlement/job_system.gd")
@@ -10,6 +10,9 @@ const Text = preload("res://scripts/settlement/text.gd")
 const Catalog = preload("res://data/settlement/catalog.gd")
 const ObjectTooltip = preload("res://scripts/settlement/object_tooltip.gd")
 const Icon = preload("res://scripts/settlement/build_icon.gd")
+const BuildingReadout = preload("res://scripts/settlement/building_readout.gd")
+# Temporary construction shortcut; hide here when debugging is finished.
+const SHOW_DEBUG_FINISH := true
 const SPEED_ICONS = [
 	preload("res://assets/ui/speed_1.svg"),
 	preload("res://assets/ui/speed_2.svg"),
@@ -17,9 +20,11 @@ const SPEED_ICONS = [
 ]
 const Compass = preload("res://scripts/compass_widget.gd")
 const DayNight = preload("res://scripts/settlement/day_cycle_icon.gd")
+const DayTrack = preload("res://scripts/settlement/day_cycle_track.gd")
 const DayCycle = preload("res://scripts/settlement/day_cycle.gd")
 var compass = Compass.new()
 var day_icon: Control
+var day_track: Control
 signal reset_view_requested
 signal idle_citizen_requested
 var idle_button: Button
@@ -33,6 +38,12 @@ var water_cell := Vector3i.ZERO
 signal relocation_requested
 signal copy_requested
 signal removal_requested
+signal utilities_requested
+signal rain_edit_requested
+var rain_edit_button: Button
+var utilities_button: Button
+signal upgrade_requested
+var upgrade_button: Button
 signal finish_requested
 var finish_button: Button
 var move_button: Button
@@ -51,6 +62,10 @@ signal level_changed(level: int)
 signal speed_changed(speed: float)
 var resource_label: Label
 var resource_counts: Dictionary = {}
+# Money belongs beside food/water when it joins the economy's resource catalogue.
+const MAIN_RESOURCES := ["food", "water", "money", "coins"]
+var material_panel: PanelContainer
+var material_column: VBoxContainer
 var status_label: Label
 var detail_label: Label
 var level_label: Label
@@ -65,6 +80,7 @@ var selection_points := PackedVector2Array()
 var ground_hover_points := PackedVector2Array()
 var object_hover_strokes: Array[PackedVector2Array] = []
 var placement_color := VisualTokens.SELECTION_COLOR
+var well_capacity_label: Label
 var placement_strokes: Array[PackedVector2Array] = []
 var selection_strokes: Array[PackedVector2Array] = []
 var route_strokes: Array[PackedVector2Array] = []
@@ -76,6 +92,8 @@ var detail_panel: PanelContainer
 var detail_readout: PanelContainer
 var world_tooltips: Dictionary = {}
 var category_title: Label
+var description_cost: BuildingReadout
+var description_benefit: BuildingReadout
 var description_label: Label
 var description_tooltip: PanelContainer
 var tooltip_request := 0
@@ -85,6 +103,9 @@ var toolbar_tooltip_targets: Dictionary = {}
 var toolbar_hovered: Control
 var toolbar_hover_time := 0.0
 var population_tooltip := ""
+var housing_preview := 0
+var housing_feedback_key: Array=[]
+var housing_pulse: Tween
 var current_category := "housing"
 const INK := Color("64452f")
 const MUTED := Color("96704f")
@@ -138,6 +159,13 @@ func _ready() -> void:
 		theme.set_stylebox("separator", type, divider)
 		theme.set_constant("separation", type, VisualTokens.GAP_UNIT)
 	root.theme = theme
+	well_capacity_label = Label.new()
+	well_capacity_label.name = "WellCapacity"
+	well_capacity_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	well_capacity_label.add_theme_color_override("font_outline_color", PAPER)
+	well_capacity_label.add_theme_constant_override("outline_size", int(VisualTokens.LINE_WIDTH))
+	root.add_child(well_capacity_label)
+	well_capacity_label.hide()
 	root.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	selection_outline = Control.new()
 	selection_outline.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -147,40 +175,66 @@ func _ready() -> void:
 	compass.mount(self, root, func(): reset_view_requested.emit())
 
 	var resources := PanelContainer.new()
-	resources.position = Vector2(12, 12)
+	resources.position = Vector2.ZERO
 	resources.add_theme_stylebox_override("panel", style(PAPER, false))
 	root.add_child(resources)
 	var resource_row := HFlowContainer.new()
 	resource_row.add_theme_constant_override("h_separation", 12 * VisualTokens.GAP_UNIT)
 	resource_row.add_theme_constant_override("v_separation", 4 * VisualTokens.GAP_UNIT)
 	resources.add_child(resource_row)
+	material_panel = PanelContainer.new()
+	material_panel.name = "MaterialSidebar"
+	material_panel.add_theme_stylebox_override("panel", style(PAPER, false))
+	root.add_child(material_panel)
+	material_column = VBoxContainer.new()
+	material_column.add_theme_constant_override("separation", 4 * VisualTokens.GAP_UNIT)
+	material_panel.add_child(material_column)
+	material_panel.hide()
+	material_panel.resized.connect(_position_material_sidebar)
 	var day_row := HBoxContainer.new()
 	day_row.add_theme_constant_override("separation", 4 * VisualTokens.GAP_UNIT)
-	resource_row.add_child(day_row)
 	day_icon = DayNight.new()
 	day_row.add_child(day_icon)
+	var day_details := VBoxContainer.new()
+	day_details.add_theme_constant_override("separation", 2 * VisualTokens.GAP_UNIT)
+	day_row.add_child(day_details)
 	day_label = counter_label()
-	day_row.add_child(day_label)
+	day_label.custom_minimum_size.x += root.theme.default_font.get_string_size(tr("day_count_text").replace("%d", ""), HORIZONTAL_ALIGNMENT_LEFT, -1, VisualTokens.UI_FONT_SIZE).x
+	day_details.add_child(day_label)
+	day_track = DayTrack.new()
+	day_details.add_child(day_track)
 	day_row.mouse_filter = Control.MOUSE_FILTER_STOP
-	bind_toolbar_tooltip(day_row, resources, func(): return tr("economy_night_text" if day_icon.is_night else "day_tooltip_text"))
-	for kind in ["food", "log", "grain", "plank", "stone", "block", "pottery", "water", "citizens"]:
+	bind_toolbar_tooltip(day_row, resources, func(): return tr("economy_night_text" if day_icon.is_night else "economy_day_text"))
+	resource_row.add_child(day_row)
+	var resource_order: Array = ["citizens"]
+	for kind in MAIN_RESOURCES:
+		if kind in Economy.RESOURCES: resource_order.append(kind)
+	for kind in Economy.RESOURCES:
+		if kind not in MAIN_RESOURCES: resource_order.append(kind)
+	for kind: String in resource_order:
 		var item := HBoxContainer.new()
+		item.name = kind
 		item.visible = kind == "citizens"
+		var is_main := kind == "citizens" or kind in MAIN_RESOURCES
+		var bar: Control = resources if is_main else material_panel
 		item.add_theme_constant_override("separation", 4 * VisualTokens.GAP_UNIT)
 		var tooltip_key: String = "settlement_citizens_tooltip_text" if kind == "citizens" else ("log_tooltip_text" if kind == "log" else "settlement_resource_" + kind + "_text")
-		bind_toolbar_tooltip(item, resources, func(): return tr(tooltip_key) + (" · −1/person/30s" if kind == "food" else ""))
+		bind_toolbar_tooltip(item, bar, func(): return tr(tooltip_key) + (" · −1/person/30s" if kind == "food" else ""))
 		item.mouse_filter = Control.MOUSE_FILTER_STOP
 		var icon := Control.new()
 		icon.set_script(Icon)
 		icon.kind = kind
 		item.add_child(icon)
-		var count := counter_label(true)
+		var count := counter_label(true) if is_main else label("", INK)
 		if kind == "food":
 			count.custom_minimum_size.x += root.theme.default_font.get_string_size("  −888", HORIZONTAL_ALIGNMENT_LEFT, -1, VisualTokens.UI_FONT_SIZE).x
 		count.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		item.add_child(count)
 		resource_counts[kind] = count
-		resource_row.add_child(item)
+		if is_main:
+			resource_row.add_child(item)
+		else:
+			material_column.add_child(item)
 		if kind == "citizens":
 			count.mouse_filter = Control.MOUSE_FILTER_PASS
 			bind_toolbar_tooltip(count, resources, func(): return population_tooltip)
@@ -226,7 +280,7 @@ func _ready() -> void:
 	build_panel.offset_right = -12
 	build_panel.offset_top = 12 * VisualTokens.POINT + TOOLBAR_BUTTON_SIZE + 4 * VisualTokens.GAP_UNIT
 	root.add_child(build_panel)
-	build_panel.resized.connect(func(): build_panel.position.x = root.size.x - 12 * VisualTokens.POINT - build_panel.size.x)
+	build_panel.resized.connect(_position_material_sidebar)
 	var content := VBoxContainer.new()
 	build_content = content
 	content.add_theme_constant_override("separation", 6 * VisualTokens.GAP_UNIT)
@@ -253,7 +307,7 @@ func _ready() -> void:
 		bind_toolbar_tooltip(tab, top, func(): return tr("settlement_category_" + category + "_text"))
 		var icon := Control.new()
 		icon.set_script(Icon)
-		icon.kind = category
+		icon.kind = Catalog.CATEGORY_ICONS[category]
 		icon.framed = false
 		icon.position = Vector2.ONE * (TOOLBAR_BUTTON_SIZE - VisualTokens.GAME_ICON_SIZE) / 2.0
 		tab.add_child(icon)
@@ -262,6 +316,8 @@ func _ready() -> void:
 	for terrain_tool: String in ["terrain_dig", "terrain_fill"]:
 		var terrain_button := toolbar_button(func(): tool_changed.emit(terrain_tool))
 		terrain_button.name = terrain_tool.to_pascal_case()
+		# Landscape editing is deferred; retain the tools for development only.
+		terrain_button.hide()
 		terrain_button.toggle_mode = true
 		terrain_button.focus_mode = Control.FOCUS_ALL
 		var focus_style := style(PAPER, true)
@@ -285,6 +341,16 @@ func _ready() -> void:
 	bind_toolbar_tooltip(move_button, selection_toolbar, func(): return hotkeys.hint(move_label, "move"))
 	copy_button = selection_action_button("CopyObject", "copy", func(): copy_requested.emit(), "building_copy_text")
 	removal_button = selection_action_button("RemoveObject", "deconstruct", func(): removal_requested.emit(), "building_remove_text")
+	upgrade_button = toolbar_button(func(): upgrade_requested.emit())
+	upgrade_button.text = "↑"
+	upgrade_button.tooltip_text = "Upgrade"
+	selection_toolbar.add_child(upgrade_button)
+	utilities_button=toolbar_button(func(): utilities_requested.emit())
+	utilities_button.text="Utilities"
+	selection_toolbar.add_child(utilities_button)
+	rain_edit_button=toolbar_button(func():rain_edit_requested.emit())
+	rain_edit_button.text="Rain"
+	selection_toolbar.add_child(rain_edit_button)
 	finish_button = selection_action_button("FinishBuilding", "debug_finish", func(): finish_requested.emit(), "Finish · Debug")
 	for state in ["normal", "hover", "pressed", "disabled"]:
 		var box := finish_button.get_theme_stylebox(state).duplicate() as StyleBoxFlat
@@ -320,37 +386,21 @@ func _ready() -> void:
 		for kind: String in Catalog.CATEGORIES[category]:
 			var row := button("", func(): tool_changed.emit(kind))
 			row.toggle_mode = true
-			row.custom_minimum_size = Vector2(264, 64) * VisualTokens.POINT
+			row.custom_minimum_size = Vector2(220, 44) * VisualTokens.POINT
 			row.add_theme_stylebox_override("normal", style(PAPER, false))
 			var icon := Control.new()
 			icon.set_script(Icon)
 			icon.kind = kind
-			icon.position = Vector2(4, 15) * VisualTokens.POINT
+			icon.position = Vector2(4, 5) * VisualTokens.POINT
 			row.add_child(icon)
 			var title := label("", INK)
 			title.text = Catalog.title(kind)
 			if kind in ["seed_vine", "seed_bush"]:
 				row.set_meta("plant_title", title)
 				row.hide()
-			title.position = Vector2(44, 4) * VisualTokens.POINT
+			title.position = Vector2(44, 8) * VisualTokens.POINT
 			title.mouse_filter = Control.MOUSE_FILTER_IGNORE
 			row.add_child(title)
-			var cost := label("", MUTED)
-			cost.text = Catalog.cost_text(kind)
-			if kind in Catalog.SEEDS:
-				row.custom_minimum_size.y = 44 * VisualTokens.POINT
-				title.position.y = 8 * VisualTokens.POINT
-				icon.position.y = 5 * VisualTokens.POINT
-			cost.position = Vector2(44, 32) * VisualTokens.POINT
-			cost.mouse_filter = Control.MOUSE_FILTER_IGNORE
-			row.add_child(cost)
-			var cost_icon := Control.new()
-			cost_icon.set_script(Icon)
-			cost_icon.kind = "log"
-			cost_icon.position = Vector2(70, 25)
-			cost_icon.scale = Vector2(0.55, 0.55)
-			cost_icon.visible = false
-			row.add_child(cost_icon)
 			row.mouse_entered.connect(func(): show_building_tooltip(row, kind))
 			row.mouse_exited.connect(func(): hide_building_tooltip())
 			row.visibility_changed.connect(func():
@@ -358,8 +408,11 @@ func _ready() -> void:
 					hide_building_tooltip())
 			buttons[kind] = row
 			list.add_child(row)
-			row.custom_minimum_size.x = 44 * VisualTokens.POINT + maxf(title.get_combined_minimum_size().x, cost.get_combined_minimum_size().x) + VisualTokens.PANEL_PADDING_X
+			row.custom_minimum_size.x = 44 * VisualTokens.POINT + title.get_combined_minimum_size().x + VisualTokens.PANEL_PADDING_X
 			build_scroll.custom_minimum_size.x = maxf(build_scroll.custom_minimum_size.x, row.custom_minimum_size.x + build_scroll.get_v_scroll_bar().get_combined_minimum_size().x)
+	var generated_plan := button("Building plan", func(): tool_changed.emit("generated_plan"))
+	generated_plan.custom_minimum_size.y = 44 * VisualTokens.POINT
+	category_lists["housing"].add_child(generated_plan)
 	workshop_button = button(hotkeys.hint("Blueprints", "blueprints"), func(): structure_workshop_requested.emit())
 	content.add_child(workshop_button)
 	description_tooltip = PanelContainer.new()
@@ -368,10 +421,15 @@ func _ready() -> void:
 	description_tooltip.add_theme_stylebox_override("panel", style(Color.BLACK, false))
 	root.add_child(description_tooltip)
 	description_label = label("", Color.WHITE)
-	description_label.custom_minimum_size.x = 214
+	description_label.custom_minimum_size.x = 214 * VisualTokens.POINT
 	description_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	description_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	description_tooltip.add_child(description_label)
+	var tooltip_content := VBoxContainer.new()
+	tooltip_content.add_theme_constant_override("separation",4*VisualTokens.GAP_UNIT)
+	description_tooltip.add_child(tooltip_content)
+	tooltip_content.add_child(description_label)
+	description_cost=BuildingReadout.new(); tooltip_content.add_child(description_cost)
+	description_benefit=BuildingReadout.new(); tooltip_content.add_child(description_benefit)
 	hide_building_tooltip()
 	toolbar_tooltip = PanelContainer.new()
 	toolbar_tooltip.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -441,7 +499,11 @@ func _process(delta: float) -> void:
 	var gap := 4 * VisualTokens.GAP_UNIT
 	var x := rect.get_center().x - toolbar_tooltip.size.x * 0.5
 	x = clampf(x, gap, maxf(gap, root.size.x - toolbar_tooltip.size.x - gap))
-	toolbar_tooltip.global_position = Vector2(x, bar_rect.end.y + gap)
+	var y := bar_rect.end.y + gap
+	if target.bar == material_panel:
+		x = maxf(gap, bar_rect.position.x - toolbar_tooltip.size.x - gap)
+		y = clampf(rect.position.y, gap, maxf(gap, root.size.y - toolbar_tooltip.size.y - gap))
+	toolbar_tooltip.global_position = Vector2(x, y)
 	toolbar_tooltip.show()
 
 
@@ -465,12 +527,18 @@ func hide_building_tooltip() -> void:
 func show_building_tooltip(row: Control, kind: String) -> void:
 	hide_building_tooltip()
 	var request := tooltip_request
-	await get_tree().create_timer(1.0).timeout
+	await get_tree().create_timer(0.35).timeout
 	if request != tooltip_request or not is_instance_valid(row) or not visible or not row.is_visible_in_tree():
 		return
-	description_label.text = Catalog.description(kind)
-	description_tooltip.size = Vector2(row.size.x, 0)
-	description_tooltip.global_position = row.global_position + Vector2(0, row.size.y + 2)
+	description_label.text = Catalog.title(kind)
+	description_cost.display(BuildingReadout.costs(kind),Color.WHITE)
+	description_benefit.display(BuildingReadout.benefit(kind),Color.WHITE)
+	description_cost.visible=not BuildingReadout.costs(kind).is_empty()
+	description_benefit.visible=not BuildingReadout.benefit(kind).is_empty()
+	await get_tree().process_frame
+	if request != tooltip_request or not is_instance_valid(row) or not row.is_visible_in_tree(): return
+	description_tooltip.reset_size()
+	description_tooltip.global_position = Vector2(maxf(0,row.global_position.x-description_tooltip.size.x-8*VisualTokens.GAP_UNIT),minf(row.global_position.y,root.size.y-description_tooltip.size.y-8*VisualTokens.GAP_UNIT))
 	description_tooltip.show()
 
 func show_category(category: String) -> void:
@@ -506,7 +574,7 @@ func _size_resource_bar(resources: Control) -> void:
 			count += 1
 	width += max(0, count - 1) * row.get_theme_constant("h_separation")
 	var padding := resources.get_theme_stylebox("panel").get_minimum_size().x
-	row.custom_minimum_size.x = minf(width, root.size.x - 24 * VisualTokens.POINT - padding)
+	row.custom_minimum_size.x = minf(width, root.size.x - padding)
 	resources.reset_size()
 
 func _position_selection_toolbar(resources: Control) -> void:
@@ -520,6 +588,7 @@ func _position_selection_toolbar(resources: Control) -> void:
 	if is_instance_valid(build_panel):
 		build_panel.position.y = top_target.end.y + gap
 		_size_build_menu()
+	_position_material_sidebar()
 	var width := maxf(TOOLBAR_BUTTON_SIZE, selection_toolbar.get_combined_minimum_size().x)
 	selection_toolbar.size.x = width
 	var target := Rect2(Vector2((root.size.x - width) / 2.0, margin), Vector2(width, TOOLBAR_BUTTON_SIZE))
@@ -528,6 +597,16 @@ func _position_selection_toolbar(resources: Control) -> void:
 		if target.intersects(bar_rect):
 			target.position.y = bar_rect.end.y
 	selection_toolbar.position = target.position
+
+func _position_material_sidebar() -> void:
+	if not is_instance_valid(top_toolbar):
+		return
+	var margin := 12 * VisualTokens.POINT
+	var gap := 4 * VisualTokens.GAP_UNIT
+	material_panel.position = Vector2(root.size.x - margin - material_panel.size.x, top_toolbar.get_rect().end.y + gap)
+	if is_instance_valid(build_panel):
+		var sidebar_width := material_panel.size.x + gap if material_panel.visible else 0.0
+		build_panel.position.x = root.size.x - margin - sidebar_width - build_panel.size.x
 
 func selection_action_button(node_name: String, icon_kind: String, action: Callable, tooltip_key: String) -> Button:
 	var result := toolbar_button(action)
@@ -586,7 +665,11 @@ func select_tool(kind: String) -> void:
 		build_panel.visible = true
 
 func update(model, selected: int, speed_value: float, selected_object: Dictionary = {}) -> void:
+	for category: String in Catalog.CATEGORIES:
+		for kind: String in Catalog.CATEGORIES[category]:
+			buttons[kind].visible = model.building_unlocked(kind)
 	for kind in ["seed_vine", "seed_bush"]:
+		if not buttons.has(kind): continue
 		var row: Button = buttons[kind]
 		var count: int = model.vine_roots if kind == "seed_vine" else model.uprooted_bushes.size()
 		row.visible = model.vine_discovered if kind == "seed_vine" else model.bush_discovered
@@ -595,49 +678,92 @@ func update(model, selected: int, speed_value: float, selected_object: Dictionar
 		var title: Label = row.get_meta("plant_title")
 		title.text = "%s (%d)" % [Catalog.title("berry" if kind == "seed_bush" else kind), count]
 		row.custom_minimum_size.x = 44 * VisualTokens.POINT + title.get_combined_minimum_size().x + VisualTokens.PANEL_PADDING_X
-	for resource in ["food", "log", "grain", "plank", "stone", "block", "pottery", "water"]:
+	var has_materials := false
+	for resource in Economy.RESOURCES:
 		resource_counts[resource].text = "%d/%d" % [model.resource_total(resource), Economy.storage_capacity(model, resource)]
 		if resource == "food": resource_counts[resource].text += "  −%d" % model.workers.size()
-		resource_counts[resource].get_parent().visible = model.discovered_resources.has(resource)
+		var discovered: bool = model.discovered_resources.has(resource)
+		resource_counts[resource].get_parent().visible = discovered
+		if resource not in MAIN_RESOURCES and discovered: has_materials = true
+	material_panel.visible = has_materials
+	material_panel.reset_size()
 	var phase: float = fposmod(model.time, Settings.SIMULATION_DAY_SECONDS) / Settings.SIMULATION_DAY_SECONDS
 	day_icon.set_phase(phase)
+	day_track.set_phase(phase)
 	root.modulate = Color.WHITE.lerp(Color("94b8ff"), DayCycle.night_amount(phase))
 	# Selection feedback retains its colour while the surrounding paper UI cools.
 	var untinted := Color(1.0 / root.modulate.r, 1.0 / root.modulate.g, 1.0 / root.modulate.b)
 	idle_button.modulate = untinted
 	selection_outline.modulate = untinted
-	day_label.text = str(int(model.time / Settings.SIMULATION_DAY_SECONDS) + 1)
+	day_label.text = tr("day_count_text") % (int(model.time / Settings.SIMULATION_DAY_SECONDS) + 1)
 	resource_counts["citizens"].text = str(model.workers.size())
 	var adults := 0
 	for citizen in model.workers:
 		adults += int(model.can_control(citizen))
 	population_tooltip = tr("settlement_population_ages_text") % [adults, model.workers.size() - adults]
 	var idle_total: int = model.idle_citizen_ids().size()
-	idle_count.text = "%d/%d" % [model.workers.size(), Economy.capacity(model)]
+	update_housing_feedback(model)
 	population_tooltip += " · %d idle" % idle_total
+	if housing_feedback_key.size()==3 and housing_feedback_key[1]+housing_feedback_key[2]>0:
+		population_tooltip += " · %d built · %d planned" % [housing_feedback_key[0],housing_feedback_key[1]]
+		if housing_preview>0: population_tooltip += " · +%d preview" % housing_preview
 	idle_button.disabled = idle_total == 0
 	_size_resource_bar(resource_counts.food.get_parent().get_parent().get_parent())
 	collect_button.visible = false
 	var entity_key := str(selected_object.get("entity_key", ""))
 	deleting_plan = selected < 0 and entity_key.begins_with("plan:") and not model.editable_plan(int(entity_key.trim_prefix("plan:"))).is_empty()
-	finish_button.visible = model.debug_mode and deleting_plan and model.Planning.includes(model.plans[int(entity_key.trim_prefix("plan:"))])
+	finish_button.visible = SHOW_DEBUG_FINISH and deleting_plan and model.Planning.includes(model.plans[int(entity_key.trim_prefix("plan:"))])
 	finish_button.disabled = not finish_button.visible or not model.can_debug_finish(int(entity_key.trim_prefix("plan:")))
-	var movable_object: bool = selected < 0 and selected_object.has("cell") and not entity_key.begins_with("plan:") and not model.Relocation.kind_at(model, selected_object.cell).is_empty() and not model.Relocation.locked(model, selected_object.cell)
+	var pending_move: Dictionary = model.Relocation.pending_move(model, selected_object.cell) if selected_object.has("cell") and not entity_key.begins_with("plan:") else {}
+	var movable_object: bool = selected < 0 and selected_object.has("cell") and not entity_key.begins_with("plan:") and not model.Relocation.kind_at(model, selected_object.cell).is_empty() and (not pending_move.is_empty() or not model.Relocation.locked(model, selected_object.cell))
 	# Apply each button's final state once. Hiding then showing a plan action
 	# during a frame cancels a mouse press before its release can activate it.
+	if selected_object.get("kind") == "hay_field" and model.Relocation.kind_at(model, selected_object.cell) != "hay_field": movable_object = false
 	move_button.visible = movable_object or deleting_plan
-	move_button.disabled = movable_object and not model.Relocation.source_error(model, selected_object.cell).is_empty()
+	move_button.disabled = movable_object and not model.Relocation.source_error(model, selected_object.cell, not pending_move.is_empty()).is_empty()
+	if movable_object and pending_move.is_empty() and HouseSelection.is_house(selected_object):
+		move_button.disabled = not HouseSelection.source_error(model, selected_object).is_empty()
+	elif not pending_move.is_empty() and HouseSelection.members(model, selected_object).size() > 1:
+		move_button.disabled = true
 	if movable_object:
 		move_label = tr("replant_bush_text" if model.Relocation.kind_at(model, selected_object.cell) in ["tree", "berry"] else "relocation_move_text")
-		if model.vines.has(selected_object.cell): move_label = "Collect root"
+		if model.vines.has(selected_object.cell): move_label = "Move"
 		if model.deposits.get(selected_object.cell, {}).get("kind") == "berry": move_label = "Move"
 	var copyable_object: bool = movable_object and model.Relocation.kind_at(model, selected_object.cell) in Catalog.COSTS
 	copy_button.visible = copyable_object and model.gardens.get(selected_object.cell, {}).get("species") != "grass"
+	copy_button.disabled = copyable_object and not model.building_unlocked(model.Relocation.kind_at(model, selected_object.cell))
 	removal_button.visible = copyable_object or deleting_plan
-	removal_button.disabled = move_button.disabled
+	removal_button.disabled = move_button.disabled or not pending_move.is_empty()
 	if deleting_plan:
 		move_label = tr("relocation_move_text")
-	selection_toolbar.visible = move_button.visible or removal_button.visible or finish_button.visible
+	upgrade_button.visible = selected_object.get("kind", "") == "house" and not entity_key.begins_with("plan:") and model.buildings.get(selected_object.get("cell"), {}).get("kind") == "house" and preload("res://scripts/settlement/house_tiers.gd").tier(model.buildings[selected_object.cell]) < 3
+	if upgrade_button.visible: upgrade_button.visible = HouseSelection.members(model, selected_object).size() == 1
+	if upgrade_button.visible:
+		upgrade_button.disabled = not preload("res://scripts/settlement/house_tiers.gd").error(model, selected_object.cell).is_empty()
+		var target := preload("res://scripts/settlement/house_tiers.gd").tier(model.buildings[selected_object.cell]) + 1
+		var price := preload("res://scripts/settlement/house_tiers.gd").cost(target)
+		var parts: Array[String] = []
+		for resource: String in price: parts.append("%d %s" % [price[resource], resource.capitalize()])
+		upgrade_button.tooltip_text = "Tier %d · %s" % [target, " + ".join(parts)]
+	if selected_object.has("bridge_id"):
+		var bridge: Dictionary = model.RopeBridges.get_record(model, selected_object.bridge_id)
+		move_button.visible = not bridge.is_empty(); removal_button.visible = not bridge.is_empty()
+		move_button.disabled = not bridge.is_empty() and model.bridges.has(selected_object.bridge_id) and model.RopeBridges.occupied(model, bridge)
+		removal_button.disabled = move_button.disabled; move_label = "Move"
+		copy_button.hide(); upgrade_button.hide()
+	utilities_button.hide()
+	if selected_object.get("kind")=="house" and not entity_key.begins_with("plan:"):
+		var homes=preload("res://scripts/settlement/home_assembly.gd")
+		var uid: int=model.buildings.get(selected_object.get("cell"),{}).get("home_uid",-1)
+		var context=homes.context_for(model,uid)
+		if context!=null:
+			var owner: int=homes.U.owner_for(context,homes.U.room(context,uid))
+			var price: Dictionary=homes.U.installation_cost(context,owner)
+			utilities_button.visible=not price.is_empty()
+			utilities_button.disabled=model.plans.values().any(func(p):return p.get("utility_owner",-1)==owner)
+			utilities_button.tooltip_text=homes.U.cost_text(price)
+	rain_edit_button.visible=selected_object.get("kind","") in ["house","support","well"] and not entity_key.begins_with("plan:")
+	selection_toolbar.visible = rain_edit_button.visible or utilities_button.visible or upgrade_button.visible or move_button.visible or removal_button.visible or finish_button.visible
 	_position_selection_toolbar(resource_counts.food.get_parent().get_parent().get_parent())
 	speed = speed_value
 	speed_button.icon = SPEED_ICONS[2 if speed_value >= 4 else (1 if speed_value >= 2 else 0)]
@@ -658,6 +784,7 @@ func update_selection(world, camera: Camera3D, selection: Dictionary, model = nu
 	compass.update_camera(camera.global_basis.z)
 	work_bars.clear()
 	var screen_scale := root.size / Vector2(camera.get_viewport().size)
+
 	route_strokes.clear()
 	for stroke: PackedVector3Array in world.route_strokes:
 		var projected := _project_marker(camera, screen_scale, world, stroke)
@@ -708,6 +835,16 @@ func _object_marker(world, camera: Camera3D, selection: Dictionary, model) -> Di
 	var points := PackedVector2Array()
 	var strokes: Array[PackedVector2Array] = []
 	var screen_scale := root.size / Vector2(camera.get_viewport().size)
+	if selection.has("bridge_id") and model != null:
+		var bridge: Dictionary = model.RopeBridges.get_record(model, selection.bridge_id)
+		var span: Node3D = world.bridge_node(selection.bridge_id)
+		if not bridge.is_empty() and is_instance_valid(span) and span.is_visible_in_tree():
+			var side: Vector3 = (bridge.end - bridge.start).cross(Vector3.UP).normalized() * 0.58
+			for sign_ in [-1, 1]:
+				var edge := PackedVector2Array()
+				for point: Vector3 in model.RopeBridges.curve(bridge): edge.append(camera.unproject_position(point + side * sign_ + Vector3.UP * 0.03) * screen_scale)
+				strokes.append(edge)
+		return {"points": points, "strokes": strokes}
 	if selection.has("worker_id"):
 		var id: int = selection.worker_id
 		if id >= 0 and id < world.actors.size():
@@ -728,7 +865,11 @@ func _object_marker(world, camera: Camera3D, selection: Dictionary, model) -> Di
 			var centre: Vector3 = definition.offset
 			centre.y = 0.035
 			if model != null and selection.kind in ["stockpile", "house"] and not node.get_meta("planned", false):
-				var members := Houses.members(model, selection.cell) if selection.kind == "house" else Piles.members(model, selection.cell)
+				var members := HouseSelection.members(model, selection) if selection.kind == "house" else Piles.members(model, selection.cell)
+				if selection.kind == "house":
+					members = members.filter(func(cell):
+						var room: Node3D = world.entity_views.get("building:%s" % cell)
+						return is_instance_valid(room) and room.is_visible_in_tree())
 				var placement_offset: Vector3 = model.buildings.get(selection.cell, {}).get("placement_offset", Vector3.ZERO) if selection.kind == "house" else Vector3.ZERO
 				for corner in Piles.outline(members):
 					var point: Vector3 = corner.point + placement_offset + Vector3.UP * 0.035
@@ -777,12 +918,12 @@ func update_object_hover(world, camera: Camera3D, model, selection: Dictionary, 
 	object_hover_strokes.clear()
 	if not hovered_object.is_empty():
 		ground_hover_points.clear()
-		var already_selected := not selection.is_empty() and _tooltip_key(selection, model) == _tooltip_key(hovered_object, model)
+		var already_selected := not selection.is_empty() and (_tooltip_key(selection, model) == _tooltip_key(hovered_object, model) or HouseSelection.covers(model, selection, hovered_object))
 		if hovered_object.has("worker_id"):
 			var id: int = hovered_object.worker_id
 			already_selected = already_selected or (id >= 0 and id < world.actors.size() and world.actors[id].ring.visible)
 		if not already_selected:
-			object_hover_strokes.assign(_object_marker(world, camera, hovered_object, model).strokes)
+			object_hover_strokes.assign(_object_marker(world, camera, HouseSelection.select(model, selection, hovered_object), model).strokes)
 	selection_outline.queue_redraw()
 
 func _project_marker(camera: Camera3D, screen_scale: Vector2, node: Node3D, points: PackedVector3Array) -> PackedVector2Array:
@@ -825,11 +966,19 @@ func update_ground_hover(camera: Camera3D, cell: Variant) -> void:
 func update_placement_outline(camera: Camera3D, preview: Node3D = null, kind := "", placement_valid := true) -> void:
 	placement_color = VisualTokens.SELECTION_COLOR if placement_valid else WORK_FILL
 	placement_strokes.clear()
+	well_capacity_label.hide()
 	if is_instance_valid(preview) and preview.is_visible_in_tree():
 		var definition: Dictionary = Catalog.DEFINITIONS.get(kind, {})
 		if kind in ["terrain_dig", "terrain_fill"]: definition = {"offset": Vector3.UP * 0.5, "size": Vector3.ONE}
 		if not definition.is_empty():
 			var screen_scale := root.size / Vector2(camera.get_viewport().size)
+			if kind == "well" and placement_valid and preview.has_meta("expected_water_capacity"):
+				var anchor := preview.global_position + Vector3.UP * (float(definition.size.y) + 0.25)
+				if not camera.is_position_behind(anchor):
+					well_capacity_label.text = "%d water capacity" % int(preview.get_meta("expected_water_capacity"))
+					well_capacity_label.reset_size()
+					well_capacity_label.position = camera.unproject_position(anchor) * screen_scale - Vector2(well_capacity_label.size.x * 0.5, well_capacity_label.size.y)
+					well_capacity_label.show()
 			for edge in preview.get_meta("placement_edges", PlacementOutline.box_edges(definition.offset, definition.size)):
 				placement_strokes.append(_project_marker(camera, screen_scale, preview, edge))
 	selection_outline.queue_redraw()
@@ -857,8 +1006,9 @@ func _draw_selection() -> void:
 func update_object_tooltips(world, camera: Camera3D, model, selection: Dictionary, hovered_object: Dictionary = {}) -> void:
 	update_object_hover(world, camera, model, selection, hovered_object)
 	var targets: Dictionary = {}
-	if not hovered_object.is_empty():
-		targets[_tooltip_key(hovered_object, model)] = {"target": hovered_object, "selected": false}
+	if not hovered_object.is_empty() and not HouseSelection.covers(model, selection, hovered_object):
+		var hover_target := HouseSelection.select(model, selection, hovered_object)
+		targets[_tooltip_key(hover_target, model)] = {"target": hover_target, "selected": false}
 	if not selection.is_empty():
 		targets[_tooltip_key(selection, model)] = {"target": selection, "selected": true}
 	for id in world.actors.size():
@@ -875,6 +1025,12 @@ func update_object_tooltips(world, camera: Camera3D, model, selection: Dictionar
 				continue
 			node = world.actors[target.worker_id]
 			anchor = node.global_position + Vector3.UP * (1.15 if not model.can_control(model.workers[target.worker_id]) else 1.7)
+		elif target.has("bridge_id"):
+			var bridge: Dictionary = model.RopeBridges.get_record(model, target.bridge_id)
+			if bridge.is_empty(): continue
+			node = world.bridge_node(target.bridge_id)
+			if not is_instance_valid(node): continue
+			anchor = (bridge.start + bridge.end) * 0.5 + Vector3.UP * 1.35
 		else:
 			node = world.entity_views.get(target.get("entity_key", ""))
 			if not is_instance_valid(node):
@@ -889,20 +1045,32 @@ func update_object_tooltips(world, camera: Camera3D, model, selection: Dictionar
 				if shape.shape is BoxShape3D:
 					height += shape.shape.size.y * 0.5
 				# Mesh colliders have no size; their visible silhouette is projected below.
+			height = ObjectTooltip.stationary_height(node, height)
 			anchor = node.to_global(Vector3(0, height, 0))
 		if not node.is_visible_in_tree() or camera.is_position_behind(anchor):
 			continue
 		var screen := camera.unproject_position(anchor) * screen_scale
-		if not target.has("worker_id"):
+		if not target.has("worker_id") and not target.has("bridge_id"):
+			var named_nodes: Array[Node3D] = [node]
+			if HouseSelection.is_house(target):
+				var centre := Vector3.ZERO
+				named_nodes.clear()
+				for cell in HouseSelection.members(model, target):
+					var room: Node3D = world.entity_views.get("building:%s" % cell)
+					if not is_instance_valid(room) or not room.is_visible_in_tree(): continue
+					named_nodes.append(room)
+					centre += room.global_position
+				if not named_nodes.is_empty(): screen.x = camera.unproject_position(centre / named_nodes.size()).x * screen_scale.x
 			# A roof's far corner can project above its centre even at the same height.
-			# Keep the name above the visible silhouette, including rotated buildings.
-			for mesh: MeshInstance3D in node.find_children("*", "MeshInstance3D", true, false):
-				if not mesh.is_visible_in_tree() or mesh.mesh == null: continue
-				var bounds := mesh.get_aabb()
-				for index in 8:
-					var corner := mesh.to_global(bounds.get_endpoint(index))
-					if not camera.is_position_behind(corner):
-						screen.y = minf(screen.y, camera.unproject_position(corner).y * screen_scale.y)
+			# Keep the name above the stationary body, including rotated buildings.
+			for named_node in named_nodes:
+				for mesh: MeshInstance3D in named_node.find_children("*", "MeshInstance3D", true, false):
+					if not ObjectTooltip.name_anchor_mesh(named_node, mesh): continue
+					var bounds := mesh.get_aabb()
+					for index in 8:
+						var corner := mesh.to_global(bounds.get_endpoint(index))
+						if not camera.is_position_behind(corner):
+							screen.y = minf(screen.y, camera.unproject_position(corner).y * screen_scale.y)
 		if not Rect2(Vector2.ZERO, root.size).has_point(screen):
 			continue
 		if not world_tooltips.has(key):
@@ -925,8 +1093,9 @@ func update_object_tooltips(world, camera: Camera3D, model, selection: Dictionar
 			world_tooltips.erase(key)
 
 func _tooltip_key(target: Dictionary, model = null) -> String:
-	if model != null and target.get("kind") in ["stockpile", "house"] and not str(target.get("entity_key", "")).begins_with("plan:"):
-		var members := Houses.members(model, target.cell) if target.kind == "house" else Piles.members(model, target.cell)
+	if model != null and HouseSelection.is_house(target): return HouseSelection.key(model, target)
+	if model != null and target.get("kind") == "stockpile" and not str(target.get("entity_key", "")).begins_with("plan:"):
+		var members := Piles.members(model, target.cell)
 		var addresses: Array[String] = []
 		for member in members:
 			addresses.append(str(member))
@@ -939,3 +1108,28 @@ func _tooltip_key(target: Dictionary, model = null) -> String:
 
 func refresh_hotkeys() -> void:
 	workshop_button.text = hotkeys.hint("Blueprints", "blueprints")
+
+func set_housing_preview(model, places: int) -> void:
+	housing_preview=maxi(0,places)
+	update_housing_feedback(model)
+
+func update_housing_feedback(model) -> void:
+	var built: int=Economy.capacity(model)
+	var pending := 0
+	for plan in model.plans.values():
+		if plan.kind=="house" and not plan.get("house_upgrade",false) and not plan.has("relocation") and not plan.get("deconstruction",false): pending+=model.Houses.ROOM_RESIDENTS
+	var target := built+pending+housing_preview
+	idle_count.text="%d/%d" % [model.workers.size(),target]
+	var projected: bool=pending+housing_preview>0
+	idle_count.add_theme_color_override("font_color",preload("res://scripts/game_palette.gd").TIMBER_SIDE if projected else Color.BLACK)
+	var key: Array=[built,pending,housing_preview]
+	if key!=housing_feedback_key:
+		var animate: bool=not housing_feedback_key.is_empty()
+		housing_feedback_key=key
+		if housing_pulse!=null: housing_pulse.kill()
+		idle_count.scale=Vector2.ONE
+		if animate and is_inside_tree():
+			idle_count.pivot_offset=idle_count.size*0.5
+			housing_pulse=create_tween()
+			housing_pulse.tween_property(idle_count,"scale",Vector2.ONE*1.14,0.12)
+			housing_pulse.tween_property(idle_count,"scale",Vector2.ONE,0.32)

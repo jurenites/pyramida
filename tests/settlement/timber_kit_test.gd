@@ -33,7 +33,7 @@ func run() -> void:
 	check(Kit.transform(plank).basis.get_scale().is_equal_approx(Vector3.ONE), "Component editing cannot widen the reference plank")
 	var edited := 0
 	for kind in Kit.Appearance.buildings() + ["platform_2m", "stairs_1m"]:
-		var asset := (load("res://data/settlement/%s.tscn" % kind) as PackedScene).instantiate() as Node3D
+		var asset := (load(Kit.Appearance.asset_path(kind)) as PackedScene).instantiate() as Node3D
 		for mesh: MeshInstance3D in asset.find_children("*", "MeshInstance3D", true, false):
 			if not mesh.has_meta("timber_stock"): continue
 			edited += 1
@@ -48,11 +48,16 @@ func run() -> void:
 				for surface in source.mesh.get_surface_count():
 					var arrays: Array = source.mesh.surface_get_arrays(surface)
 					expected_vertices += arrays[Mesh.ARRAY_INDEX].size() if arrays[Mesh.ARRAY_INDEX] != null else arrays[Mesh.ARRAY_VERTEX].size()
+			if mesh.get_meta("timber_cut_profile","")=="split_half":
+				var split=preload("res://scripts/settlement/stair_timber.gd").stock_mesh()
+				check(is_equal_approx(split.get_aabb().size.x,Timber.LOG_LENGTH) and is_equal_approx(split.get_aabb().size.z,Timber.LOG_DIAMETER/2),"Stair sides are lengthwise halves of canonical Log stock")
+				expected_vertices=0
+				for surface in split.get_surface_count(): expected_vertices+=split.surface_get_arrays(surface)[Mesh.ARRAY_VERTEX].size()
 			var actual_vertices := 0
 			for surface in mesh.mesh.get_surface_count():
 				var arrays: Array = mesh.mesh.surface_get_arrays(surface)
 				actual_vertices += arrays[Mesh.ARRAY_INDEX].size() if arrays[Mesh.ARRAY_INDEX] != null else arrays[Mesh.ARRAY_VERTEX].size()
-			check(actual_vertices == expected_vertices * int(mesh.get_meta("timber_count")), "Construction contains complete copies of stock meshes")
+			check(actual_vertices == expected_vertices * int(mesh.get_meta("timber_count")), "Construction contains rigid stock pieces or explicit lengthwise Log cuts")
 		asset.free()
 	check(edited > 100, "Shared stock is used throughout the construction library")
 	for kind in ["well", "waterworks", "sawmill"]:
@@ -89,11 +94,11 @@ func run() -> void:
 	var facade: Transform3D = lower.get_node("PlasterWall").transform
 	var original_pose: Transform3D = lower.transform
 	world.buildings[Vector3i(0, 2, 0)] = {"kind": "house", "direction": 0, "placement_offset": Vector3.ZERO}
-	world.buildings[Vector3i(2, 0, 0)] = {"kind": "house", "direction": 1, "placement_offset": Vector3.ZERO}
+	world.buildings[Vector3i(2, 0, 0)] = {"kind": "house", "direction": 3, "placement_offset": Vector3.ZERO}
 	world.rebuild_navigation()
 	view.sync(world, 0, -1)
 	check(lower.transform.is_equal_approx(original_pose) and lower.get_node("PlasterWall").transform.is_equal_approx(facade), "Vertical and side neighbours preserve the authored shell and rotation")
-	check(not lower.has_node("JoinedWalls"), "Side neighbours do not replace the placed facade")
+	check(not lower.has_node("JoinedWalls") and lower.get_node("PlasterWall2").visible, "Wall-only neighbours retain their original facade")
 	var visible_caps := 0
 	for cap in lower.get_node("Roof").get_children(): visible_caps += int(cap.visible)
 	check(visible_caps == 0, "Completed upper neighbour removes only the covered roof")
@@ -103,7 +108,7 @@ func run() -> void:
 	view.sync(world, 0, -1)
 	visible_caps = 0
 	for cap in lower.get_node("Roof").get_children(): visible_caps += int(cap.visible)
-	check(visible_caps == 4, "Roof returns after removing the upper neighbour")
+	check(visible_caps == 0 and lower.has_node("JoinedRoof"), "Procedural roof returns after removing the upper neighbour")
 	view.free()
 	var workshop := preload("res://scenes/settlement/StructureWorkshop.tscn").instantiate()
 	workshop.restore_last = false

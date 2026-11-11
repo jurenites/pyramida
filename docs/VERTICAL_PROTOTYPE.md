@@ -6,7 +6,7 @@ The default F5 scene is now `scenes/settlement/Terraces.tscn`. The older flat-wo
 
 ## Try it
 
-Choose one of three settlement slots when the game opens. An empty slot offers Easy, Normal and Hard, with **Normal** as the only enabled choice. Selecting an existing slot continues its saved settlement. A new game starts with only a Stockpile, two adults and one child. The stockpile holds 18 timber and 5 food. Place the first buildings yourself; no terraces, stairs, wells, gardens or construction orders are prebuilt. Children wander and eat independently, cannot be selected for work, and become adults after three simulation days. Pausing also pauses growth; saving preserves age and appearance.
+Choose one of three settlement slots when the game opens. An empty slot offers Easy, Normal and Hard, with **Normal** as the only enabled choice. Selecting an existing slot continues its saved settlement. A new game starts with one completed house, two adults and one child. Its food inventory holds five meals and accepts gathered berries. There is no starting pile or loose timber; builders can harvest raw logs and stone for the first shed or pile. Place further buildings yourself; no terraces, stairs, wells, gardens or construction orders are prebuilt. Children wander and eat independently, cannot be selected for work, and become adults after three simulation days. Pausing also pauses growth; saving preserves age and appearance.
 
 - Click an adult resident to inspect their current job, cargo, distance travelled, and route.
 - Click the well, tree, garden, stockpile, or platform to inspect it.
@@ -19,7 +19,7 @@ Choose one of three settlement slots when the game opens. An empty slot offers E
 - **WASD** pans, **right-drag** or **middle-drag** orbits, and the wheel zooms.
 - **C** hides architecture above the chosen floor. The speed button cycles 1×, 2×, 4×; there is no gameplay pause. **Esc** deselects everything without saving or leaving play.
 - The toolbar exit saves and returns to settlement selection. Within menus, Esc goes back from a submenu and resumes from the main menu.
-- Saving is automatic every 30 seconds of real play time, after construction clicks, on opening the menu, changing slots, leaving the application, and quitting normally. F5/F9 are no longer manual save/load shortcuts. In the Godot editor, F5 still runs the project.
+- Saving is automatic every five minutes of real play time, on opening the menu, changing slots, and quitting normally. Periodic encoding and disk writes run in the background; construction actions and application focus changes do not save. F5/F9 are no longer manual save/load shortcuts. In the Godot editor, F5 still runs the project.
 - Settings contain only Fullscreen and Show delivery routes; both persist automatically.
 - A fresh settlement uses an empty slot. Existing slots are never reset or overwritten by the new-game flow.
 
@@ -76,6 +76,7 @@ The earlier `AppliedLabour` helper is reused. The original object assets, bluepr
 `data/settlement/` contains 33 original editable models, each delivered as a `.tscn` and a `.glb`:
 
 - Four featureless citizen outfits (shorts, dress, one-shoulder robe, separate top and skirt) and named head, limb and cargo pivots.
+- Citizens now use a joined body/clothing surface and an eleven-bone skeleton. Regenerate the shapes with Blender: `Blender --background --python tools/settlement/sculpt_citizens.py -- /tmp/pyramida-citizens`, then run Godot headless with `--script tools/settlement/import_citizen_surfaces.gd`, followed by `--script tools/settlement/generate_assets.gd -- citizen_0 citizen_1 citizen_2 citizen_3`. The committed `data/settlement/citizens/body_*.res` meshes feed editable TSCN/GLB exports; Blender is an authoring dependency only. Clothing and exposed skin share seam positions and weights instead of overlapping shells. This is skeletal deformation, not cloth or ragdoll simulation.
 - Timber platform, stairwell landing, support frame and staircase.
 - Timber storage rack, raised garden and stone well.
 - Olive tree, palm, limestone and loose log.
@@ -180,3 +181,23 @@ The two cube buttons beside the construction categories select **Dig** (minus) a
 `terrain_editor.gd` owns sparse `surface_edits`, independent of disposable meshes. Dig lowers an exposed column by one metre; Fill raises it by one metre. The first edit squares the shallow natural soil relief to the integer grid. Fill can target a pit's exposed inner wall when its floor is hidden by the isometric view; Dig can target an exposed side of the column's top cube. Only the current surface cube can change: tunnels, overhangs, floating cubes, sand physics and resource jobs are outside this implementation. Edited surface heights range from −36 to +36 m. Natural sloped cells, explicit terrain connectors, water sources, occupied footprints, construction plans and citizens reject editing. Fog and unloaded cells also block edits.
 
 Changed columns replace walking surfaces and invalidate affected terrain chunks and neighbouring walls. Sharp exposed sand faces receive thin contours without changing their uniform sand fill. Equal-height adjoining cells retain a continuous surface. Terrain edits persist through autosave, reload, and chunk unloading; old saves default to no surface edits. The terrain edit and toolbar tests cover model changes, volume queries, picking, real input dispatch, collision, navigation, streaming and persistence.
+
+
+## Room construction milestone
+
+Retained development prototype, removed from normal gameplay on 6 November 2026. Main-game construction uses role-specific buildings such as houses and sheds; there is no Rooms toolbar entry or room-shape menu. The editor and its geometry remain available through the isolated development fixture for future reuse. Existing room saves remain supported. The following describes that prototype, first integrated on 30 October 2026.
+
+- **Scale:** one logical room cell maps to 2 m on x, y and z. A two-storey frame is 4 m tall; the metre grid, citizen scale and existing saved world positions are unchanged.
+- **Editor (development fixture only):** the fixture opens a compact shape palette. Click to plan; R rotates, F cycles a room entrance, arrows shift the held footprint, 1–9 select floors, and comma/period or ↓/↑ move one storey. Escape puts the piece aside, then closes the editor. The cutaway icon cycles roofs, walls and low walls.
+- **Selection:** click building → floor → group → room. Shift selects multiple rooms; Command/Ctrl G groups them. Move, Copy and Delete apply explicitly. Floor copies start one storey higher and queue new material jobs. Completed structures and plans with delivered/reserved work cannot be moved or deleted in this milestone; untouched plans can be edited or undone with Z.
+- **Frame and infill:** halls provide floors and corner posts. Rooms and stairs replace only covered hall cells; completed support remains physical until workers finish the replacement. Partial hall fragments retain their building identity and support. Connecting separate buildings does not merge their editor ownership.
+- **Construction:** prototype costs are 4 timber per hall cell, 2 per room cell, 3 per stair cell, and 2 per bed. Existing hauling, reservations and labour apply. Upper construction waits for actual support, and builders need a reachable work position. Planned floors never grant walking access.
+- **Stair:** the shared 2×2 m prefab rises 2 m through two 1 m flights and a 180° landing. The lower entrance and upper exit occupy opposite corners on the same side. The receiving floor leaves the shaft open. Citizens follow the authored turn in both directions and enter rooms through their door openings.
+- **Bed:** place it in an ordinary room. Workers build it after the room; its footprint leaves a bedside lane. An idle adult can visit a reachable bed. This proves access, not sleeping needs, household ownership or population capacity.
+- **Persistence:** planned and built layouts, building IDs, groups, infill frame fragments and beds use the normal settlement save. Older saves load without a room site. Malformed module/job payloads are rejected. Terrain edits and legacy construction cannot undermine or overlap the room site.
+
+`./tools/settlement/play_rooms.sh` opens an isolated practice fixture in the real settlement scene with two builders and stocked materials. It queues a two-storey 4×4 m hall frame; after completion it queues the U-turn stair, a 2×4 m upstairs room and its bed. It does not save progress or touch existing settlement slots. Normal F5 play does not expose the room editor. Existing saved room construction still loads and persists.
+
+The full editor is not yet a completed-building renovation system: dismantling/refunds, moving inhabited rooms, copying furniture, elevators, drawn utilities and room-function economy are deferred. The first milestone uses timber and plaster finishes with the shared shell geometry.
+
+Checks: `tests/settlement/room_construction_test.gd` exercises real hauling, material consumption, incomplete access, infill, navigation, rendered stair movement and save/reload. `room_editor_test.gd` uses the real game scene for hierarchy, floor copy, invalid edits, bed previews and geometry caching. `tools/settlement/capture_room_milestone.gd` captures the planned frame, built frame, upstairs bed and roofed view without writing player saves.

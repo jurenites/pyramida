@@ -1,4 +1,4 @@
-# Pyramida 2 — Glossary
+# Town — Glossary
 
 Terminology game specific only (no need to explain some basics), this document subordinate to code and tests.
 Definitions provide names for implemented and deferred concepts; they do not claim that every entry is playable. [README.md](README.md) is the current behaviour summary. If terminology prose conflicts with code, update the prose rather than restoring obsolete behaviour.
@@ -167,4 +167,4 @@ A `Utility Port` is a functional connection point owned by a Building, tool, or 
 
 ## World Unit
 
-A `World Unit` is the standard 1×1×1 construction space. Every World Unit contains exactly eight Sub-Units arranged as 2×2×2. A World Unit currently has no assigned real-world metre value.
+A `World Unit` is a 1×1×1 m construction space (updated 30 October 2026). Every World Unit contains exactly eight 0.5×0.5×0.5 m Sub-Units arranged as 2×2×2. A room is an architectural space spanning multiple World Units; its minimum proposed module is 2×2×2 m. Older room-relative prototype coordinates require explicit conversion rather than reinterpretation. See [building measurements](docs/BUILDING_MEASUREMENTS.md).

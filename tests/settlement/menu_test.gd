@@ -31,16 +31,19 @@ func run() -> void:
 	root.add_child(game)
 	await process_frame
 	await process_frame
-	check(game.menu.visible and game.menu.current_page == "home" and game.menu.title.is_visible_in_tree() and game.menu.title.text == "Pyramida", "Launch starts with the Pyramida main menu")
+	check(game.menu.visible and game.menu.current_page == "home" and game.menu.title.is_visible_in_tree() and game.menu.title.text == "... Town", "Launch starts with the town main menu")
 	check(not game.session_started and game.active_slot == -1, "Opening menu never silently starts or overwrites a settlement")
 	var preview = game.menu_preview
 	var preview_snapshot: Dictionary = preview.snapshot()
+	check(preview.difficulty=="easy" and preview.generator_version==Model.Generator.VERSION, "Menu offers the latest island landscape")
+	check(game.world.scenery.solid_view!=null and game.rig.zoom==78.0, "Menu frames the archipelago and animated sea")
 	check(game.menu.seed_label.text == "Seed %d" % preview.world_seed, "Menu displays the generated preview seed")
 	check(is_equal_approx(game.menu.seed_label.get_global_rect().end.y, game.menu.root.size.y - 16), "Seed label reaches the bottom margin of the viewport")
 	check(game.world.scenery.model_id == preview.get_instance_id() and game.world.scenery.terrain_revision == preview.terrain_revision, "Rendered background uses the preview terrain")
 	check(game.menu.root.get_child(0).color.a < 1.0, "Menu backdrop reveals the generated world")
 	check(not game.menu.buttons.resume.visible, "Continue is hidden when no playable save exists")
 	var play_rect: Rect2 = game.menu.buttons.settlements.get_global_rect()
+	var quit_rect: Rect2 = game.menu.buttons.quit.get_global_rect()
 	check(is_equal_approx(play_rect.position.y, 160.0), "Play starts at the fixed action position without an empty Continue row")
 	game.menu.buttons.settings.pressed.emit()
 	game.menu.buttons.settings_back.pressed.emit()
@@ -48,6 +51,7 @@ func run() -> void:
 	await process_frame
 	await process_frame
 	check(game.menu.buttons.slot_0.get_global_rect().is_equal_approx(play_rect), "First New game shares Play's click area")
+	check(game.menu.buttons.slots_back.get_global_rect().is_equal_approx(quit_rect), "Slot Back shares Quit's click area without saved games")
 	check(game.menu.title.is_visible_in_tree() and game.menu.title.text == "Select slot", "Slot selection has its own visible title")
 	check(not game.menu.buttons.slot_0.disabled and game.menu.buttons.slot_0.get_theme_color("font_color") != game.menu.buttons.slots_back.get_theme_color("font_color"), "New game has a distinct color and remains clickable")
 	check(game.menu_preview == preview, "Navigating menu pages preserves the offered world")
@@ -57,14 +61,16 @@ func run() -> void:
 	check(not DirAccess.dir_exists_absolute(directory), "Browsing empty slots does not create save files")
 	check(game.hud.root.find_children("*", "Button", true, false).all(func(button): return button.text not in ["Save", "Load", "..."]), "Manual persistence controls are absent from the HUD")
 	game.menu.buttons.slot_0.pressed.emit()
+	while game.operation_busy: await process_frame
 	await process_frame
 	await process_frame
-	check(game.menu.pages.difficulty.get_child(1) == game.menu.buttons.normal and game.menu.buttons.normal.get_global_rect().is_equal_approx(play_rect), "Sand shares Play's click area")
+	check(game.menu.pages.difficulty.get_child(1) == game.menu.buttons.easy and game.menu.buttons.easy.get_global_rect().is_equal_approx(play_rect), "Fields shares Play's click area")
 	check(game.menu.current_page == "difficulty", "Empty slot opens difficulty selection")
 	check(not game.menu.buttons.easy.disabled and game.menu.buttons.hard.disabled and not game.menu.buttons.normal.disabled, "Easy and Normal are available; Hard stays disabled")
 	check(not game.menu.buttons.has("start") and not game.session_started, "Difficulty selection waits for one click without an extra start button")
-	game.menu.buttons.normal.pressed.emit()
-	check(game.session_started and game.active_slot == 0 and not game.menu.visible, "Starting Normal creates slot one and enters play")
+	game.menu.buttons.easy.pressed.emit()
+	while game.operation_busy: await process_frame
+	check(game.session_started and game.active_slot == 0 and not game.menu.visible, "Starting Fields creates slot one and enters play")
 	check(game.speed == 1.0, "New settlement starts at normal speed")
 	check(game.model == preview and game.model.snapshot() == preview_snapshot, "New Game starts the exact untouched preview model")
 	var saved_preview = Model.new()
@@ -87,10 +93,11 @@ func run() -> void:
 		game._restore_view({"speed": legacy_speed})
 		check(game.speed == 1.0, "Unsupported saved speed resumes at 1x")
 	check(FileAccess.file_exists(game.saves.path_for(0)), "A new settlement is immediately saved")
-	check(game.saves.read_slot(0).difficulty == "normal", "Difficulty persists with the slot")
+	check(game.saves.read_slot(0).difficulty == "easy", "Difficulty persists with the slot")
 	game.model.time = 101.0
 	game.autosave_elapsed = Slots.AUTOSAVE_SECONDS
 	game._process(0.01)
+	await game._wait_for_autosave()
 	check(float(game.saves.read_slot(0).elapsed) >= 101, "Periodic autosave writes current simulation progress")
 	game.speed = 4.0
 	game._set_tool("house")
@@ -118,7 +125,7 @@ func run() -> void:
 	game.rig.focus = Vector3(4, 2, 3)
 	game.rig.zoom = 32.0
 	game.world.cutaway = true
-	game._open_menu()
+	await game._open_menu()
 	check(game.menu.buttons.resume.visible and not game.menu.buttons.resume.disabled, "Continue appears after a slot is created")
 	game._notification(Node.NOTIFICATION_APPLICATION_FOCUS_OUT)
 	var menu_save_view: Dictionary = game.saves.read_slot(0).view
@@ -152,34 +159,49 @@ func run() -> void:
 	game.accumulator = 0.0
 	game.model.time = 1234.0
 	game.rig.zoom = 30.0
-	game._open_menu()
+	await game._open_menu()
 	game.menu.buttons.settlements.pressed.emit()
 	var second_preview = game.menu_preview
 	check(second_preview.world_seed != preview.world_seed, "Returning to the menu offers a fresh seed")
 	check(second_preview.time == 0.0 and game.model.time == 1234.0, "Preview stays pristine without changing the active settlement")
 	game.menu.buttons.slot_1.pressed.emit()
-	game.menu.buttons.normal.pressed.emit()
+	game.menu.buttons.easy.pressed.emit()
+	while game.operation_busy: await process_frame
 	check(game.model == second_preview, "A second New Game also uses its displayed preview")
 	check(game.active_slot == 1 and game.model.time == 0, "Second empty slot starts an independent settlement")
 	check(game.saves.read_slot(0).elapsed == 1234, "Switching slots saves the previous settlement first")
-	game._open_menu()
+	await game._open_menu()
 	game.menu.buttons.settlements.pressed.emit()
 	game.menu.buttons.slot_0.pressed.emit()
+	while game.operation_busy: await process_frame
 	check(game.active_slot == 0 and game.model.time == 1234 and game.rig.zoom == 30, "Selecting occupied slot resumes progress and camera")
-	game._choose_slot(0, true)
+	await game._choose_slot(0, true)
 	check(game.model.time == 1234, "Stale create action cannot replace an occupied slot")
 	game.model.time = 1300
 	game._notification(Node.NOTIFICATION_APPLICATION_FOCUS_OUT)
-	check(game.saves.read_slot(0).elapsed == 1300, "Leaving the application flushes progress automatically")
+	check(game.saves.read_slot(0).elapsed == 1234, "Changing application focus does not trigger a save")
 	game.hud.buttons.exit.pressed.emit()
+	while game.operation_busy: await process_frame
 	check(game.saves.read_slot(0).elapsed == 1300, "Toolbar exit saves current progress")
 	check(game.menu_preview.world_seed != game.model.world_seed and game.menu_preview.time == 0.0, "Leaving gameplay prepares a fresh unplayed world")
 	check(game.menu.seed_label.text == "Seed %d" % game.menu_preview.world_seed, "Seed label refreshes after leaving a settlement")
 	check(not game.session_started and game.active_slot == -1 and not game.hud.visible, "Toolbar exit ends the settlement session")
-	check(game.menu.visible and game.menu.current_page == "slots" and not game.menu.buttons.resume.disabled, "Toolbar exit returns to selection with the saved settlement available to Continue")
+	check(game.menu.visible and game.menu.current_page == "home" and game.menu.title.text == "... Town" and not game.menu.buttons.resume.disabled, "Toolbar X returns to the town title screen with the saved settlement available to Continue")
+	await process_frame
+	await process_frame
+	quit_rect = game.menu.buttons.quit.get_global_rect()
+	game.menu.buttons.settlements.pressed.emit()
+	await process_frame
+	await process_frame
+	check(game.menu.buttons.slots_back.get_global_rect().is_equal_approx(quit_rect), "Slot Back shares Quit's click area with Continue visible")
+	game.menu.buttons.slots_back.pressed.emit()
+	await process_frame
+	await process_frame
+	check(game.menu.current_page == "home" and game.menu.buttons.quit.get_global_rect().is_equal_approx(quit_rect), "Back returns to the title screen with Quit under the same cursor position")
 	escape(game)
 	check(game.menu.visible and not game.session_started, "Escape cannot resume an exited settlement")
 	game.menu.buttons.resume.pressed.emit()
+	while game.operation_busy: await process_frame
 	check(game.session_started and game.active_slot == 0 and game.model.time == 1300, "Continue reopens the most recently saved settlement")
 	var another_game := Scene.instantiate()
 	another_game.slot_directory = directory.path_join("another-launch")
@@ -218,10 +240,11 @@ func run() -> void:
 	write_text(blocked, "file")
 	game.saves.directory = blocked
 	before = game.model.time
-	check(not game.autosave(), "Write failure is reported rather than claiming success")
-	game._choose_slot(2, true)
+	check(game.autosave() and not await game._wait_for_autosave(), "Background write failure is reported on completion")
+	await game._choose_slot(2, true)
 	check(game.active_slot == 0 and game.model.time == before, "Failed autosave prevents switching away from unsaved progress")
 	game.hud.buttons.exit.pressed.emit()
+	while game.operation_busy: await process_frame
 	check(game.session_started and game.active_slot == 0, "Failed save prevents toolbar exit from discarding the active session")
 	game.queue_free()
 	await process_frame

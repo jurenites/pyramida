@@ -61,10 +61,10 @@ func run() -> void:
 	game.model.time = Settings.SIMULATION_DAY_SECONDS * 0.25
 	game.hud.update(game.model, -1, 1)
 	check(is_equal_approx(game.hud.day_icon.phase, 0.25), "Original day/night dial follows saved time")
-	check(not game.hud.day_icon.is_night and game.hud.day_label.text == "1", "Day counter uses sun and number")
+	check(not game.hud.day_icon.is_night and game.hud.day_label.text == "Day 1", "Day counter uses sun and numbered day label")
 	game.model.time = Settings.SIMULATION_DAY_SECONDS * 0.5
 	game.hud.update(game.model, -1, 4)
-	check(game.hud.day_icon.is_night and game.hud.day_label.text == "1", "Dusk swaps sun for moon without changing day number")
+	check(game.hud.day_icon.is_night and game.hud.day_label.text == "Day 1", "Dusk swaps sun for moon without changing day number")
 	game.rig.yaw = 1.1
 	game.rig.pitch = 0.9
 	game.rig.update_camera()
